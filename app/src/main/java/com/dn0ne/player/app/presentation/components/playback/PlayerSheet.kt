@@ -91,6 +91,7 @@ import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.presentation.components.CoverArt
 import com.dn0ne.player.app.presentation.components.TrackMenuButton
+import com.dn0ne.player.app.presentation.components.shareTrack
 import com.dn0ne.player.app.presentation.components.isSystemInLandscapeOrientation
 import com.dn0ne.player.app.presentation.components.settings.Theme
 import com.dn0ne.player.core.data.Settings
@@ -614,7 +615,8 @@ fun ExpandedPlayer(
                             onAddToPlaylistClick = onAddToPlaylistClick,
                             onViewTrackInfoClick = onViewTrackInfoClick,
                             onGoToAlbumClick = onGoToAlbumClick,
-                            onGoToArtistClick = onGoToArtistClick
+                            onGoToArtistClick = onGoToArtistClick,
+                            onShareClick = { shareTrack(context, currentTrack) }
                         )
                     }
                 }
@@ -812,7 +814,8 @@ fun ExpandedPlayer(
                                     onAddToPlaylistClick = onAddToPlaylistClick,
                                     onViewTrackInfoClick = onViewTrackInfoClick,
                                     onGoToAlbumClick = onGoToAlbumClick,
-                                    onGoToArtistClick = onGoToArtistClick
+                                    onGoToArtistClick = onGoToArtistClick,
+                                    onShareClick = { shareTrack(context, currentTrack) }
                                 )
                             }
                         }

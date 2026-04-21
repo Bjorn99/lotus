@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PlaylistRemove
 import androidx.compose.material.icons.rounded.QueuePlayNext
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -45,6 +46,7 @@ fun TrackMenu(
     onViewTrackInfoClick: () -> Unit,
     onGoToAlbumClick: () -> Unit,
     onGoToArtistClick: () -> Unit,
+    onShareClick: () -> Unit,
     onRemoveFromPlaylistClick: (() -> Unit)? = null
 ) {
     DropdownMenu(
@@ -119,6 +121,22 @@ fun TrackMenu(
                 }
             )
         }
+
+        DropdownMenuItem(
+            text = {
+                Text(text = context.resources.getString(R.string.share_track))
+            },
+            onClick = {
+                onShareClick()
+                onDismissRequest()
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.Share,
+                    contentDescription = null
+                )
+            }
+        )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -202,6 +220,7 @@ fun TrackMenuButton(
     onViewTrackInfoClick: () -> Unit,
     onGoToAlbumClick: () -> Unit,
     onGoToArtistClick: () -> Unit,
+    onShareClick: () -> Unit,
     onRemoveFromPlaylistClick: (() -> Unit)? = null,
 ) {
     Box {
@@ -231,6 +250,7 @@ fun TrackMenuButton(
             onViewTrackInfoClick = onViewTrackInfoClick,
             onGoToAlbumClick = onGoToAlbumClick,
             onGoToArtistClick = onGoToArtistClick,
+            onShareClick = onShareClick,
             onRemoveFromPlaylistClick = onRemoveFromPlaylistClick
         )
     }

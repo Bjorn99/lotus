@@ -43,6 +43,7 @@
     <string name="remove_from_playlist">Удалить из плейлиста</string>
     <string name="go_to_album">Перейти к альбому</string>
     <string name="go_to_artist">Перейти к исполнителю</string>
+    <string name="share_track">Поделиться</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>
