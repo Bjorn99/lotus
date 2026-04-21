@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 class RealmLyricsRepository(
     private val realm: Realm
 ): LyricsRepository {
-    override fun getLyricsByUri(uri: String): Lyrics? {
+    override suspend fun getLyricsByUri(uri: String): Lyrics? {
         return realm.query<LyricsJson>("uri = $0", uri).find().firstOrNull()?.toLyrics()
     }
 

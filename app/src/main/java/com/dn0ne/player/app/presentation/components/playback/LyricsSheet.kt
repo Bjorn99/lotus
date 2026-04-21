@@ -176,7 +176,7 @@ fun LyricsSheet(
                     )
 
                     val synced = showSyncedLyrics
-                    if (lyrics?.synced != null && lyrics.plain != null && synced != null) {
+                    if (lyrics?.synced != null && lyrics?.plain != null && synced != null) {
                         LyricsTypeSwitch(
                             isSynced = synced,
                             onIsSyncedSwitch = {
