@@ -35,16 +35,24 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew testDebugUnitTest --stacktrace --info 2>&1 | tee /tmp/gradle-unit.log
 
       - name: Dump unit test reports on failure
         if: failure()
         run: |
+          echo "::group::Gradle output — last 400 lines"
+          tail -n 400 /tmp/gradle-unit.log || true
+          echo "::endgroup::"
+          echo "::group::kotlinc / KSP error lines"
+          grep -n -E '^(e: |error: |w: |.* error: )' /tmp/gradle-unit.log || echo "(no kotlinc-style error lines)"
+          echo "::endgroup::"
           echo "::group::Unit test XML reports"
           find app/build/test-results -type f -name '*.xml' -print -exec cat {} \; || true
           echo "::endgroup::"
           echo "::group::Unit test text output"
-          find app/build/reports/tests -type f \( -name '*.txt' -o -name 'index.html' \) -print || true
+          find app/build/reports/tests -type f -name '*.txt' -print -exec cat {} \; || true
           echo "::endgroup::"
 
       - name: Assemble debug APK
