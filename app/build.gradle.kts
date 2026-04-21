@@ -139,6 +139,15 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+
+    // Lint runs in "report-only" mode for now, same posture as detekt/ktlint.
+    // CI uploads the HTML report as an artifact so findings are visible
+    // without gating the build. Burn down, then flip `abortOnError` to true.
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = true
+        warningsAsErrors = false
+    }
 }
 
 tasks.withType<com.android.build.gradle.internal.tasks.CompileArtProfileTask> {
