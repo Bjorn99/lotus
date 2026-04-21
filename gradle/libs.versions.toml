@@ -25,7 +25,7 @@ jaudiotagger = "3.0.1"
 scrollbars = "2.2.0"
 detekt = "1.23.7"
 ktlint = "12.1.2"
-room = "2.7.1"
+room = "2.6.1"
 ksp = "2.0.20-1.0.25"
 
 [libraries]
