@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Exposes the on-device crash logs so users can share them via ACTION_SEND. -->
+    <files-path name="crash-logs" path="crash-logs/" />
+</paths>
