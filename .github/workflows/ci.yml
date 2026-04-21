@@ -37,6 +37,16 @@ jobs:
       - name: Unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
+      - name: Dump unit test reports on failure
+        if: failure()
+        run: |
+          echo "::group::Unit test XML reports"
+          find app/build/test-results -type f -name '*.xml' -print -exec cat {} \; || true
+          echo "::endgroup::"
+          echo "::group::Unit test text output"
+          find app/build/reports/tests -type f \( -name '*.txt' -o -name 'index.html' \) -print || true
+          echo "::endgroup::"
+
       - name: Assemble debug APK
         run: ./gradlew assembleDebug --stacktrace
 

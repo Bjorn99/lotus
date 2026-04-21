@@ -8,11 +8,11 @@ class LyricsParserTest {
 
     @Test
     fun parses_standard_mm_ss_xx_timestamps() {
-        val input = """
-            [00:00.00] Intro
-            [00:12.34] First line
-            [01:23.45] Second line
-        """.trimIndent()
+        val input = listOf(
+            "[00:00.00] Intro",
+            "[00:12.34] First line",
+            "[01:23.45] Second line",
+        ).joinToString("\n")
 
         val result = input.toSyncedLyrics()
 
@@ -24,10 +24,7 @@ class LyricsParserTest {
 
     @Test
     fun parses_single_digit_minutes() {
-        // Upstream regression: older parser called substring(1..8) which would
-        // mis-slice when minutes were a single digit.
-        val input = "[1:23.45] Line"
-        val result = input.toSyncedLyrics()
+        val result = "[1:23.45] Line".toSyncedLyrics()
 
         assertEquals(1, result.size)
         assertEquals(83_450 to "Line", result[0])
@@ -35,22 +32,20 @@ class LyricsParserTest {
 
     @Test
     fun parses_three_digit_milliseconds() {
-        // LRCLIB sometimes returns ms precision ([mm:ss.xxx]).
-        val input = "[00:12.345] Line"
-        val result = input.toSyncedLyrics()
+        val result = "[00:12.345] Line".toSyncedLyrics()
 
         assertEquals(12_345 to "Line", result[0])
     }
 
     @Test
     fun skips_lines_that_are_not_timestamped() {
-        val input = """
-            [ti: Song]
-            [ar: Artist]
-            [00:10.00] First actual line
-            just a comment
-            [00:20.00] Second actual line
-        """.trimIndent()
+        val input = listOf(
+            "[ti: Song]",
+            "[ar: Artist]",
+            "[00:10.00] First actual line",
+            "just a comment",
+            "[00:20.00] Second actual line",
+        ).joinToString("\n")
 
         val result = input.toSyncedLyrics()
 
@@ -61,8 +56,7 @@ class LyricsParserTest {
 
     @Test
     fun trims_whitespace_from_lyric_text() {
-        val input = "[00:10.00]    indented line   "
-        val result = input.toSyncedLyrics()
+        val result = "[00:10.00]    indented line   ".toSyncedLyrics()
 
         assertEquals(10_000 to "indented line", result[0])
     }
@@ -76,11 +70,11 @@ class LyricsParserTest {
 
     @Test
     fun only_metadata_throws() {
-        val input = """
-            [ti: Song]
-            [ar: Artist]
-            no tracks here
-        """.trimIndent()
+        val input = listOf(
+            "[ti: Song]",
+            "[ar: Artist]",
+            "no tracks here",
+        ).joinToString("\n")
 
         assertThrows(IllegalArgumentException::class.java) {
             input.toSyncedLyrics()
