@@ -7,6 +7,21 @@
   
 </div>
 
+## About this fork
+This is a community continuation of [Lotus](https://github.com/dn0ne/lotus) by
+**[dn0ne](https://github.com/dn0ne)**, who built the original app. All design,
+branding, and prior work are theirs — huge thanks. Upstream is no longer
+actively maintained, so this fork picks up bug fixes, stability work, and
+small features while keeping the app true to its original spirit.
+
+- Upstream repository: https://github.com/dn0ne/lotus
+- Upstream license: GPLv3 (preserved)
+- Application ID: `com.dn0ne.lotus.community` (so it can coexist with the
+  upstream build if you already have it installed)
+
+If you are the original author and would prefer any change here, please open
+an issue — we'll respect your wishes.
+
 ## Screenshots
 
 <div align="center">
@@ -54,7 +69,25 @@ If you enjoy using Lotus, consider [buying me a coffee](https://en.liberapay.com
    - Ensure a device or emulator is connected.  
    - Click the **Run** button or press `Shift + F10` to build and launch the app.  
 
-That's it! The app should now be running. 
+That's it! The app should now be running.
+
+## Release builds
+
+Release builds need a signing keystore. For local use, create `keystore.properties`
+at the repo root (it is gitignored):
+
+```properties
+storeFile=/absolute/path/to/lotus-release.jks
+storePassword=...
+keyAlias=lotus
+keyPassword=...
+```
+
+Or set the same values as environment variables for CI:
+`LOTUS_KEYSTORE_FILE`, `LOTUS_KEYSTORE_PASSWORD`, `LOTUS_KEY_ALIAS`, `LOTUS_KEY_PASSWORD`.
+
+If neither is configured, `assembleRelease` still works but falls back to the
+debug keystore with a visible warning — **do not distribute those APKs**.
 
 ## Credits
 Some UI elements are inspired by [Vanilla](https://github.com/vanilla-music/vanilla)

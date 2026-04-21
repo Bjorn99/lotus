@@ -329,4 +329,10 @@
 
     <string name="copy_error">Скопіювати помилку</string>
     <string name="select_all">Обрати всі</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">Поділитися останнім логом збою</string>
+    <string name="share_crash_log_explain">Додайте цей файл при повідомленні про помилку. Логи збоїв зберігаються лише на вашому пристрої.</string>
+    <string name="no_crash_log_available">Логів збоїв немає</string>
+    <string name="share_crash_log_subject">Звіт про збій Lotus</string>
 </resources>

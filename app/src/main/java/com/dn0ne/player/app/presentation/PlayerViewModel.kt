@@ -278,16 +278,17 @@ class PlayerViewModel(
                     }
                 }
 
+                val p = player ?: return@let
                 _playbackState.update {
                     it.copy(
                         playlist = playlist,
                         currentTrack = track,
-                        isPlaying = player!!.isPlaying,
-                        position = player!!.currentPosition
+                        isPlaying = p.isPlaying,
+                        position = p.currentPosition
                     )
                 }
 
-                if (player!!.isPlaying) {
+                if (p.isPlaying) {
                     positionUpdateJob = startPositionUpdate()
                 }
             }

@@ -341,4 +341,10 @@
 
     <string name="copy_error">Copy error</string>
     <string name="select_all">Select all</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">Share last crash log</string>
+    <string name="share_crash_log_explain">Attach this file when filing a bug. Crash logs stay on your device.</string>
+    <string name="no_crash_log_available">No crash logs on this device</string>
+    <string name="share_crash_log_subject">Lotus crash report</string>
 </resources>
