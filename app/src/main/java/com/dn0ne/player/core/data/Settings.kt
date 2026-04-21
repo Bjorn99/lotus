@@ -56,6 +56,8 @@ class Settings(context: Context) {
 
     private val gridPlaylistsKey = "grid-playlists"
 
+    private val realmToRoomMigrationDoneKey = "realm-to-room-migration-done"
+
     var handleAudioFocus: Boolean
         get() = sharedPreferences.getBoolean(handleAudioFocusKey, true)
         set(value) {
@@ -387,4 +389,19 @@ class Settings(context: Context) {
             apply()
         }
     }
+
+    /**
+     * Set once the one-shot Realm → Room copy completes successfully. Guards
+     * against re-running the migration (which would be idempotent thanks to
+     * REPLACE on primary keys, but still wasteful) and lets us drop the Realm
+     * dependency entirely in the next release.
+     */
+    var realmToRoomMigrationDone: Boolean
+        get() = sharedPreferences.getBoolean(realmToRoomMigrationDoneKey, false)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putBoolean(realmToRoomMigrationDoneKey, value)
+                apply()
+            }
+        }
 }

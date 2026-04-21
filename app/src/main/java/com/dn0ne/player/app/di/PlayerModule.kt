@@ -1,21 +1,24 @@
 package com.dn0ne.player.app.di
 
+import androidx.room.Room
 import com.dn0ne.player.EqualizerController
 import com.dn0ne.player.app.data.LyricsReader
 import com.dn0ne.player.app.data.LyricsReaderImpl
 import com.dn0ne.player.app.data.MetadataWriter
 import com.dn0ne.player.app.data.MetadataWriterImpl
 import com.dn0ne.player.app.data.SavedPlayerState
+import com.dn0ne.player.app.data.db.LotusDatabase
+import com.dn0ne.player.app.data.db.LyricsDao
+import com.dn0ne.player.app.data.db.PlaylistDao
+import com.dn0ne.player.app.data.db.RealmToRoomMigrator
 import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
-import com.dn0ne.player.app.data.repository.LyricsJson
 import com.dn0ne.player.app.data.repository.LyricsRepository
-import com.dn0ne.player.app.data.repository.PlaylistJson
 import com.dn0ne.player.app.data.repository.PlaylistRepository
-import com.dn0ne.player.app.data.repository.RealmLyricsRepository
-import com.dn0ne.player.app.data.repository.RealmPlaylistRepository
+import com.dn0ne.player.app.data.repository.RoomLyricsRepository
+import com.dn0ne.player.app.data.repository.RoomPlaylistRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.data.repository.TrackRepositoryImpl
 import com.dn0ne.player.app.presentation.PlayerViewModel
@@ -24,8 +27,6 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -79,24 +80,30 @@ val playerModule = module {
         )
     }
 
-    single<Realm> {
-        val configuration = RealmConfiguration.create(
-            schema = setOf(LyricsJson::class, PlaylistJson::class)
-        )
+    single<LotusDatabase> {
+        Room.databaseBuilder(
+            androidContext(),
+            LotusDatabase::class.java,
+            LotusDatabase.NAME,
+        ).build()
+    }
+    single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
+    single<LyricsDao> { get<LotusDatabase>().lyricsDao() }
 
-        Realm.open(configuration)
+    single<RealmToRoomMigrator> {
+        RealmToRoomMigrator(
+            context = androidContext(),
+            database = get(),
+            settings = get(),
+        )
     }
 
     single<LyricsRepository> {
-        RealmLyricsRepository(
-            realm = get()
-        )
+        RoomLyricsRepository(dao = get())
     }
 
     single<PlaylistRepository> {
-        RealmPlaylistRepository(
-            realm = get()
-        )
+        RoomPlaylistRepository(dao = get())
     }
 
     single<EqualizerController> {

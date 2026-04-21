@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.realm)
+    alias(libs.plugins.ksp)
 }
 
 val splitApks = !project.hasProperty("noSplits")
@@ -181,4 +182,12 @@ dependencies {
     implementation(libs.realm.library.base)
     implementation(libs.reorderable)
     implementation(libs.scrollbars)
+
+    // Room — Realm replacement. Kept alongside Realm for one release so the
+    // RealmToRoomMigrator can read the legacy store once. Realm and its
+    // entities will be removed in the next release.
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    androidTestImplementation(libs.androidx.room.testing)
 }
