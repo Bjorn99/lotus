@@ -20,14 +20,19 @@ class RealmPlaylistRepository(
     }
 
     override suspend fun insertPlaylist(playlist: Playlist) {
+        // Realm's PK is a non-null String; a playlist without a name can't be
+        // persisted. Drop silently rather than crash — the UI layer enforces
+        // non-empty names when users create playlists.
+        if (playlist.name == null) return
         realm.write {
             copyToRealm(instance = playlist.toPlaylistJson(), updatePolicy = UpdatePolicy.ALL)
         }
     }
 
     override suspend fun updatePlaylistTrackList(playlist: Playlist, trackList: List<Track>) {
+        val name = playlist.name ?: return
         realm.write {
-            val queryResult = query<PlaylistJson>(query = "name = $0", playlist.name!!).find().firstOrNull()
+            val queryResult = query<PlaylistJson>(query = "name = $0", name).find().firstOrNull()
             queryResult?.let {
                 findLatest(it)?.json = playlist.copy(trackList = trackList).toPlaylistJson().json
             }
@@ -35,9 +40,10 @@ class RealmPlaylistRepository(
     }
 
     override suspend fun deletePlaylist(playlist: Playlist) {
+        val name = playlist.name ?: return
         realm.write {
-            val playlist = query<PlaylistJson>(query = "name = $0", playlist.name!!)
-            delete(playlist)
+            val stored = query<PlaylistJson>(query = "name = $0", name)
+            delete(stored)
         }
     }
 
@@ -56,6 +62,9 @@ class PlaylistJson(): RealmObject {
 }
 
 fun Playlist.toPlaylistJson(): PlaylistJson = PlaylistJson().apply {
-    this.name = this@toPlaylistJson.name!!
+    // Callers (RealmPlaylistRepository) filter out null-name playlists before
+    // reaching here; orEmpty() is belt-and-braces to keep this non-crashing
+    // even if a future caller forgets.
+    this.name = this@toPlaylistJson.name.orEmpty()
     json = Json.encodeToString(this@toPlaylistJson)
 }
