@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -10,16 +12,33 @@ val splitApks = !project.hasProperty("noSplits")
 val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';').orEmpty()
 val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 
+// Release signing is sourced from (in order of precedence):
+//   1. keystore.properties at the repo root (gitignored)
+//   2. LOTUS_KEYSTORE_FILE / _PASSWORD / LOTUS_KEY_ALIAS / _PASSWORD env vars (CI)
+// If neither is configured, release falls back to debug signing with a warning
+// so local dev builds still work; never ship that APK to users.
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun signingField(propKey: String, envKey: String): String? =
+    (keystoreProps[propKey] as? String) ?: System.getenv(envKey)
+val releaseSigningAvailable =
+    signingField("storeFile", "LOTUS_KEYSTORE_FILE") != null &&
+    signingField("storePassword", "LOTUS_KEYSTORE_PASSWORD") != null &&
+    signingField("keyAlias", "LOTUS_KEY_ALIAS") != null &&
+    signingField("keyPassword", "LOTUS_KEY_PASSWORD") != null
+
 android {
     namespace = "com.dn0ne.player"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.dn0ne.lotus"
+        applicationId = "com.dn0ne.lotus.community"
         minSdk = 24
         targetSdk = 35
         versionCode = 1_002_000
-        versionName = "1.2.0"
+        versionName = "1.2.0-community"
 
         if (splitApks) {
             splits {
@@ -63,6 +82,23 @@ android {
         }
     }
 
+    if (releaseSigningAvailable) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(signingField("storeFile", "LOTUS_KEYSTORE_FILE")!!)
+                storePassword = signingField("storePassword", "LOTUS_KEYSTORE_PASSWORD")
+                keyAlias = signingField("keyAlias", "LOTUS_KEY_ALIAS")
+                keyPassword = signingField("keyPassword", "LOTUS_KEY_PASSWORD")
+            }
+        }
+    } else {
+        logger.warn(
+            "Lotus: no release keystore configured — release builds will be " +
+            "signed with the debug keystore. Do not distribute these APKs. " +
+            "See README for keystore.properties setup."
+        )
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -72,7 +108,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (releaseSigningAvailable) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
