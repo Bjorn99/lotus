@@ -15,7 +15,11 @@ subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
-    detekt {
+    // Type-safe accessor (`detekt { ... }`) isn't generated for plugins
+    // applied imperatively inside `subprojects { }`, only for plugins in
+    // the root `plugins { }` block. Use the extension type directly, same
+    // pattern as the ktlint block below.
+    configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
         buildUponDefaultConfig = true
         ignoreFailures = true
         autoCorrect = false
