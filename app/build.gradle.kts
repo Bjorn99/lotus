@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.realm)
     alias(libs.plugins.ksp)
 }
 
@@ -38,8 +37,8 @@ android {
         applicationId = "com.dn0ne.lotus.community"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1_002_003
-        versionName = "1.2.3-community"
+        versionCode = 1_003_000
+        versionName = "1.3.0-community"
 
         if (splitApks) {
             splits {
@@ -188,13 +187,9 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.realm.library.base)
     implementation(libs.reorderable)
     implementation(libs.scrollbars)
 
-    // Room — Realm replacement. Kept alongside Realm for one release so the
-    // RealmToRoomMigrator can read the legacy store once. Realm and its
-    // entities will be removed in the next release.
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)

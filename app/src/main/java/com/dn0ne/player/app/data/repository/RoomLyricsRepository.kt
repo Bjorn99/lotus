@@ -6,10 +6,6 @@ import com.dn0ne.player.app.domain.lyrics.Lyrics
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-/**
- * Room-backed replacement for RealmLyricsRepository. Same JSON-blob shape
- * as the legacy Realm store so the migrator can copy rows verbatim.
- */
 class RoomLyricsRepository(
     private val dao: LyricsDao,
 ) : LyricsRepository {

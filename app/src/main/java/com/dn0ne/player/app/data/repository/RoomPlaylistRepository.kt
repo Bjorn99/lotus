@@ -9,11 +9,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-/**
- * Room-backed replacement for RealmPlaylistRepository. Preserves the
- * JSON-blob storage shape so upgrading users see their existing playlists
- * after the one-shot RealmToRoomMigrator copies rows over.
- */
 class RoomPlaylistRepository(
     private val dao: PlaylistDao,
 ) : PlaylistRepository {
