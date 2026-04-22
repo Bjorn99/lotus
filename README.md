@@ -58,12 +58,12 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   Actions workflow that builds per-ABI + universal APKs, signs them with
   the release keystore, verifies with `apksigner`, generates
   `SHA256SUMS.txt`, and publishes everything to a GitHub Release.
-- **Realm → Room database migration** — the upstream app stored playlists
-  and lyrics in Realm (an embedded mobile database that had been
-  deprecated). Lotus migrates to Android's official [Room](https://developer.android.com/training/data-storage/room)
-  on first launch via a one-shot `RealmToRoomMigrator`, then keeps both
-  side-by-side for one release so the legacy store can be safely removed
-  in a later cleanup pass.
+- **Room-only storage (was Realm)** — the upstream app used Realm (an
+  embedded mobile database that had been deprecated). v1.2.0 migrated
+  to Android's official [Room](https://developer.android.com/training/data-storage/room)
+  via a one-shot in-place migrator; v1.3.0 dropped the Realm dependency
+  and migrator entirely. Result: ~10–15 MB smaller APK per ABI, faster
+  cold start, and no deprecated SDKs in the build graph.
 - **Crash reporter** — uncaught exceptions are written to a private log
   file instead of just killing the process. From the About page you can
   share the most recent crash log via the Android share sheet, which

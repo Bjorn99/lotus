@@ -10,7 +10,6 @@ import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LyricsDao
 import com.dn0ne.player.app.data.db.PlaylistDao
-import com.dn0ne.player.app.data.db.RealmToRoomMigrator
 import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
@@ -89,14 +88,6 @@ val playerModule = module {
     }
     single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
     single<LyricsDao> { get<LotusDatabase>().lyricsDao() }
-
-    single<RealmToRoomMigrator> {
-        RealmToRoomMigrator(
-            context = androidContext(),
-            database = get(),
-            settings = get(),
-        )
-    }
 
     single<LyricsRepository> {
         RoomLyricsRepository(dao = get())

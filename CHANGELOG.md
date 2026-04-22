@@ -8,6 +8,38 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.0 — Drop Realm, Room-only storage
+
+**Layman:** A long-overdue cleanup with no visible behaviour change on
+your phone. Older versions of this app used a database library called
+Realm for your playlists and lyrics. v1.2.0 switched to a modern one
+(Room) and ran a migration so your data carried over. That migration
+has now had a release to complete on every device, so this version
+rips Realm out entirely. The APK is meaningfully smaller and the app
+starts up a little faster. If you're installing Lotus for the first
+time on v1.3.0 it doesn't matter — nothing to migrate, nothing
+missing.
+
+**Technical:**
+- Removed: `RealmPlaylistRepository`, `RealmLyricsRepository` (with
+  their embedded `PlaylistJson` / `LyricsJson` `RealmObject` schemas),
+  `RealmToRoomMigrator` + its instrumented test, and the
+  `realmToRoomMigrationDone` flag in `Settings`.
+- Build: dropped `io.realm.kotlin` plugin from root +
+  `app/build.gradle.kts`, `libs.realm.library.base` from
+  dependencies, and the `realm` entries (version, library, plugin)
+  from `libs.versions.toml`.
+- DI: removed the `single<RealmToRoomMigrator>` Koin binding and the
+  associated import from `PlayerModule.kt`.
+- Application class: removed the `realmToRoomMigrator` inject and the
+  `applicationScope.launch { migrator.migrateIfNeeded() }` call from
+  `PlayerApp.onCreate()`. The crash reporter install remains first.
+- Room DAOs / entities / repositories are unchanged and remain the
+  sole persistence layer for playlists + cached lyrics.
+- APK size shrinks by ~10–15 MB per ABI (Realm's native libraries +
+  its KMP runtime are gone).
+- No schema change on the Room side; upgrading users keep their data.
+
 ## 1.2.3 — Smart playlists + release notes overhaul
 
 **Layman:** The Playlists tab now has a "Smart" section at the top with
