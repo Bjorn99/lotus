@@ -1,0 +1,147 @@
+name: Release
+
+# Builds and publishes a signed release whenever a version tag is pushed.
+# Example:
+#   git tag -a v1.2.0 -m "Lotus 1.2.0"
+#   git push origin v1.2.0
+#
+# Requires four repo secrets (Settings → Secrets and variables → Actions):
+#   LOTUS_KEYSTORE_BASE64   base64 of the release .jks file
+#                           (e.g. `base64 -w0 lotus-release.jks | pbcopy`)
+#   LOTUS_KEYSTORE_PASSWORD keystore password
+#   LOTUS_KEY_ALIAS         key alias inside the keystore
+#   LOTUS_KEY_PASSWORD      password for that key
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re-)release. Must already be pushed.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build signed release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      # Fail fast with an actionable message when any of the four signing
+      # secrets is missing — otherwise assembleRelease silently falls back to
+      # the debug keystore and we'd publish an unsignable APK.
+      - name: Check signing secrets are present
+        env:
+          B: ${{ secrets.LOTUS_KEYSTORE_BASE64 }}
+          P: ${{ secrets.LOTUS_KEYSTORE_PASSWORD }}
+          A: ${{ secrets.LOTUS_KEY_ALIAS }}
+          K: ${{ secrets.LOTUS_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -z "$B" ] && missing="$missing LOTUS_KEYSTORE_BASE64"
+          [ -z "$P" ] && missing="$missing LOTUS_KEYSTORE_PASSWORD"
+          [ -z "$A" ] && missing="$missing LOTUS_KEY_ALIAS"
+          [ -z "$K" ] && missing="$missing LOTUS_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing release signing secrets:$missing. Add them in Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.LOTUS_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/lotus-release.jks"
+          echo "LOTUS_KEYSTORE_FILE=$RUNNER_TEMP/lotus-release.jks" >> "$GITHUB_ENV"
+
+      - name: Assemble release APKs
+        env:
+          LOTUS_KEYSTORE_PASSWORD: ${{ secrets.LOTUS_KEYSTORE_PASSWORD }}
+          LOTUS_KEY_ALIAS: ${{ secrets.LOTUS_KEY_ALIAS }}
+          LOTUS_KEY_PASSWORD: ${{ secrets.LOTUS_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Verify APKs are signed with the release key
+        run: |
+          set -euo pipefail
+          BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -n1)
+          APKSIGNER="${BUILD_TOOLS_DIR%/}/apksigner"
+          for apk in app/build/outputs/apk/release/*.apk; do
+            echo "::group::apksigner verify $apk"
+            "$APKSIGNER" verify --verbose --print-certs "$apk"
+            echo "::endgroup::"
+          done
+
+      - name: Generate SHA-256 checksums
+        run: |
+          set -euo pipefail
+          cd app/build/outputs/apk/release
+          sha256sum *.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      # Scrub the decoded keystore from the runner disk, regardless of outcome.
+      - name: Remove keystore from runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/lotus-release.jks"
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          cd app/build/outputs/apk/release
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — re-uploading assets."
+            gh release upload "$TAG" *.apk SHA256SUMS.txt \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --generate-notes \
+              --repo "$GITHUB_REPOSITORY" \
+              *.apk SHA256SUMS.txt
+          fi
+
+      - name: Upload release APKs as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks-release-signed
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/SHA256SUMS.txt
+          if-no-files-found: ignore
+          retention-days: 90
