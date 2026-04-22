@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.AddToQueue
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SelectAll
@@ -169,19 +170,40 @@ fun Playlist(
                                 )
                             }
 
-                            IconButton(
-                                onClick = {
-                                    showSearchField = true
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = if (replaceSearchWithFilter) {
-                                        Icons.Rounded.FilterList
-                                    } else Icons.Rounded.Search,
-                                    contentDescription = context.resources.getString(
-                                        R.string.track_search
+                            Row {
+                                val exportM3u = rememberM3uExport()
+                                IconButton(
+                                    onClick = {
+                                        exportM3u(
+                                            playlist.name
+                                                ?: context.resources.getString(R.string.unknown),
+                                            playlist.trackList
+                                        )
+                                    },
+                                    enabled = playlist.trackList.isNotEmpty()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Download,
+                                        contentDescription = context.resources.getString(
+                                            R.string.export_m3u
+                                        )
                                     )
-                                )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        showSearchField = true
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = if (replaceSearchWithFilter) {
+                                            Icons.Rounded.FilterList
+                                        } else Icons.Rounded.Search,
+                                        contentDescription = context.resources.getString(
+                                            R.string.track_search
+                                        )
+                                    )
+                                }
                             }
                         }
                     }

@@ -32,8 +32,10 @@ class MusicBrainzMetadataProvider(
     private val logTag = "MBMetadataProvider"
     private val musicBrainzEndpoint = "https://musicbrainz.org/ws/2"
     private val coverArtArchiveEndpoint = "https://coverartarchive.org"
+    // MusicBrainz requires an identifying User-Agent with a contact (email or URL);
+    // see https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting#User-Agent
     private val userAgent =
-        "${context.resources.getString(R.string.app_name)}/${context.getAppVersionName()} ( dev.dn0ne@gmail.com )"
+        "${context.resources.getString(R.string.app_name)}/${context.getAppVersionName()} ( https://github.com/Bjorn99/lotus )"
 
     override suspend fun searchMetadata(
         query: String,

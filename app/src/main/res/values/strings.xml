@@ -8,9 +8,9 @@
     <!-- Metadata provider link -->
     <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
     <!-- Repository link -->
-    <string name="repo_url" translatable="false">https://github.com/dn0ne/lotus</string>
-    <!-- Feedback mail link -->
-    <string name="feedback_url" translatable="false">mailto:dev.dn0ne@gmail.com</string>
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
 
     <!-- Common back button -->
     <string name="back">Back</string>
@@ -59,6 +59,9 @@
     <string name="search_library">Search library</string>
     <string name="search_library_hint">Search tracks, albums, artists, genres, and playlists</string>
     <string name="search_no_results">No results</string>
+    <string name="export_m3u">Export to M3U</string>
+    <string name="export_m3u_success">Playlist exported</string>
+    <string name="export_m3u_failure">Couldn\'t export playlist</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Tracks</string>
