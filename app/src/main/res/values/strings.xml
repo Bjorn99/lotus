@@ -63,6 +63,11 @@
     <string name="export_m3u_success">Playlist exported</string>
     <string name="export_m3u_failure">Couldn\'t export playlist</string>
 
+    <!-- Smart playlists -->
+    <string name="smart_playlists">Smart</string>
+    <string name="smart_recently_added">Recently added</string>
+    <string name="smart_random_mix">Random mix</string>
+
     <!-- Tabs' names -->
     <string name="tracks">Tracks</string>
     <string name="albums">Albums</string>

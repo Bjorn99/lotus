@@ -44,6 +44,77 @@ an issue — we'll respect your wishes.
 - Manually update track details or fetch accurate info from [MusicBrainz](https://musicbrainz.org/)
 - Designed with [Material You](https://m3.material.io/) and supports dynamic color palettes
 
+## What this fork adds (vs upstream dn0ne/lotus)
+
+Each item appears in the order it was introduced. Per-version notes live
+in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
+
+### Stability and infrastructure
+
+- **Continuous Integration pipeline** — every pull request runs unit tests,
+  builds debug + release APKs, runs Android lint + detekt + ktlint, and
+  uploads reports as artifacts. Broken code never reaches master.
+- **Signed release pipeline** — pushing a `v*` tag triggers a GitHub
+  Actions workflow that builds per-ABI + universal APKs, signs them with
+  the release keystore, verifies with `apksigner`, generates
+  `SHA256SUMS.txt`, and publishes everything to a GitHub Release.
+- **Realm → Room database migration** — the upstream app stored playlists
+  and lyrics in Realm (an embedded mobile database that had been
+  deprecated). Lotus migrates to Android's official [Room](https://developer.android.com/training/data-storage/room)
+  on first launch via a one-shot `RealmToRoomMigrator`, then keeps both
+  side-by-side for one release so the legacy store can be safely removed
+  in a later cleanup pass.
+- **Crash reporter** — uncaught exceptions are written to a private log
+  file instead of just killing the process. From the About page you can
+  share the most recent crash log via the Android share sheet, which
+  makes "it crashed for me" bug reports actually actionable. No network,
+  no analytics, no telemetry.
+- **Lyrics reader hardening** — the upstream reader could crash on
+  malformed files and also nuked the shared cache directory (which Coil
+  uses for album-art thumbnails) on every read. Lotus catches the
+  jaudiotagger exceptions, deletes only its own temp file, and logs
+  rather than crashing. Fewer crashes, no more surprise re-downloaded
+  artwork.
+- **Release-build lint posture flipped** — Android lint and the two
+  Kotlin analysers (detekt + ktlint) run on every PR in "report-only"
+  mode. Findings surface as downloadable HTML reports without gating the
+  build, so the backlog can be burned down deliberately.
+
+### Features
+
+- **Share track** — the track-dropdown menu has a "Share" entry that
+  sends the current track to any app via Android's share sheet (audio
+  file + title subject line). Works from the track list and from the
+  now-playing sheet.
+- **Global library search** — a magnifying-globe icon in the top bar
+  opens a single search field that queries across tracks, albums,
+  artists, genres, and playlists at once. Results are grouped by
+  category; tap anything to jump to it. The existing per-tab search
+  still works unchanged.
+- **Export playlist to M3U** — a Download icon on every playlist view
+  (user playlists plus album/artist/genre views) writes the playlist as
+  a standard `.m3u8` file to a folder you pick. Open the file in VLC,
+  PowerAmp, Musicolet, Foobar2000, or anywhere else M3U is supported.
+- **Smart playlists** — the Playlists tab now shows auto-generated
+  lists at the top: **Recently added** (files modified within the last
+  30 days) and **Random mix** (up to 100 tracks shuffled). They feel
+  like any other playlist — tap to open, play from, or export to M3U.
+
+### Housekeeping
+
+- **Fork rebrand** — `applicationId` is `com.dn0ne.lotus.community`, so
+  the community build coexists with the original upstream build side-by-side
+  on the same device.
+- **In-app links point at the right place** — Repository / Feedback
+  buttons open this fork's GitHub repo and issue tracker, not the
+  upstream author's personal email.
+- **MusicBrainz / LRCLIB contact** — the User-Agent sent with those
+  API calls identifies this fork, so rate-limit or abuse reports reach
+  us rather than the upstream author.
+- **Zero telemetry, zero analytics, phone-only** — no network calls
+  except LRCLIB (lyrics on demand) and MusicBrainz (optional metadata
+  search). No crash reporting SDKs, no analytics, no server.
+
 ## Download
 
 Community builds of this fork are published as signed APKs on the
