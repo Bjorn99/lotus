@@ -56,8 +56,12 @@ The original upstream build (different application ID) is still on
 [upstream releases page](https://github.com/dn0ne/lotus/releases/latest) —
 those are *not* produced by this fork.
 
-## Support
-If you enjoy using Lotus, consider [buying me a coffee](https://en.liberapay.com/dn0ne/donate)!
+## Support the original author
+
+This community fork exists because of the original Lotus by **dn0ne**. If
+you'd like to thank them for the underlying app, you can do so on
+[Liberapay](https://en.liberapay.com/dn0ne/donate). This fork does not
+solicit donations of its own.
 
 ## Build
 1. **Get the Source Code**  

@@ -47,6 +47,9 @@
     <string name="search_library">Поиск по библиотеке</string>
     <string name="search_library_hint">Поиск треков, альбомов, исполнителей, жанров и плейлистов</string>
     <string name="search_no_results">Ничего не найдено</string>
+    <string name="export_m3u">Экспорт в M3U</string>
+    <string name="export_m3u_success">Плейлист экспортирован</string>
+    <string name="export_m3u_failure">Не удалось экспортировать плейлист</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>

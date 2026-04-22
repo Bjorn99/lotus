@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Search
@@ -222,6 +223,25 @@ fun MutablePlaylist(
                                         contentDescription = context.resources.getString(
                                             R.string.rename_playlist
                                         ) + " ${playlist.name}"
+                                    )
+                                }
+
+                                val exportM3u = rememberM3uExport()
+                                IconButton(
+                                    onClick = {
+                                        exportM3u(
+                                            playlist.name
+                                                ?: context.resources.getString(R.string.unknown),
+                                            playlist.trackList
+                                        )
+                                    },
+                                    enabled = playlist.trackList.isNotEmpty()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Download,
+                                        contentDescription = context.resources.getString(
+                                            R.string.export_m3u
+                                        )
                                     )
                                 }
 
