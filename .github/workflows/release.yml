@@ -2,15 +2,20 @@ name: Release
 
 # Builds and publishes a signed release whenever a version tag is pushed.
 # Example:
-#   git tag -a v1.2.0 -m "Lotus 1.2.0"
-#   git push origin v1.2.0
+#   git tag -a v1.2.3 -m "Lotus 1.2.3"
+#   git push origin v1.2.3
 #
 # Requires four repo secrets (Settings → Secrets and variables → Actions):
 #   LOTUS_KEYSTORE_BASE64   base64 of the release .jks file
-#                           (e.g. `base64 -w0 lotus-release.jks | pbcopy`)
+#                           (e.g. `base64 -w0 lotus-release.jks`)
 #   LOTUS_KEYSTORE_PASSWORD keystore password
 #   LOTUS_KEY_ALIAS         key alias inside the keystore
 #   LOTUS_KEY_PASSWORD      password for that key
+#
+# Release notes are sourced from CHANGELOG.md. The tag name (v1.2.3) must
+# match the committed versionName (1.2.3-community), and CHANGELOG.md must
+# have a matching `## 1.2.3 — ...` section, or the workflow fails before
+# building anything. Keeps tags, APKs, and changelog in lockstep.
 
 on:
   push:
@@ -75,6 +80,65 @@ jobs:
             exit 1
           fi
 
+      # Prevent the "tag pushed before the version bump merged" failure mode
+      # that shipped two mislabelled releases already. versionName looks like
+      # "1.2.3-community"; tag looks like "v1.2.3". They must agree.
+      - name: Check tag matches committed versionName
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${TAG#v}"
+          BUILD_VERSION=$(
+            grep 'versionName = ' app/build.gradle.kts \
+              | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+).*/\1/' \
+              | head -n1
+          )
+          if [ "$TAG_VERSION" != "$BUILD_VERSION" ]; then
+            echo "::error::Tag ($TAG, -> $TAG_VERSION) does not match versionName in app/build.gradle.kts ($BUILD_VERSION). Fix the tag or bump the version, then re-tag."
+            exit 1
+          fi
+          echo "Tag $TAG ↔ versionName $BUILD_VERSION — OK."
+
+      # CHANGELOG.md section for this tag is the body of the GitHub Release.
+      # Fails if the section is missing so we never ship a release with
+      # empty / default notes.
+      - name: Extract release notes from CHANGELOG.md
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          NOTES_FILE="$RUNNER_TEMP/release-notes.md"
+
+          # Standard fork-summary preamble on every release.
+          cat > "$NOTES_FILE" <<'EOF'
+          > **Community fork of [Lotus](https://github.com/dn0ne/lotus).** See the [README](https://github.com/Bjorn99/lotus/blob/master/README.md#what-this-fork-adds-vs-upstream-dn0nelotus) for the cumulative list of improvements this fork carries over the upstream.
+          >
+          > **Which APK do I pick?** If you're not sure, download `lotus-*-universal-release.apk` — it works on any phone. Otherwise pick the one matching your CPU architecture (`arm64-v8a` covers most modern phones). Verify the download against `SHA256SUMS.txt`.
+
+          EOF
+
+          # Extract "## <VERSION>" through the next "## " header.
+          awk -v ver="$VERSION" '
+              /^## / {
+                  if (in_section) exit
+                  if ($2 == ver) { in_section = 1 }
+              }
+              in_section { print }
+          ' CHANGELOG.md >> "$NOTES_FILE"
+
+          # Sanity-check that the extraction found something.
+          if ! grep -q "^## ${VERSION}" "$NOTES_FILE"; then
+            echo "::error::CHANGELOG.md has no '## ${VERSION}' section. Add one before tagging."
+            exit 1
+          fi
+
+          echo "::group::Release notes body"
+          cat "$NOTES_FILE"
+          echo "::endgroup::"
+          echo "NOTES_FILE=$NOTES_FILE" >> "$GITHUB_ENV"
+
       - name: Unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
@@ -124,13 +188,16 @@ jobs:
           set -euo pipefail
           cd app/build/outputs/apk/release
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists — re-uploading assets."
+            echo "Release $TAG already exists — re-uploading assets and refreshing notes."
+            gh release edit "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --notes-file "$NOTES_FILE"
             gh release upload "$TAG" *.apk SHA256SUMS.txt \
               --repo "$GITHUB_REPOSITORY" --clobber
           else
             gh release create "$TAG" \
               --title "$TAG" \
-              --generate-notes \
+              --notes-file "$NOTES_FILE" \
               --repo "$GITHUB_REPOSITORY" \
               *.apk SHA256SUMS.txt
           fi

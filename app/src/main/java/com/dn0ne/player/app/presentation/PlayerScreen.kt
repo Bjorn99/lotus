@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -73,6 +74,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -84,6 +86,7 @@ import com.dn0ne.player.R
 import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.TrackSort
+import com.dn0ne.player.app.domain.playlist.SmartPlaylists
 import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.filterPlaylists
@@ -94,6 +97,7 @@ import com.dn0ne.player.app.presentation.components.TrackSortButton
 import com.dn0ne.player.app.presentation.components.playback.PlayerSheet
 import com.dn0ne.player.app.presentation.components.playlist.AddToOrCreatePlaylistBottomSheet
 import com.dn0ne.player.app.presentation.components.playlist.DeletePlaylistDialog
+import com.dn0ne.player.app.presentation.components.playlist.PlaylistSectionHeader
 import com.dn0ne.player.app.presentation.components.playlist.MutablePlaylist
 import com.dn0ne.player.app.presentation.components.playlist.Playlist
 import com.dn0ne.player.app.presentation.components.playlist.RenamePlaylistBottomSheet
@@ -282,6 +286,28 @@ fun PlayerScreen(
                         val genrePlaylists by viewModel.genrePlaylists.collectAsState()
                         val folderPlaylists by viewModel.folderPlaylists.collectAsState()
 
+                        // Smart playlists are derived here (not in the VM)
+                        // so the localised names come from the Compose
+                        // resource lookup without forcing a Context into
+                        // PlayerViewModel's constructor. Recomputed only
+                        // when trackList changes — "Random Mix" stays
+                        // stable within a session.
+                        val recentlyAddedName = stringResource(R.string.smart_recently_added)
+                        val randomMixName = stringResource(R.string.smart_random_mix)
+                        val smartPlaylists = remember(
+                            trackList, recentlyAddedName, randomMixName
+                        ) {
+                            val seed = System.currentTimeMillis()
+                            buildList {
+                                SmartPlaylists
+                                    .recentlyAdded(trackList, recentlyAddedName)
+                                    ?.let(::add)
+                                SmartPlaylists
+                                    .randomMix(trackList, randomMixName, seed)
+                                    ?.let(::add)
+                            }
+                        }
+
                         val gridState = rememberLazyGridState()
                         val gridPlaylists by viewModel.settings.gridPlaylists.collectAsState()
 
@@ -371,6 +397,7 @@ fun PlayerScreen(
                                 navController.navigate(PlayerRoutes.Playlist)
                             },
                             playlists = playlists,
+                            smartPlaylists = smartPlaylists,
                             albumPlaylists = albumPlaylists,
                             artistPlaylists = artistPlaylists,
                             genrePlaylists = genrePlaylists,
@@ -945,6 +972,7 @@ fun MainPlayerScreen(
     onGoToAlbumClick: (Track) -> Unit,
     onGoToArtistClick: (Track) -> Unit,
     playlists: List<Playlist>,
+    smartPlaylists: List<Playlist>,
     albumPlaylists: List<Playlist>,
     artistPlaylists: List<Playlist>,
     genrePlaylists: List<Playlist>,
@@ -1343,8 +1371,33 @@ fun MainPlayerScreen(
             }
 
             Tab.Playlists -> {
+                val filteredSmart = smartPlaylists.filterPlaylists(searchFieldValue)
                 if (gridPlaylists) {
                     if (!isInSelectionMode) {
+                        if (filteredSmart.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                PlaylistSectionHeader(
+                                    text = context.resources.getString(R.string.smart_playlists)
+                                )
+                            }
+                            playlistCards(
+                                playlists = filteredSmart,
+                                sort = playlistSort,
+                                sortOrder = playlistSortOrder,
+                                fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
+                                showSinglePreview = false,
+                                // Smart playlists navigate to the immutable view
+                                // (same as album/artist/genre) — they can't be
+                                // renamed or reordered.
+                                onCardClick = onAlbumPlaylistSelection,
+                                onLongClick = { /* smart lists aren't selectable */ }
+                            )
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                PlaylistSectionHeader(
+                                    text = context.resources.getString(R.string.playlists)
+                                )
+                            }
+                        }
                         playlistCards(
                             playlists = playlists.filterPlaylists(searchFieldValue),
                             sort = playlistSort,
@@ -1378,6 +1431,27 @@ fun MainPlayerScreen(
                     }
                 } else {
                     if (!isInSelectionMode) {
+                        if (filteredSmart.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                PlaylistSectionHeader(
+                                    text = context.resources.getString(R.string.smart_playlists)
+                                )
+                            }
+                            playlistRows(
+                                playlists = filteredSmart,
+                                sort = playlistSort,
+                                sortOrder = playlistSortOrder,
+                                fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
+                                showSinglePreview = false,
+                                onRowClick = onAlbumPlaylistSelection,
+                                onLongClick = { /* smart lists aren't selectable */ }
+                            )
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                PlaylistSectionHeader(
+                                    text = context.resources.getString(R.string.playlists)
+                                )
+                            }
+                        }
                         playlistRows(
                             playlists = playlists.filterPlaylists(searchFieldValue),
                             sort = playlistSort,

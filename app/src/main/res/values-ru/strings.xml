@@ -51,6 +51,11 @@
     <string name="export_m3u_success">Плейлист экспортирован</string>
     <string name="export_m3u_failure">Не удалось экспортировать плейлист</string>
 
+    <!-- Smart playlists -->
+    <string name="smart_playlists">Автоплейлисты</string>
+    <string name="smart_recently_added">Недавно добавленные</string>
+    <string name="smart_random_mix">Случайная подборка</string>
+
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>
     <string name="albums">Альбомы</string>
