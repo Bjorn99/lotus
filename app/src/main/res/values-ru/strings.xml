@@ -44,6 +44,9 @@
     <string name="go_to_album">Перейти к альбому</string>
     <string name="go_to_artist">Перейти к исполнителю</string>
     <string name="share_track">Поделиться</string>
+    <string name="search_library">Поиск по библиотеке</string>
+    <string name="search_library_hint">Поиск треков, альбомов, исполнителей, жанров и плейлистов</string>
+    <string name="search_no_results">Ничего не найдено</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>

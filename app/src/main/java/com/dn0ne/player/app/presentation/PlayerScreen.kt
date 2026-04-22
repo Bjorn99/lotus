@@ -40,6 +40,7 @@ import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -87,6 +88,7 @@ import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.filterPlaylists
 import com.dn0ne.player.app.domain.track.filterTracks
+import com.dn0ne.player.app.presentation.components.GlobalSearchSheet
 import com.dn0ne.player.app.presentation.components.PlaylistSortButton
 import com.dn0ne.player.app.presentation.components.TrackSortButton
 import com.dn0ne.player.app.presentation.components.playback.PlayerSheet
@@ -975,6 +977,9 @@ fun MainPlayerScreen(
     var showSearchField by rememberSaveable {
         mutableStateOf(false)
     }
+    var showGlobalSearch by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     var isInSelectionMode: Boolean by remember {
         mutableStateOf(false)
@@ -1086,6 +1091,17 @@ fun MainPlayerScreen(
                                             )
                                         )
                                     }
+                                }
+
+                                IconButton(
+                                    onClick = { showGlobalSearch = true }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.TravelExplore,
+                                        contentDescription = context.resources.getString(
+                                            R.string.search_library
+                                        )
+                                    )
                                 }
 
                                 IconButton(
@@ -1665,6 +1681,21 @@ fun MainPlayerScreen(
             }
         }
     }
+
+    GlobalSearchSheet(
+        isVisible = showGlobalSearch,
+        onDismiss = { showGlobalSearch = false },
+        allTracks = trackList,
+        playlists = playlists,
+        albumPlaylists = albumPlaylists,
+        artistPlaylists = artistPlaylists,
+        genrePlaylists = genrePlaylists,
+        onTrackClick = onTrackClick,
+        onPlaylistClick = onPlaylistSelection,
+        onAlbumPlaylistClick = onAlbumPlaylistSelection,
+        onArtistPlaylistClick = onArtistPlaylistSelection,
+        onGenrePlaylistClick = onGenrePlaylistSelection,
+    )
 }
 
 @Composable

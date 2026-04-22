@@ -56,6 +56,9 @@
     <string name="go_to_album">Go to album</string>
     <string name="go_to_artist">Go to artist</string>
     <string name="share_track">Share</string>
+    <string name="search_library">Search library</string>
+    <string name="search_library_hint">Search tracks, albums, artists, genres, and playlists</string>
+    <string name="search_no_results">No results</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Tracks</string>
