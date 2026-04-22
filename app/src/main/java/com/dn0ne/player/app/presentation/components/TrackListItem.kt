@@ -99,6 +99,7 @@ fun TrackListItem(
                 onViewTrackInfoClick = onViewTrackInfoClick,
                 onGoToAlbumClick = onGoToAlbumClick,
                 onGoToArtistClick = onGoToArtistClick,
+                onShareClick = { shareTrack(context, track) },
                 onRemoveFromPlaylistClick = onRemoveFromPlaylistClick
             )
 
