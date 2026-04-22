@@ -616,7 +616,9 @@ fun ExpandedPlayer(
                             onViewTrackInfoClick = onViewTrackInfoClick,
                             onGoToAlbumClick = onGoToAlbumClick,
                             onGoToArtistClick = onGoToArtistClick,
-                            onShareClick = { shareTrack(context, currentTrack) }
+                            onShareClick = {
+                                playbackState.currentTrack?.let { shareTrack(context, it) }
+                            }
                         )
                     }
                 }
@@ -815,7 +817,9 @@ fun ExpandedPlayer(
                                     onViewTrackInfoClick = onViewTrackInfoClick,
                                     onGoToAlbumClick = onGoToAlbumClick,
                                     onGoToArtistClick = onGoToArtistClick,
-                                    onShareClick = { shareTrack(context, currentTrack) }
+                                    onShareClick = {
+                                        playbackState.currentTrack?.let { shareTrack(context, it) }
+                                    }
                                 )
                             }
                         }
