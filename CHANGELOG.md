@@ -8,6 +8,36 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.1 — Stability: remove force-unwraps from playback UI
+
+**Layman:** Pure stability fix, no visible changes. The player sheet
+and track-info screens used to assume there was always a current track
+when they were drawn. Most of the time that's true, but during certain
+state transitions (clearing the queue, stopping playback, app coming
+back from background) the assumption could briefly fail and crash the
+app. The screens now skip drawing for that one frame instead.
+
+**Technical:**
+- Phase 3 cleanup, item 2 of 4. Replaces every `!!` non-null assertion
+  in `app/src/main/java/com/dn0ne/player/` (six sites total) with a
+  null-safe pattern. Zero `!!` operators remain in main sources.
+- `BottomPlayer`, `ExpandedPlayer` (two inner scopes), and
+  `PlaybackControl` in `PlayerSheet.kt`: each `derivedStateOf {
+  playbackState.currentTrack!! }` is split into a nullable
+  `derivedStateOf { playbackState.currentTrack }` plus an explicit
+  `?: return@<scope>` guard. The remaining body still uses a non-null
+  `currentTrack` (via local shadow), so no downstream call sites
+  changed.
+- `TrackInfoSheet.kt` `Changes` and `ManualEditing` child routes: the
+  `state.track!!` arg is replaced with `val track = state.track ?:
+  return@composable` followed by `track = track`. If the navigation
+  child renders before its parent populated the track (a state race),
+  the route no-ops instead of NPE-ing.
+- The parent `PlayerScreen` already gates the entire player sheet via
+  `AnimatedVisibility(visible = currentTrack != null, …)`, but
+  `AnimatedVisibility` keeps composing the child for the duration of
+  the exit animation — that's the gap these guards close.
+
 ## 1.3.0 — Drop Realm, Room-only storage
 
 **Layman:** A long-overdue cleanup with no visible behaviour change on

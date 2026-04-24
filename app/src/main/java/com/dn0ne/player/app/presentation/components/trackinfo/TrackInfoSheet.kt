@@ -329,8 +329,14 @@ fun TrackInfoSheet(
                     )
                 }
                 composable<TrackInfoRoutes.Changes> {
+                    // state.track is set when entering the TrackInfoSheet
+                    // (it's the track the user picked "Track info" on). If
+                    // it's somehow null when this child route renders, no-op
+                    // rather than crash — the user will just see an empty
+                    // sheet and can back out.
+                    val track = state.track ?: return@composable
                     ChangesSheet(
-                        track = state.track!!,
+                        track = track,
                         state = state.changesSheetState,
                         onBackClick = {
                             navController.navigateUp()
@@ -347,8 +353,9 @@ fun TrackInfoSheet(
                 }
 
                 composable<TrackInfoRoutes.ManualEditing> {
+                    val track = state.track ?: return@composable
                     ManualInfoEditSheet(
-                        track = state.track!!,
+                        track = track,
                         state = state.manualInfoEditSheetState,
                         isCoverArtEditable = state.isCoverArtEditable,
                         onPickCoverArtClick = onPickCoverArtClick,
