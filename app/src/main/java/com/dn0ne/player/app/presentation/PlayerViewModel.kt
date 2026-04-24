@@ -20,6 +20,7 @@ import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.domain.lyrics.Lyrics
+import com.dn0ne.player.app.domain.lyrics.LyricsFetcher
 import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.playback.PlaybackMode
@@ -70,6 +71,15 @@ class PlayerViewModel(
     private val equalizerController: EqualizerController
 ) : ViewModel() {
     var player: Player? = null
+
+    // Self-contained facade for reading embedded lyrics from tags and
+    // fetching them from LRCLIB. Same behaviour as before, just moved out
+    // of this class so the VM can shrink.
+    private val lyricsFetcher = LyricsFetcher(
+        lyricsReader = lyricsReader,
+        lyricsProvider = lyricsProvider,
+        lyricsRepository = lyricsRepository,
+    )
 
     private val _settingsSheetState = MutableStateFlow(
         SettingsSheetState(
@@ -1093,7 +1103,7 @@ class PlayerViewModel(
                     val track = _trackInfoSheetState.value.track ?: return@launch
 
                     val lyricsFromRepository = lyricsRepository.getLyricsByUri(track.uri.toString())
-                    var lyricsFromTag: Lyrics? = readLyricsFromTag(track)
+                    var lyricsFromTag: Lyrics? = lyricsFetcher.readFromTag(track, viewModelScope)
 
                     _lyricsControlSheetState.update {
                         it.copy(
@@ -1163,7 +1173,7 @@ class PlayerViewModel(
 
                         delay(5000)
 
-                        val fromTag = readLyricsFromTag(track)
+                        val fromTag = lyricsFetcher.readFromTag(track, viewModelScope)
                         _lyricsControlSheetState.update {
                             it.copy(
                                 lyricsFromTag = fromTag,
@@ -1182,7 +1192,7 @@ class PlayerViewModel(
                             isFetchingFromRemote = true
                         )
                     }
-                    val lyrics = fetchLyrics(track)
+                    val lyrics = lyricsFetcher.fetchFromRemote(track)
 
                     _lyricsControlSheetState.update {
                         it.copy(
@@ -1371,118 +1381,6 @@ class PlayerViewModel(
         }
     }
 
-    private fun readLyricsFromTag(track: Track): Lyrics? {
-        var lyrics: Lyrics? = null
-
-        val readResult = lyricsReader.readFromTag(track)
-        when (readResult) {
-            is Result.Success -> {
-                lyrics = readResult.data
-            }
-
-            is Result.Error -> {
-                viewModelScope.launch {
-                    when (readResult.error) {
-                        DataError.Local.NoReadPermission -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.no_read_permission
-                                )
-                            )
-                        }
-
-                        DataError.Local.FailedToRead -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.failed_to_read
-                                )
-                            )
-                        }
-
-                        else -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.unknown_error_occurred
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        return lyrics
-    }
-
-    private suspend fun fetchLyrics(track: Track): Lyrics? {
-        return withContext(Dispatchers.IO) {
-            if (track.title == null || track.artist == null) {
-                SnackbarController.sendEvent(
-                    SnackbarEvent(
-                        message = R.string.cant_look_for_lyrics_title_or_artist_is_missing
-                    )
-                )
-                return@withContext null
-            }
-
-            var lyrics: Lyrics? = null
-            val result = lyricsProvider.getLyrics(track)
-
-            when (result) {
-                is Result.Success -> {
-                    lyrics = result.data
-                    lyricsRepository.insertLyrics(lyrics)
-                }
-
-                is Result.Error -> {
-                    when (result.error) {
-                        DataError.Network.BadRequest -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.cant_look_for_lyrics_title_or_artist_is_missing
-                                )
-                            )
-                        }
-
-                        DataError.Network.NotFound -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.lyrics_not_found
-                                )
-                            )
-                        }
-
-                        DataError.Network.ParseError -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.failed_to_parse_response
-                                )
-                            )
-                        }
-
-                        DataError.Network.NoInternet -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.no_internet
-                                )
-                            )
-                        }
-
-                        else -> {
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(
-                                    message = R.string.unknown_error_occurred
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            lyrics
-        }
-    }
-
     private fun loadLyrics() {
         _playbackState.value.currentTrack?.let { currentTrack ->
             if (currentTrack.uri.toString() == _playbackState.value.lyrics?.uri) return
@@ -1496,7 +1394,8 @@ class PlayerViewModel(
                 }
 
                 var lyrics: Lyrics? = lyricsRepository.getLyricsByUri(currentTrack.uri.toString())
-                    ?: fetchLyrics(currentTrack) ?: readLyricsFromTag(currentTrack)
+                    ?: lyricsFetcher.fetchFromRemote(currentTrack)
+                    ?: lyricsFetcher.readFromTag(currentTrack, viewModelScope)
                         ?.also { lyricsRepository.insertLyrics(it) }
 
                 _playbackState.update {
