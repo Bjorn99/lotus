@@ -21,6 +21,7 @@ import com.dn0ne.player.app.data.repository.PlaylistRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.domain.lyrics.Lyrics
 import com.dn0ne.player.app.domain.lyrics.LyricsFetcher
+import com.dn0ne.player.app.domain.playlist.PlaylistEditor
 import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.playback.PlaybackMode
@@ -80,6 +81,10 @@ class PlayerViewModel(
         lyricsProvider = lyricsProvider,
         lyricsRepository = lyricsRepository,
     )
+
+    // Mutation-side playlist operations (create/rename/delete/add/remove/reorder).
+    // VM-owned state updates (`_selectedPlaylist`) stay in the event branches.
+    private val playlistEditor = PlaylistEditor(repository = playlistRepository)
 
     private val _settingsSheetState = MutableStateFlow(
         SettingsSheetState(
@@ -983,94 +988,61 @@ class PlayerViewModel(
 
             is OnCreatePlaylistClick -> {
                 viewModelScope.launch {
-                    if (playlists.value.map { it.name }.contains(event.name)) return@launch
-                    playlistRepository.insertPlaylist(
-                        Playlist(
-                            name = event.name,
-                            trackList = emptyList()
-                        )
+                    playlistEditor.create(
+                        name = event.name,
+                        existingNames = playlists.value.map { it.name },
                     )
                 }
             }
 
             is OnRenamePlaylistClick -> {
                 viewModelScope.launch {
-                    if (playlists.value.map { it.name }.contains(event.name)) return@launch
-                    playlistRepository.renamePlaylist(
+                    val renamed = playlistEditor.rename(
                         playlist = event.playlist,
-                        name = event.name
+                        newName = event.name,
+                        existingNames = playlists.value.map { it.name },
                     )
-
-                    _selectedPlaylist.update {
-                        it?.copy(
-                            name = event.name
-                        )
+                    if (renamed) {
+                        _selectedPlaylist.update { it?.copy(name = event.name) }
                     }
                 }
             }
 
             is OnDeletePlaylistClick -> {
                 viewModelScope.launch {
-                    playlistRepository.deletePlaylist(
-                        playlist = event.playlist
-                    )
-
+                    playlistEditor.delete(event.playlist)
                     _selectedPlaylist.update { null }
                 }
             }
 
             is OnAddToPlaylist -> {
                 viewModelScope.launch {
-                    if (event.playlist.trackList.any { it in event.tracks }) {
-                        SnackbarController.sendEvent(
-                            SnackbarEvent(
-                                message = R.string.track_is_already_on_playlist
-                            )
-                        )
-                    }
-
-                    val newTrackList =
-                        (event.playlist.trackList.toMutableSet() + event.tracks).toList()
-                    playlistRepository.updatePlaylistTrackList(
+                    playlistEditor.addTracks(
                         playlist = event.playlist,
-                        trackList = newTrackList
+                        tracks = event.tracks,
                     )
                 }
             }
 
             is OnRemoveFromPlaylist -> {
                 viewModelScope.launch {
-                    val newTrackList = event.playlist.trackList.toMutableList().apply {
-                        removeAll(event.tracks)
-                    }
-
-                    playlistRepository.updatePlaylistTrackList(
+                    val newTrackList = playlistEditor.removeTracks(
                         playlist = event.playlist,
-                        trackList = newTrackList
+                        tracks = event.tracks,
                     )
-
-                    _selectedPlaylist.update {
-                        it?.copy(
-                            trackList = newTrackList
-                        )
-                    }
+                    _selectedPlaylist.update { it?.copy(trackList = newTrackList) }
                 }
             }
 
             is OnPlaylistReorder -> {
                 if (event.playlist.trackList != event.trackList) {
                     viewModelScope.launch {
-                        playlistRepository.updatePlaylistTrackList(
+                        playlistEditor.reorder(
                             playlist = event.playlist,
-                            trackList = event.trackList
+                            newOrder = event.trackList,
                         )
                     }
-
-                    _selectedPlaylist.update {
-                        it?.copy(
-                            trackList = event.trackList
-                        )
-                    }
+                    _selectedPlaylist.update { it?.copy(trackList = event.trackList) }
                 }
             }
 
