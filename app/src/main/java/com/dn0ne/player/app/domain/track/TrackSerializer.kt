@@ -1,7 +1,6 @@
 package com.dn0ne.player.app.domain.track
 
 import android.net.Uri
-import androidx.media3.common.MediaItem
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -97,8 +96,21 @@ object TrackSerializer : KSerializer<Track> {
             require(uriString.isNotBlank() && coverArtUriString.isNotBlank() && duration >= 0 && size >= 0)
 
             val uri = Uri.parse(uriString)
-            val mediaItem = MediaItem.fromUri(uri)
             val coverArtUri = Uri.parse(coverArtUriString)
+            // Rebuild the MediaItem with full metadata so the system media
+            // notification has a title / artist / artwork to show after a
+            // process restart, not just "Lotus is playing".
+            val mediaItem = buildMediaItem(
+                uri = uri,
+                title = title,
+                artist = artist,
+                album = album,
+                albumArtist = albumArtist,
+                genre = genre,
+                year = year,
+                trackNumber = trackNumber,
+                coverArtUri = coverArtUri,
+            )
             Track(
                 uri = uri,
                 mediaItem = mediaItem,
