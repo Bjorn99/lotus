@@ -8,6 +8,33 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.2 — Extract LyricsFetcher out of PlayerViewModel
+
+**Layman:** Code cleanup with no visible changes. `PlayerViewModel`
+has grown into a 1541-line file handling playback, metadata,
+playlists, lyrics, and more — all mixed together. This release
+extracts the lyrics fetching logic into its own focused class so
+future work on lyrics doesn't drag the whole file into every diff.
+First step in a multi-release split; the behaviour on your phone is
+unchanged.
+
+**Technical:**
+- Phase 3 cleanup, item 3 of 4 (first pass). Pure extraction — no
+  state-coupling changes, no behaviour changes, no public API changes.
+- New `com.dn0ne.player.app.domain.lyrics.LyricsFetcher` class owns
+  the two formerly private methods `readFromTag` and `fetchFromRemote`
+  (previously `readLyricsFromTag` / `fetchLyrics` inside the VM).
+  Constructor takes `LyricsReader`, `LyricsProvider`, `LyricsRepository`.
+- `PlayerViewModel` now holds a private `lyricsFetcher` field and
+  delegates at the three call sites (`OnLyricsControlClick`,
+  `OnFetchLyricsFromRemoteClick`, `loadLyrics`). `readFromTag` takes
+  the coroutine scope explicitly so snackbar errors keep launching
+  off `viewModelScope` exactly as before.
+- Net: `-102 lines` in `PlayerViewModel.kt` (1541 → 1439). Remaining
+  slices — metadata search, playlist CRUD, queue ops, lyrics control
+  sheet state — stay in the VM for now; they'll be pulled out in
+  follow-up PRs once this pattern is proven in production.
+
 ## 1.3.1 — Stability: remove force-unwraps from playback UI
 
 **Layman:** Pure stability fix, no visible changes. The player sheet
