@@ -336,11 +336,14 @@ fun BottomPlayer(
             }
     ) {
         val playbackState by playbackStateFlow.collectAsState()
-        val currentTrack by remember {
-            derivedStateOf {
-                playbackState.currentTrack!!
-            }
+        // The parent (`PlayerScreen.kt`) wraps us in
+        // `AnimatedVisibility(visible = currentTrack != null, …)`, but the
+        // exit animation keeps composing us briefly after `currentTrack`
+        // flips to null. Guard explicitly so a state race can't NPE.
+        val currentTrackOrNull: Track? by remember {
+            derivedStateOf { playbackState.currentTrack }
         }
+        val currentTrack = currentTrackOrNull ?: return@Box
         val isPlaying by remember {
             derivedStateOf {
                 playbackState.isPlaying
@@ -629,11 +632,10 @@ fun ExpandedPlayer(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    val currentTrack by remember {
-                        derivedStateOf {
-                            playbackState.currentTrack!!
-                        }
+                    val currentTrackOrNull: Track? by remember {
+                        derivedStateOf { playbackState.currentTrack }
                     }
+                    val currentTrack = currentTrackOrNull ?: return@Column
 
                     AnimatedContent(
                         targetState = currentTrack,
@@ -704,11 +706,10 @@ fun ExpandedPlayer(
                     horizontalArrangement = Arrangement.Center
                 ) {
 
-                    val currentTrack by remember {
-                        derivedStateOf {
-                            playbackState.currentTrack!!
-                        }
+                    val currentTrackOrNull: Track? by remember {
+                        derivedStateOf { playbackState.currentTrack }
                     }
+                    val currentTrack = currentTrackOrNull ?: return@Row
                     AnimatedContent(
                         targetState = currentTrack,
                         label = "cover-art-animation"
@@ -966,11 +967,10 @@ fun PlaybackControl(
                 playbackState.position
             }
         }
-        val currentTrack by remember {
-            derivedStateOf {
-                playbackState.currentTrack!!
-            }
+        val currentTrackOrNull: Track? by remember {
+            derivedStateOf { playbackState.currentTrack }
         }
+        val currentTrack = currentTrackOrNull ?: return@Column
         val isPlaying by remember {
             derivedStateOf {
                 playbackState.isPlaying
