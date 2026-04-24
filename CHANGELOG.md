@@ -8,6 +8,46 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.4 — Fix media notification: show song title, artist, and artwork
+
+**Layman:** When you play a song, the system notification (and the
+lock screen, and Android Auto, and your watch's media tile) used to
+say just "Lotus is playing" instead of the actual song title.
+Embarrassing. Fixed: every track now carries its title, artist, album,
+album art, year, and track number into the notification, so you
+finally see what's playing.
+
+**Technical:**
+- Phase 4, item 1. Stability + modernization fix.
+- Root cause: both Track → MediaItem conversion sites
+  (`TrackRepositoryImpl` at scan time and `TrackSerializer` at saved-
+  state restore time) called `MediaItem.fromUri(uri)`, which builds a
+  `MediaItem` with **no** `MediaMetadata`. Media3's automatic
+  notification reads `mediaMetadata.title` / `displayTitle`, so when
+  both are null the system fell back to the app label.
+- New helper: `com.dn0ne.player.app.domain.track.buildMediaItem(uri,
+  title, artist, album, albumArtist, genre, year, trackNumber,
+  coverArtUri)`. Single source of truth for Track → MediaItem with
+  full `MediaMetadata` populated:
+  - `title`, `artist`, `albumTitle`, `albumArtist`, `genre`
+  - `releaseYear`, `trackNumber` (parsed via `?.toIntOrNull()` so
+    weirdly-formatted tags don't crash)
+  - `artworkUri` from the MediaStore album-art URI (system-loaded —
+    no manual bitmap decode)
+  - `displayTitle` + `subtitle` set explicitly because different
+    OEMs prefer different fields for the notification's primary /
+    secondary lines
+  - stable `mediaId` = uri string, plus `RequestMetadata.mediaUri`
+    for MediaSession correlation across queue reorders + process
+    restarts
+- Two call sites migrated to `buildMediaItem(...)`. Unused
+  `androidx.media3.common.MediaItem` import removed from
+  `TrackSerializer`.
+- Modernisation: `POST_NOTIFICATIONS` permission added to the
+  manifest. Required on Android 13+ for foreground-service media
+  notifications to be reliably visible. The system handles the runtime
+  prompt automatically when the foreground service starts.
+
 ## 1.3.3 — Extract PlaylistEditor out of PlayerViewModel
 
 **Layman:** Second step in the PlayerViewModel cleanup begun in 1.3.2.
