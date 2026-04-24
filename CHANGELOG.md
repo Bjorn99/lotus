@@ -8,6 +8,34 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.3 — Extract PlaylistEditor out of PlayerViewModel
+
+**Layman:** Second step in the PlayerViewModel cleanup begun in 1.3.2.
+All the "create / rename / delete / add / remove / reorder" playlist
+operations move into their own class. No visible change on your phone
+— same behaviour, same snackbars, same results.
+
+**Technical:**
+- Phase 3 cleanup, item 3 of 4 (second pass). Another pure extraction.
+- New `com.dn0ne.player.app.domain.playlist.PlaylistEditor` class with
+  six `suspend` methods — `create`, `rename`, `delete`, `addTracks`,
+  `removeTracks`, `reorder`. Constructor takes `PlaylistRepository`.
+- The name-collision check (previously `playlists.value.map { it.name
+  }.contains(event.name)`) now takes an explicit `existingNames`
+  list. Name checks, snackbars, and the "add tracks that are already
+  present still adds them" quirk are all preserved exactly.
+- Six `PlayerScreenEvent` branches in the VM — `OnCreatePlaylistClick`,
+  `OnRenamePlaylistClick`, `OnDeletePlaylistClick`, `OnAddToPlaylist`,
+  `OnRemoveFromPlaylist`, `OnPlaylistReorder` — now delegate to the
+  editor. `_selectedPlaylist` mutations stay in the branches because
+  they're VM-local state.
+- `parseM3U` still calls `playlistRepository.insertPlaylist` directly
+  — its behaviour (no name-collision check) differs from the editor
+  and is kept identical to avoid a behavioural change in this
+  refactor.
+- Net: `PlayerViewModel.kt` **1439 → 1412 lines** (−27). Combined with
+  v1.3.2 that's −129 lines total out of the 1541-line original.
+
 ## 1.3.2 — Extract LyricsFetcher out of PlayerViewModel
 
 **Layman:** Code cleanup with no visible changes. `PlayerViewModel`
