@@ -8,6 +8,49 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.5 — Stop crashes during MusicBrainz / LRCLIB requests
+
+**Layman:** Searching online for track metadata (the "Track info →
+Search" flow) and fetching lyrics from LRCLIB used to crash the app
+on flaky networks — DNS hiccups, TLS / certificate weirdness, slow
+connections. Now those failures pop a snackbar with a helpful message
+instead of taking the app down. Also: the request timeout dropped
+from **3 minutes** to **20 seconds**, so a slow lookup gives you an
+error long before you'd reach for the back button.
+
+**Technical:**
+- Phase 4, item 2. The metadata search feature was kept (it's
+  legitimately useful for fixing badly-tagged music) and hardened
+  rather than removed.
+- Three crash-paths fixed across `MusicBrainzMetadataProvider` (2
+  network calls) and `LrclibLyricsProvider` (3 network calls). Each
+  call previously caught only a narrow set: `UnresolvedAddressException`,
+  `HttpRequestTimeoutException`, sometimes `SocketException`. Anything
+  else escaped uncaught:
+  - `ConnectTimeoutException` / `SocketTimeoutException` — connection
+    + read timeouts (distinct from `HttpRequestTimeoutException`)
+  - `UnknownHostException` — DNS failures on some Android stacks
+  - `SSLException` — TLS handshake / cert pinning errors
+  - any other `IOException` — generic socket / EOF problems
+- Both providers now use a single `Throwable.toNetworkError()`
+  classifier and a `Throwable` fallback at the end of each `catch`
+  block. `CancellationException` is explicitly re-thrown so coroutine
+  cancellation still unwinds correctly (catching it would break
+  structured concurrency).
+- `body()` parse paths gain the same `Throwable` fallback, mapping
+  to `DataError.Network.ParseError`.
+- HTTP timeouts in `PlayerModule.kt` retuned:
+  - `requestTimeoutMillis 180_000 → 20_000` (3 min → 20 s)
+  - new `connectTimeoutMillis = 10_000`
+  - new `socketTimeoutMillis = 15_000`
+- Dead code removed in `getCoverArtBytes`: a `Log.d(...)` after a
+  `return` was unreachable. Moved before the return so 307 redirect
+  responses (which Ktor follows automatically — should never reach
+  this branch in practice) actually log when they do.
+- `println("RESPONSE BODY: ...")` left over from earlier debugging in
+  `LrclibLyricsProvider.postLyrics` replaced with a proper
+  `Log.d(logTag, ...)` call.
+
 ## 1.3.4 — Fix media notification: show song title, artist, and artwork
 
 **Layman:** When you play a song, the system notification (and the

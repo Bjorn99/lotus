@@ -56,7 +56,13 @@ val playerModule = module {
                 )
             }
             install(HttpTimeout) {
-                requestTimeoutMillis = 180000
+                // Snappy enough that a flaky network produces a user-visible
+                // error inside the attention span of someone who just tapped
+                // "Search" — the previous 3-minute total was effectively
+                // "the app is hung".
+                requestTimeoutMillis = 20_000
+                connectTimeoutMillis = 10_000
+                socketTimeoutMillis = 15_000
             }
         }
     }

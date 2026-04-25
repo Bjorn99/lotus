@@ -8,6 +8,8 @@ import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -17,11 +19,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import io.ktor.http.headers
 import io.ktor.serialization.JsonConvertException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.io.IOException
 import java.net.SocketException
+import java.net.UnknownHostException
 import java.nio.channels.UnresolvedAddressException
+import javax.net.ssl.SSLException
 import com.dn0ne.player.R
 import com.dn0ne.player.core.util.getAppVersionName
 
@@ -58,13 +64,11 @@ class MusicBrainzMetadataProvider(
                     append(HttpHeaders.UserAgent, userAgent)
                 }
             }
-        } catch (e: UnresolvedAddressException) {
-            Log.i(logTag, e.message.toString())
-            return Result.Error(DataError.Network.NoInternet)
-        } catch (_: HttpRequestTimeoutException) {
-            return Result.Error(DataError.Network.RequestTimeout)
-        } catch (_: SocketException) {
-            return Result.Error(DataError.Network.Unknown)
+        } catch (e: CancellationException) {
+            // Coroutine cancellation must propagate; never swallow.
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
         }
 
         when (response.status) {
@@ -74,8 +78,15 @@ class MusicBrainzMetadataProvider(
                     return Result.Success(
                         data = searchResult.toMetadataSearchResultList()
                     )
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: JsonConvertException) {
                     Log.d(logTag, e.message, e)
+                    return Result.Error(DataError.Network.ParseError)
+                } catch (e: Throwable) {
+                    // Defensive — body parsing can throw a wide range of
+                    // wrapped Ktor / kotlinx.serialization exceptions.
+                    Log.w(logTag, "Failed to parse MusicBrainz search response", e)
                     return Result.Error(DataError.Network.ParseError)
                 }
             }
@@ -129,11 +140,10 @@ class MusicBrainzMetadataProvider(
                     append(HttpHeaders.UserAgent, userAgent)
                 }
             }
-        } catch (e: UnresolvedAddressException) {
-            Log.d(logTag, e.message.toString())
-            return Result.Error(DataError.Network.NoInternet)
-        } catch (_: HttpRequestTimeoutException) {
-            return Result.Error(DataError.Network.RequestTimeout)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
         }
 
         when (response.status) {
@@ -141,15 +151,20 @@ class MusicBrainzMetadataProvider(
                 try {
                     val bytes = response.body<ByteArray>()
                     return Result.Success(bytes)
-                } catch (e: Exception) {
-                    Log.d(logTag, e.message, e)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    Log.w(logTag, "Failed to read cover-art body", e)
                     return Result.Error(DataError.Network.ParseError)
                 }
             }
 
             HttpStatusCode.TemporaryRedirect -> {
+                // Ktor's default config follows redirects automatically, so
+                // we shouldn't see this in practice. Log + treat as unknown
+                // so future regressions in redirect handling surface clearly.
+                Log.d(logTag, "Unexpected 307 from CoverArtArchive: ${response.bodyAsText()}")
                 return Result.Error(DataError.Network.Unknown)
-                Log.d(logTag, "Redirected: ${response.bodyAsText()}")
             }
 
             HttpStatusCode.BadRequest -> {
@@ -165,6 +180,39 @@ class MusicBrainzMetadataProvider(
             }
 
             else -> return Result.Error(DataError.Network.Unknown)
+        }
+    }
+
+    /**
+     * Maps any thrown network-side exception onto our [DataError.Network]
+     * vocabulary. The previous code only caught a handful of exception
+     * types; everything else escaped and crashed the process. This is the
+     * single fallback so [searchMetadata] and [getCoverArtBytes] stay
+     * consistent and complete.
+     */
+    private fun Throwable.toNetworkError(): DataError.Network {
+        return when (this) {
+            is UnresolvedAddressException, is UnknownHostException -> {
+                Log.i(logTag, "DNS / address resolution failed: $message")
+                DataError.Network.NoInternet
+            }
+            is HttpRequestTimeoutException,
+            is ConnectTimeoutException,
+            is SocketTimeoutException -> {
+                DataError.Network.RequestTimeout
+            }
+            is SSLException -> {
+                Log.w(logTag, "TLS handshake / cert error: $message")
+                DataError.Network.Unknown
+            }
+            is SocketException, is IOException -> {
+                Log.w(logTag, "Network I/O error: $message")
+                DataError.Network.Unknown
+            }
+            else -> {
+                Log.w(logTag, "Unexpected network failure", this)
+                DataError.Network.Unknown
+            }
         }
     }
 }
