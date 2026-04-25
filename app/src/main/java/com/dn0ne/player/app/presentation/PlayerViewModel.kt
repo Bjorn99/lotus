@@ -572,6 +572,25 @@ class PlayerViewModel(
             is OnPlayNextClick -> {
                 if (_playbackState.value.currentTrack == event.track) return
 
+                // Media3's DefaultShuffleOrder.cloneAndInsert places newly-
+                // added items at a random position in the shuffle order, so
+                // an inserted "play next" track plays at some random later
+                // time instead of next. Switch to Repeat so the user gets
+                // the behaviour they tapped for; they can re-shuffle from
+                // the playback-mode toggle afterwards.
+                val shuffleWasOn =
+                    _playbackState.value.playbackMode == PlaybackMode.Shuffle
+                if (shuffleWasOn) {
+                    setPlayerPlaybackMode(PlaybackMode.Repeat)
+                    _playbackState.update { it.copy(playbackMode = PlaybackMode.Repeat) }
+                    savedPlayerState.playbackMode = PlaybackMode.Repeat
+                    viewModelScope.launch {
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(message = R.string.shuffle_disabled_for_play_next)
+                        )
+                    }
+                }
+
                 _playbackState.value.playlist?.let { playlist ->
                     val trackIndex = playlist.trackList.indexOf(event.track)
                     val currentTrackIndex = _playbackState.value.currentTrack?.let {
@@ -579,10 +598,24 @@ class PlayerViewModel(
                     } ?: 0
 
                     if (trackIndex >= 0) {
+                        // Media3's moveMediaItem(from, newIndex) places the
+                        // moved item AT newIndex post-move. To land the
+                        // track immediately after the current one:
+                        //   trackIndex > current: removing from a later
+                        //     index doesn't shift current, so destination
+                        //     is currentTrackIndex + 1.
+                        //   trackIndex < current: removing from an earlier
+                        //     index shifts current down by 1, so destination
+                        //     is currentTrackIndex (= newCurrent + 1).
+                        val destinationIndex = if (trackIndex < currentTrackIndex) {
+                            currentTrackIndex
+                        } else {
+                            currentTrackIndex + 1
+                        }
                         onEvent(
                             OnReorderingQueue(
                                 trackIndex,
-                                (currentTrackIndex).coerceAtMost(playlist.trackList.lastIndex)
+                                destinationIndex.coerceAtMost(playlist.trackList.lastIndex)
                             )
                         )
                         return

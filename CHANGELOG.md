@@ -8,6 +8,44 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.3.6 — Fix "Play next" + queue handling in shuffle mode
+
+**Layman:** Two related queue bugs. Tapping "Play next" on a track
+already in the queue moved it to the wrong position (right *before*
+the currently-playing track instead of after). And in shuffle mode,
+"Play next" didn't actually play the track next — it inserted the
+track at a random position in the shuffle order, so it would play at
+some unpredictable later time. Fixed: the move math is correct now,
+and tapping "Play next" while shuffle is on switches to the
+non-shuffle Repeat mode (with a snackbar) so the track reliably plays
+next. Re-enable shuffle from the playback-mode toggle when you want
+it back.
+
+**Technical:**
+- `OnPlayNextClick` reorder branch (track already in queue): the
+  destination index passed to `OnReorderingQueue` was always
+  `currentTrackIndex`. Media3's `moveMediaItem(from, newIndex)` places
+  the item at `newIndex` post-move; for a track at index 5 moved to
+  index 3, the previously-current item shifts to index 4, so the
+  moved track ends up *before* the current one. Fixed by computing
+  destination conditionally:
+  - `trackIndex > currentTrackIndex` → `currentTrackIndex + 1`
+  - `trackIndex < currentTrackIndex` → `currentTrackIndex` (current
+    shifts down by 1 when target is removed; landing target at this
+    index puts it right after the new current position)
+- `OnPlayNextClick` add-new branch (track not yet in queue): in
+  shuffle mode `Player.addMediaItem(currentMediaItemIndex + 1, item)`
+  inserts at the timeline position, but Media3's
+  `DefaultShuffleOrder.cloneAndInsert` places the new item at a
+  random position in the shuffle order, defeating "play next" intent.
+  Workaround: detect shuffle, switch playback mode to Repeat, persist
+  via `savedPlayerState.playbackMode`, then add at `currentIndex + 1`
+  as before. Snackbar `R.string.shuffle_disabled_for_play_next`
+  (localised EN/RU/UK) explains the change.
+- `OnAddToQueueClick` left alone — appending to the timeline + random
+  shuffle position is consistent with what users mean by "add to
+  queue" (the order is already random by design).
+
 ## 1.3.5 — Stop crashes during MusicBrainz / LRCLIB requests
 
 **Layman:** Searching online for track metadata (the "Track info →

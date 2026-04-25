@@ -212,6 +212,9 @@
     <string name="cant_find_lyrics">Can\'t find lyrics.</string>
     <string name="lyrics_provided_by">Lyrics provided by LRCLIB</string>
 
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">Shuffle turned off so this track plays next</string>
+
     <!-- Playlists related -->
     <string name="create_playlist">Create playlist</string>
     <string name="add_to_playlist">Add to playlist</string>
