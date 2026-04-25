@@ -122,6 +122,11 @@ Community builds of this fork are published as signed APKs on the
 Each release includes per-ABI APKs plus a universal APK, and a
 `SHA256SUMS.txt` you can verify against.
 
+F-Droid and itch.io distribution channels are documented in
+[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md). For users who want
+auto-updates, the F-Droid client is the recommended channel once we
+land on f-droid.org.
+
 The original upstream build (different application ID) is still on
 [F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) and the
 [upstream releases page](https://github.com/dn0ne/lotus/releases/latest) —
