@@ -200,6 +200,9 @@
     <string name="cant_find_lyrics">Текст не знайдено.</string>
     <string name="lyrics_provided_by">Текст наданий LRCLIB</string>
 
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">Перемішування вимкнено: цей трек відтвориться наступним</string>
+
     <!-- Playlists related -->
     <string name="create_playlist">Створити плейлист</string>
     <string name="add_to_playlist">Додати до плейлисту</string>
