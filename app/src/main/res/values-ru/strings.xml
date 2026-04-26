@@ -246,6 +246,20 @@
     <string name="network_lookups">Разрешить сетевые запросы</string>
     <string name="network_lookups_explain">Главный переключатель для LRCLIB, NetEase и MusicBrainz. Отключите для строго офлайн-режима — остальная часть приложения продолжит работать с локальной библиотекой.</string>
 
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">Что покидает устройство</string>
+    <string name="privacy_what_stays">Что остаётся на устройстве</string>
+    <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
+    <string name="privacy_lrclib_body">Отправляется: название трека, исполнитель, альбом (если известен) и длительность. Используется для поиска синхронизированного или обычного текста. Запрос уходит только когда вы открываете экран текста для трека, текст которого ещё не закэширован.</string>
+    <string name="privacy_netease_title">NetEase (music.163.com)</string>
+    <string name="privacy_netease_body">Отправляется: название трека и исполнитель. Используется как запасной источник, если на LRCLIB ничего нет. Происходит, только если включён запасной источник NetEase (Настройки → Текст) и только после того, как LRCLIB вернул пусто.</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
+    <string name="privacy_musicbrainz_body">Отправляется: ваш поисковый запрос и длительность трека. Используется для поиска подходящего релиза с обложкой и метаданными. Запрос уходит только когда вы нажимаете «Поиск» на экране Информация о треке → Поиск — никогда автоматически.</string>
+    <string name="privacy_local_title">Локальные данные</string>
+    <string name="privacy_local_body">Кэш текстов, результаты сканирования музыки, настройки приложения и журналы сбоев хранятся на этом устройстве. Поделиться журналом сбоев — действие через системное меню «Поделиться»; ничего не отправляется само по себе.</string>
+    <string name="privacy_no_telemetry_title">Без телеметрии</string>
+    <string name="privacy_no_telemetry_body">Никакой аналитики, отслеживания использования или диагностических отправок. Перечисленные выше адреса — вся сетевая поверхность приложения.</string>
+
     <!-- Theme settings -->
     <string name="appearance">Оформление</string>
     <string name="appearance_system">Системное</string>

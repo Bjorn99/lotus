@@ -2,13 +2,19 @@ package com.dn0ne.player.app.presentation.components.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import com.dn0ne.player.R
+import com.dn0ne.player.app.presentation.components.NoteCard
 import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsibleTopBar
 import com.dn0ne.player.core.data.Settings
 
@@ -87,5 +94,80 @@ fun PrivacySettings(
             },
             modifier = Modifier.fillMaxWidth(),
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SectionLabel(text = context.resources.getString(R.string.privacy_what_leaves))
+
+        NoteCard(
+            label = context.resources.getString(R.string.privacy_lrclib_title),
+            leadingIcon = Icons.Rounded.Cloud,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = context.resources.getString(R.string.privacy_lrclib_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
+        NoteCard(
+            label = context.resources.getString(R.string.privacy_netease_title),
+            leadingIcon = Icons.Rounded.Cloud,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = context.resources.getString(R.string.privacy_netease_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
+        NoteCard(
+            label = context.resources.getString(R.string.privacy_musicbrainz_title),
+            leadingIcon = Icons.Rounded.Public,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = context.resources.getString(R.string.privacy_musicbrainz_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        SectionLabel(text = context.resources.getString(R.string.privacy_what_stays))
+
+        NoteCard(
+            label = context.resources.getString(R.string.privacy_local_title),
+            leadingIcon = Icons.Rounded.Folder,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = context.resources.getString(R.string.privacy_local_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
+        NoteCard(
+            label = context.resources.getString(R.string.privacy_no_telemetry_title),
+            leadingIcon = Icons.Rounded.Shield,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = context.resources.getString(R.string.privacy_no_telemetry_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, top = 4.dp, bottom = 4.dp),
+    )
 }
