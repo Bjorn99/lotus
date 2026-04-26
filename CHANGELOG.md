@@ -8,6 +8,36 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.4.1 — Small Compose performance + manifest fixes
+
+A handful of real fixes pulled out of the Android lint report. None
+of these are visible as new features, but a couple were affecting
+playback and the lyrics screen in subtle ways.
+
+- The synced-lyrics view was creating a new Kotlin Flow on every
+  recomposition (one for each visible line, every time a state
+  change triggered a redraw). The `collectAsState` reading from that
+  flow was effectively being reset on each pass, so position updates
+  could be missed and the line-highlight could feel a beat behind on
+  busy songs. The flow is now built once and reused — same data,
+  much less churn.
+
+- Three places used `Modifier.offset(x = state)` with state-backed
+  values: the lyrics-mode capsule indicator, the segment-options
+  capsule in Settings, and the seek-bar handle position. Each one
+  was triggering a recomposition every animation frame instead of
+  just relayout. Switched to the lambda overload
+  (`Modifier.offset { IntOffset(...) }`) which defers the offset
+  read to the layout phase. Smoother animation, lower CPU during
+  playback.
+
+- The manifest declared `READ_EXTERNAL_STORAGE` and
+  `WRITE_EXTERNAL_STORAGE` without a max-SDK cap. On Android 13+
+  these are deprecated and not granted at runtime — `READ_MEDIA_AUDIO`
+  takes their place. They're now scoped with `android:maxSdkVersion="32"`
+  so they only register on devices that actually use them. No
+  behaviour change on any version, just cleaner manifest output.
+
 ## 1.4.0 — NetEase as a lyrics backup, plus a cache fix
 
 If LRCLIB doesn't have the lyrics you're looking for, the app now

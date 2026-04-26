@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -208,18 +209,23 @@ fun WavingSeekBar(
                 }
             }
 
+            // animateDpAsState is composable so the call has to live up here
+            // rather than inside the offset {} lambda (which runs in
+            // Density, not Composable, scope).
+            val animatedHandleOffset by animateDpAsState(
+                targetValue = with(density) {
+                    handleOffset.toDp() - (handleSize + handlePadding * 2) / 2
+                },
+                label = "seek-bar-handle-position-animation"
+            )
+
             SeekBarHandle(
                 modifier = Modifier
                     .size(handleSize + handlePadding * 2)
                     .padding(handlePadding)
-                    .offset(
-                        x = animateDpAsState(
-                            targetValue = with(density) {
-                                handleOffset.toDp() - (handleSize + handlePadding * 2) / 2
-                            },
-                            label = "seek-bar-handle-position-animation"
-                        ).value
-                    )
+                    .offset {
+                        IntOffset(x = animatedHandleOffset.roundToPx(), y = 0)
+                    }
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragStart = {

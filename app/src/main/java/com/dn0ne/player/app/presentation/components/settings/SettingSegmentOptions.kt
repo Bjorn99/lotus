@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 
@@ -90,7 +91,7 @@ fun SettingSegmentOptions(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(.5f)
-                    .offset(x = capsuleOffset)
+                    .offset { IntOffset(x = capsuleOffset.roundToPx(), y = 0) }
                     .clip(ShapeDefaults.ExtraLarge)
                     .background(color = MaterialTheme.colorScheme.primary)
             )
