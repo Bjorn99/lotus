@@ -258,6 +258,20 @@
     <string name="network_lookups">Allow network lookups</string>
     <string name="network_lookups_explain">Master switch for LRCLIB lyrics, NetEase lyrics, and MusicBrainz metadata. Turn off for a strict-offline mode — the rest of the app keeps working from your local library.</string>
 
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">What leaves your device</string>
+    <string name="privacy_what_stays">What stays on your device</string>
+    <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
+    <string name="privacy_lrclib_body">Sent: track title, artist, album if known, and duration. Used to look up matching synced or plain lyrics. Sent only when you open the lyrics view for a track that doesn\'t have lyrics cached.</string>
+    <string name="privacy_netease_title">NetEase (music.163.com)</string>
+    <string name="privacy_netease_body">Sent: track title and artist. Used as a fallback when LRCLIB has no lyrics. Only happens if you have the NetEase fallback enabled (Settings → Lyrics) and only after LRCLIB returned nothing.</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
+    <string name="privacy_musicbrainz_body">Sent: the search query you type, plus the track\'s duration. Used to find a matching release with cover art and metadata. Sent only when you tap Search on the Track info → Search screen — never automatically.</string>
+    <string name="privacy_local_title">Local data</string>
+    <string name="privacy_local_body">Lyrics cache, music scan results, app settings, and crash logs all live on this device. Sharing a crash log is a manual action through the system share sheet — nothing is sent on its own.</string>
+    <string name="privacy_no_telemetry_title">No telemetry</string>
+    <string name="privacy_no_telemetry_body">No analytics, no usage tracking, no diagnostic uploads. The hosts above are the entire network surface.</string>
+
     <!-- Theme settings -->
     <string name="appearance">Appearance</string>
     <string name="appearance_system">System</string>

@@ -8,6 +8,37 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.1 — Privacy disclosure on the Privacy screen
+
+The Privacy screen added in 1.5.0 had only the master kill switch
+on it. This release fills out the rest: a plain-English breakdown
+of what the app sends, where it goes, and what stays local.
+
+Five small cards, in two sections.
+
+**What leaves your device** lists the three outbound features:
+
+- LRCLIB sends track title, artist, album if known, and duration
+  when you open the lyrics view for a track that doesn't have
+  lyrics cached.
+- NetEase sends track title and artist as a fallback when LRCLIB
+  has nothing, only if you have the NetEase fallback enabled.
+- MusicBrainz sends the search query you type plus the track's
+  duration, only when you tap Search on the metadata screen.
+
+**What stays on your device** lists the local data: lyrics cache,
+scan results, settings, and crash logs. Sharing a crash log is a
+manual action through the system share sheet — nothing is sent on
+its own.
+
+A final card states what isn't there: no analytics, no usage
+tracking, no diagnostic uploads.
+
+The disclosure exists so you don't have to read the source to
+answer "what does this app do with my data". The text is
+deliberately short — if you want the full picture, the source is
+on GitHub.
+
 ## 1.5.0 — Privacy and network hardening
 
 A few changes to how the app handles network calls and what data
