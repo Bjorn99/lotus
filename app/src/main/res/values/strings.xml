@@ -253,6 +253,10 @@
     <string name="about_explain">Version, repository, feedback</string>
     <string name="music_scan">Music scan</string>
     <string name="music_scan_supporting_text">Filter mode, folder management, scanning</string>
+    <string name="privacy">Privacy</string>
+    <string name="privacy_supporting_text">What leaves your device, network controls</string>
+    <string name="network_lookups">Allow network lookups</string>
+    <string name="network_lookups_explain">Master switch for LRCLIB lyrics, NetEase lyrics, and MusicBrainz metadata. Turn off for a strict-offline mode — the rest of the app keeps working from your local library.</string>
 
     <!-- Theme settings -->
     <string name="appearance">Appearance</string>

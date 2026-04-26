@@ -241,6 +241,10 @@
     <string name="about_explain">Версія, репозиторій, зворотній зв\'язок</string>
     <string name="music_scan">Сканування музики</string>
     <string name="music_scan_supporting_text">Режим фільтру, керування папками, сканування</string>
+    <string name="privacy">Конфіденційність</string>
+    <string name="privacy_supporting_text">Що залишає пристрій, керування мережею</string>
+    <string name="network_lookups">Дозволити мережеві запити</string>
+    <string name="network_lookups_explain">Головний перемикач для LRCLIB, NetEase та MusicBrainz. Вимкніть для суворо офлайн-режиму — решта додатка продовжить працювати з локальною бібліотекою.</string>
 
     <!-- Theme settings -->
     <string name="appearance">Оформлення</string>

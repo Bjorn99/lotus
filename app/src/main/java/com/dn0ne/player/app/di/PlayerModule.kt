@@ -16,6 +16,7 @@ import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.NetEaseLyricsProvider
 import com.dn0ne.player.core.data.Settings
+import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
 import com.dn0ne.player.app.data.repository.LyricsRepository
@@ -27,13 +28,22 @@ import com.dn0ne.player.app.data.repository.TrackRepositoryImpl
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
+import java.io.IOException
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+
+// 5 MB is well above the largest legitimate response we make (album cover
+// art tops out around a couple hundred KB; lyrics and JSON metadata are
+// tiny). Picked to leave generous headroom while still catching the
+// "firehose" attack shape.
+private const val MAX_RESPONSE_BYTES = 5L * 1024 * 1024
 
 val playerModule = module {
 
@@ -52,6 +62,14 @@ val playerModule = module {
 
     single<HttpClient> {
         HttpClient(CIO) {
+            // Strict redirect policy: don't auto-follow. A poisoned DNS
+            // response or a misbehaving upstream that returns a 30x can
+            // divert the request anywhere; we'd rather see that as an error
+            // and decide what to do. The one place that legitimately needs
+            // a redirect (CoverArtArchive → S3) handles its own 307 with
+            // explicit URL validation.
+            followRedirects = false
+
             install(ContentNegotiation) {
                 json(
                     Json {
@@ -68,13 +86,34 @@ val playerModule = module {
                 connectTimeoutMillis = 10_000
                 socketTimeoutMillis = 15_000
             }
+
+            // Cap response size so a malicious or buggy upstream can't fill
+            // memory with a multi-GB body. Headers-phase only — checks the
+            // declared Content-Length before we consume the body. Responses
+            // that omit Content-Length still get killed by socketTimeout
+            // long before they fill anything significant.
+            HttpResponseValidator {
+                validateResponse { response ->
+                    val length = response.contentLength()
+                    if (length != null && length > MAX_RESPONSE_BYTES) {
+                        throw IOException(
+                            "Refusing response: declared Content-Length " +
+                                "$length exceeds cap of $MAX_RESPONSE_BYTES",
+                        )
+                    }
+                }
+            }
         }
     }
 
     single<MetadataProvider> {
-        MusicBrainzMetadataProvider(
-            context = androidContext(),
-            client = get()
+        val settings = get<Settings>()
+        GatedMetadataProvider(
+            delegate = MusicBrainzMetadataProvider(
+                context = androidContext(),
+                client = get(),
+            ),
+            isEnabled = { settings.networkLookupsEnabled },
         )
     }
 
@@ -92,7 +131,13 @@ val playerModule = module {
             delegate = NetEaseLyricsProvider(client = get()),
             isEnabled = { settings.useNetEaseLyricsFallback },
         )
-        ChainLyricsProvider(listOf(lrclib, netEase))
+        // Outer gate: master switch for all lyrics network calls. When the
+        // user has disabled network lookups in Settings → Privacy, the
+        // chain short-circuits before consulting either provider.
+        GatedLyricsProvider(
+            delegate = ChainLyricsProvider(listOf(lrclib, netEase)),
+            isEnabled = { settings.networkLookupsEnabled },
+        )
     }
 
     single<LotusDatabase> {

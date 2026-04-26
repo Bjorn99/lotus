@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Locks down all of the app's network behaviour. Three things going on:
+
+  1. base-config: HTTPS only everywhere; trust anchors limited to the
+     system CA store. User-installed CAs are NOT trusted, which blocks
+     corporate MITM proxies and any hand-rolled CA on the device from
+     intercepting our traffic. Debug builds keep user CAs trusted via
+     base-config in debug-overrides (further down) so devs can run a
+     local proxy when they need to.
+
+  2. domain-config: pins each known endpoint to the same strict policy.
+     Belt-and-braces — nothing in the codebase should be hitting any
+     other host, but if a future bug or compromised dep tries to, the
+     system CA + cleartext-off rules from base-config still apply.
+
+  3. debug-overrides: only the debug build allows user CAs (so devs can
+     proxy through Charles / mitmproxy). Release builds get no override.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">lrclib.net</domain>
+        <domain includeSubdomains="true">music.163.com</domain>
+        <domain includeSubdomains="true">musicbrainz.org</domain>
+        <domain includeSubdomains="true">coverartarchive.org</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

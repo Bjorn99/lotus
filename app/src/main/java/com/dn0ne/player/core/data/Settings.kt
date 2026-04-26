@@ -33,6 +33,7 @@ class Settings(context: Context) {
     private val lyricsAlignmentKey = "lyrics-alignment"
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
     private val useNetEaseLyricsFallbackKey = "use-netease-lyrics-fallback"
+    private val networkLookupsEnabledKey = "network-lookups-enabled"
 
     private val areRisksOfMetadataEditingAcceptedKey = "metadata-editing-dialog"
 
@@ -225,6 +226,18 @@ class Settings(context: Context) {
         set(value) {
             with(sharedPreferences.edit()) {
                 putBoolean(useNetEaseLyricsFallbackKey, value)
+                apply()
+            }
+        }
+
+    // Master gate over every outbound HTTP call the app makes. When false,
+    // lyrics + metadata providers short-circuit before touching the network.
+    // Default true to preserve the existing behaviour for upgrading users.
+    var networkLookupsEnabled: Boolean
+        get() = sharedPreferences.getBoolean(networkLookupsEnabledKey, true)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putBoolean(networkLookupsEnabledKey, value)
                 apply()
             }
         }

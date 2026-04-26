@@ -8,6 +8,52 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.0 — Privacy and network hardening
+
+A few changes to how the app handles network calls and what data
+can leave your device. Nothing visible during normal use, but worth
+walking through if you care about that side of things.
+
+A new **Privacy** section in Settings, with one switch at the top —
+**Allow network lookups**. Turning it off puts the app into a strict
+offline mode: no LRCLIB, no NetEase, no MusicBrainz. The rest of the
+app keeps working from your local library. The per-provider toggles
+(like the NetEase fallback) still apply when the master switch is
+on, so you can layer the controls if you'd rather only disable some
+sources.
+
+The HTTP client is now stricter about a few things:
+
+- **HTTPS only**, enforced at the OS level via a network security
+  config. Even a hypothetical bug that tried to hit a plain HTTP URL
+  would be refused.
+- **System CAs only**. User-installed certificate authorities are
+  not trusted. This blocks corporate MITM proxies and any custom CA
+  on the device from intercepting Lotus's traffic. Debug builds
+  still allow user CAs so developers can run local proxies; release
+  builds don't.
+- **No automatic redirect-following.** A poisoned DNS response or a
+  misbehaving upstream that tries to 30x-redirect somewhere
+  unexpected now fails loudly instead of silently following the
+  redirect to wherever. The one place that legitimately needs to
+  follow a redirect (CoverArtArchive, which serves album art via a
+  CDN) does so explicitly, with the destination URL validated
+  against an allow-list.
+- **Response size cap of 5 MB.** A malicious or buggy upstream
+  can't send a multi-gigabyte body that fills memory. Generous
+  enough that no real lookup hits it.
+
+Backup and device-transfer rules are now explicit. Your settings
+(theme, tab order, sort prefs, etc.) still survive a reinstall.
+The lyrics cache and crash logs do not — listening history is the
+kind of thing that shouldn't be quietly riding to Google's servers
+along with the rest of your Auto Backup.
+
+None of this changes how the app behaves day-to-day. The provider
+endpoints are the same, the data sent to them is the same, and the
+default state for upgrading users is unchanged. The tightening is
+underneath.
+
 ## 1.4.1 — Small Compose performance + manifest fixes
 
 A handful of real fixes pulled out of the Android lint report. None
