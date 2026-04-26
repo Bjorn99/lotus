@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -109,6 +110,13 @@ fun LyricsSheet(
         derivedStateOf {
             playbackState.lyrics
         }
+    }
+    // Hoist the position-only flow once. Building it inside the itemsIndexed
+    // body recreates a new Flow on every recomposition, which resets the
+    // collectAsState() inside SyncedLyricsLine / BubblesLine (Compose lint
+    // warning FlowOperatorInvokedInComposition).
+    val positionFlow = remember(playbackStateFlow) {
+        playbackStateFlow.map { it.position }
     }
     var collapseFraction by remember {
         mutableFloatStateOf(0f)
@@ -252,7 +260,7 @@ fun LyricsSheet(
 
                                 if (line.isNotBlank()) {
                                     SyncedLyricsLine(
-                                        positionFlow = playbackStateFlow.map { it.position },
+                                        positionFlow = positionFlow,
                                         time = time,
                                         nextTime = nextTime,
                                         line = line,
@@ -282,7 +290,7 @@ fun LyricsSheet(
                                     )
                                 } else {
                                     BubblesLine(
-                                        positionFlow = playbackStateFlow.map { it.position },
+                                        positionFlow = positionFlow,
                                         time = time,
                                         nextTime = nextTime,
                                         modifier = Modifier.align(
@@ -375,7 +383,10 @@ fun LyricsTypeSwitch(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(.5f)
-                .offset(x = capsuleOffset)
+                // Lambda overload defers offset evaluation to the layout
+                // phase, so changes to capsuleOffset don't trigger
+                // recomposition of this Box.
+                .offset { IntOffset(x = capsuleOffset.roundToPx(), y = 0) }
                 .clip(ShapeDefaults.ExtraLarge)
                 .background(color = contentColor.copy(alpha = .1f))
         )
