@@ -49,17 +49,25 @@ class LyricsFetcher(
         }
     }
 
-    /**
-     * Fetches lyrics from the configured remote provider (LRCLIB). Caches a
-     * successful result in the local repository. Network / parse errors
-     * surface as snackbars; no exception escapes.
-     */
-    suspend fun fetchFromRemote(track: Track): Lyrics? = withContext(Dispatchers.IO) {
+    // Returns lyrics for the track, hitting the local cache first and only
+    // calling the remote provider on a miss. Pass forceRemote = true when the
+    // user explicitly asks for a re-fetch (the lyrics-control sheet button) so
+    // we go around the cache and write the fresh copy back.
+    //
+    // Network / parse errors surface as snackbars; no exception escapes.
+    suspend fun fetchFromRemote(
+        track: Track,
+        forceRemote: Boolean = false,
+    ): Lyrics? = withContext(Dispatchers.IO) {
         if (track.title == null || track.artist == null) {
             SnackbarController.sendEvent(
                 SnackbarEvent(message = R.string.cant_look_for_lyrics_title_or_artist_is_missing)
             )
             return@withContext null
+        }
+
+        if (!forceRemote) {
+            lyricsRepository.getLyricsByUri(track.uri.toString())?.let { return@withContext it }
         }
 
         when (val result = lyricsProvider.getLyrics(track)) {

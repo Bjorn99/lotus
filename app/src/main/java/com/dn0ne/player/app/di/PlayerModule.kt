@@ -10,8 +10,12 @@ import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LyricsDao
 import com.dn0ne.player.app.data.db.PlaylistDao
+import com.dn0ne.player.app.data.remote.lyrics.ChainLyricsProvider
+import com.dn0ne.player.app.data.remote.lyrics.GatedLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
+import com.dn0ne.player.app.data.remote.lyrics.NetEaseLyricsProvider
+import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
 import com.dn0ne.player.app.data.repository.LyricsRepository
@@ -79,10 +83,16 @@ val playerModule = module {
     }
 
     single<LyricsProvider> {
-        LrclibLyricsProvider(
+        val settings = get<Settings>()
+        val lrclib = LrclibLyricsProvider(
             context = androidContext(),
-            client = get()
+            client = get(),
         )
+        val netEase = GatedLyricsProvider(
+            delegate = NetEaseLyricsProvider(client = get()),
+            isEnabled = { settings.useNetEaseLyricsFallback },
+        )
+        ChainLyricsProvider(listOf(lrclib, netEase))
     }
 
     single<LotusDatabase> {

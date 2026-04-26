@@ -14,9 +14,6 @@ import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
 import com.dn0ne.player.core.util.getAppVersionName
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.network.sockets.ConnectTimeoutException
-import io.ktor.client.network.sockets.SocketTimeoutException
-import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -30,12 +27,7 @@ import io.ktor.http.headers
 import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
-import java.io.IOException
-import java.net.SocketException
-import java.net.UnknownHostException
-import java.nio.channels.UnresolvedAddressException
 import java.security.MessageDigest
-import javax.net.ssl.SSLException
 
 class LrclibLyricsProvider(
     context: Context,
@@ -72,7 +64,7 @@ class LrclibLyricsProvider(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
+            return Result.Error(e.toNetworkError(logTag))
         }
 
         when (response.status) {
@@ -140,7 +132,7 @@ class LrclibLyricsProvider(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
+            return Result.Error(e.toNetworkError(logTag))
         }
 
         if (response.status != HttpStatusCode.OK) return Result.Error(DataError.Network.Unknown)
@@ -187,7 +179,7 @@ class LrclibLyricsProvider(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
+            return Result.Error(e.toNetworkError(logTag))
         }
 
         return if (response.status == HttpStatusCode.Created) {
@@ -195,38 +187,6 @@ class LrclibLyricsProvider(
         } else {
             Log.d(logTag, "Publish failed: ${response.status} ${response.bodyAsText()}")
             Result.Error(DataError.Network.Unknown)
-        }
-    }
-
-    /**
-     * Maps any thrown network-side exception onto our [DataError.Network]
-     * vocabulary. The previous code only caught a handful of types and
-     * everything else escaped, which is why a flaky-network "post lyrics"
-     * could crash the app.
-     */
-    private fun Throwable.toNetworkError(): DataError.Network {
-        return when (this) {
-            is UnresolvedAddressException, is UnknownHostException -> {
-                Log.i(logTag, "DNS / address resolution failed: $message")
-                DataError.Network.NoInternet
-            }
-            is HttpRequestTimeoutException,
-            is ConnectTimeoutException,
-            is SocketTimeoutException -> {
-                DataError.Network.RequestTimeout
-            }
-            is SSLException -> {
-                Log.w(logTag, "TLS handshake / cert error: $message")
-                DataError.Network.Unknown
-            }
-            is SocketException, is IOException -> {
-                Log.w(logTag, "Network I/O error: $message")
-                DataError.Network.Unknown
-            }
-            else -> {
-                Log.w(logTag, "Unexpected network failure", this)
-                DataError.Network.Unknown
-            }
         }
     }
 
