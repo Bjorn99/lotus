@@ -1,0 +1,132 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitTypeAll(deps)"
+  ],
+  "schedule": [
+    "before 6am on Monday"
+  ],
+  "timezone": "UTC",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+  "rangeStrategy": "bump",
+  "labels": [
+    "dependencies"
+  ],
+  "platformAutomerge": false,
+  "automerge": false,
+  "dependencyDashboardTitle": "Renovate dashboard",
+  "packageRules": [
+    {
+      "description": "Group all Compose UI libraries with the BOM. Compose pieces have to move together or compose-compiler / runtime version mismatches will surface at runtime.",
+      "matchPackageNames": [
+        "androidx.compose:compose-bom",
+        "androidx.compose.ui:**",
+        "androidx.compose.material:**",
+        "androidx.compose.material3:**",
+        "androidx.compose.foundation:**",
+        "androidx.compose.runtime:**",
+        "androidx.compose.animation:**",
+        "androidx.activity:activity-compose",
+        "androidx.navigation:navigation-compose"
+      ],
+      "groupName": "compose",
+      "groupSlug": "compose"
+    },
+    {
+      "description": "Group all Media3 modules. They share a version and have to move together.",
+      "matchPackageNames": [
+        "androidx.media3:**"
+      ],
+      "groupName": "media3",
+      "groupSlug": "media3"
+    },
+    {
+      "description": "Group Room runtime/ktx/compiler/testing. Same coupling as media3.",
+      "matchPackageNames": [
+        "androidx.room:**"
+      ],
+      "groupName": "room",
+      "groupSlug": "room"
+    },
+    {
+      "description": "Group Ktor client + serialization modules. They share a version.",
+      "matchPackageNames": [
+        "io.ktor:**"
+      ],
+      "groupName": "ktor",
+      "groupSlug": "ktor"
+    },
+    {
+      "description": "Group Koin BOM and the modules that read it. BOM-managed versions need to stay in sync.",
+      "matchPackageNames": [
+        "io.insert-koin:**"
+      ],
+      "groupName": "koin",
+      "groupSlug": "koin"
+    },
+    {
+      "description": "AGP and Kotlin move together. Kotlin major/minor changes usually require an AGP bump and vice versa; bundling avoids two PRs that have to land in lockstep.",
+      "matchPackageNames": [
+        "com.android.application",
+        "com.android.library",
+        "com.android.tools.build:gradle",
+        "org.jetbrains.kotlin:**",
+        "org.jetbrains.kotlin.android",
+        "org.jetbrains.kotlin.plugin.compose",
+        "org.jetbrains.kotlin.plugin.serialization"
+      ],
+      "groupName": "agp + kotlin",
+      "groupSlug": "agp-kotlin"
+    },
+    {
+      "description": "KSP versions are pinned to a specific Kotlin version (e.g. 2.0.20-1.0.25). Group with the kotlin/agp PR so the two land together — KSP without a matching kotlin will fail to load.",
+      "matchPackageNames": [
+        "com.google.devtools.ksp",
+        "com.google.devtools.ksp:**"
+      ],
+      "groupName": "agp + kotlin",
+      "groupSlug": "agp-kotlin"
+    },
+    {
+      "description": "Detekt and ktlint can move on their own — they're CI-only and breakage is loud.",
+      "matchPackageNames": [
+        "io.gitlab.arturbosch.detekt",
+        "org.jlleitschuh.gradle.ktlint"
+      ],
+      "groupName": "static analysis",
+      "groupSlug": "static-analysis"
+    },
+    {
+      "description": "GitHub Actions used in workflows. One PR per week for any pinned-version action bumps.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "github-actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "description": "Major version bumps always need a human look. Never auto-merge them even after we flip patches on.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "labels": [
+        "dependencies",
+        "major-update"
+      ]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "security",
+      "dependencies"
+    ]
+  },
+  "lockFileMaintenance": {
+    "enabled": false
+  }
+}
