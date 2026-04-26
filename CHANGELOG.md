@@ -8,6 +8,40 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.4.0 — NetEase as a lyrics backup, plus a cache fix
+
+If LRCLIB doesn't have the lyrics you're looking for, the app now
+asks NetEase Cloud Music as a fallback. NetEase has a much wider
+catalogue (especially for Asian and indie pop), so the "lyrics not
+found" snackbar should show up a lot less often. The fallback is on
+by default and there's a switch in Settings → Lyrics if you'd rather
+keep things LRCLIB-only.
+
+There's also a small but slightly embarrassing fix: when you opened
+a track you'd already pulled lyrics for, the app was hitting the
+network anyway and only checking the local cache as a side effect of
+the view model. The cache lookup now lives where it should — inside
+the lyrics fetcher itself — so cached lyrics show instantly and the
+re-fetch button still bypasses the cache the way you'd expect.
+
+A couple of things worth knowing:
+
+- NetEase is a Chinese service; the request goes to music.163.com
+  and includes the track title and artist (no other metadata). If
+  that's not OK for your threat model, flip the switch off.
+- NetEase doesn't accept lyric submissions, so the "publish to
+  remote" button still goes to LRCLIB only.
+- The `lyrics_not_found` message no longer says "on LRCLIB" since
+  it now means "we tried every source you've enabled and nothing
+  matched".
+
+Under the hood: `ChainLyricsProvider` composes an ordered list of
+sources and returns the first hit. NetEase is wrapped in a
+`GatedLyricsProvider` that consults the settings flag at call time,
+so toggling the switch takes effect without an app restart. The
+shared `Throwable.toNetworkError()` mapping moved out of LRCLIB into
+its own file because both providers need it.
+
 ## 1.3.6 — Fix "Play next" + queue handling in shuffle mode
 
 **Layman:** Two related queue bugs. Tapping "Play next" on a track

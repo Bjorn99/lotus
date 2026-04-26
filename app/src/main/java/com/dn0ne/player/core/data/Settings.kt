@@ -32,6 +32,7 @@ class Settings(context: Context) {
     private val lyricsLetterSpacingKey = "lyrics-letter-spacing"
     private val lyricsAlignmentKey = "lyrics-alignment"
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
+    private val useNetEaseLyricsFallbackKey = "use-netease-lyrics-fallback"
 
     private val areRisksOfMetadataEditingAcceptedKey = "metadata-editing-dialog"
 
@@ -215,6 +216,15 @@ class Settings(context: Context) {
         set(value) {
             with(sharedPreferences.edit()) {
                 putBoolean(useDarkPaletteOnLyricsSheetKey, value)
+                apply()
+            }
+        }
+
+    var useNetEaseLyricsFallback: Boolean
+        get() = sharedPreferences.getBoolean(useNetEaseLyricsFallbackKey, true)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putBoolean(useNetEaseLyricsFallbackKey, value)
                 apply()
             }
         }

@@ -208,9 +208,11 @@
 
     <!-- Lyrics screen errors -->
     <string name="cant_look_for_lyrics_title_or_artist_is_missing">Can\'t look for lyrics. Title or artist is not specified for this track.</string>
-    <string name="lyrics_not_found">Unfortunately, lyrics for this track can\'t be found on LRCLIB.</string>
+    <string name="lyrics_not_found">Unfortunately, lyrics for this track can\'t be found.</string>
     <string name="cant_find_lyrics">Can\'t find lyrics.</string>
     <string name="lyrics_provided_by">Lyrics provided by LRCLIB</string>
+    <string name="netease_fallback">Use NetEase as a backup</string>
+    <string name="netease_fallback_explain">When LRCLIB has nothing, try NetEase Cloud Music. Sends the track\'s title and artist to music.163.com.</string>
 
     <!-- Playback queue -->
     <string name="shuffle_disabled_for_play_next">Shuffle turned off so this track plays next</string>

@@ -196,9 +196,11 @@
 
     <!-- Lyrics screen errors -->
     <string name="cant_look_for_lyrics_title_or_artist_is_missing">Не удается найти текст. Для этого трека не указано название или исполнитель.</string>
-    <string name="lyrics_not_found">К сожалению, на LRCLIB текст к этому треку найти не удалось.</string>
+    <string name="lyrics_not_found">К сожалению, текст к этому треку найти не удалось.</string>
     <string name="cant_find_lyrics">Текст не найден.</string>
     <string name="lyrics_provided_by">Текст предоставлен LRCLIB</string>
+    <string name="netease_fallback">Использовать NetEase как запасной источник</string>
+    <string name="netease_fallback_explain">Если на LRCLIB текста нет, попробовать NetEase Cloud Music. На music.163.com отправляются название трека и исполнитель.</string>
 
     <!-- Playback queue -->
     <string name="shuffle_disabled_for_play_next">Перемешивание выключено: этот трек воспроизведётся следующим</string>

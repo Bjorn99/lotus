@@ -1197,7 +1197,7 @@ class PlayerViewModel(
                             isFetchingFromRemote = true
                         )
                     }
-                    val lyrics = lyricsFetcher.fetchFromRemote(track)
+                    val lyrics = lyricsFetcher.fetchFromRemote(track, forceRemote = true)
 
                     _lyricsControlSheetState.update {
                         it.copy(
@@ -1398,8 +1398,7 @@ class PlayerViewModel(
                     )
                 }
 
-                var lyrics: Lyrics? = lyricsRepository.getLyricsByUri(currentTrack.uri.toString())
-                    ?: lyricsFetcher.fetchFromRemote(currentTrack)
+                var lyrics: Lyrics? = lyricsFetcher.fetchFromRemote(currentTrack)
                     ?: lyricsFetcher.readFromTag(currentTrack, viewModelScope)
                         ?.also { lyricsRepository.insertLyrics(it) }
 
