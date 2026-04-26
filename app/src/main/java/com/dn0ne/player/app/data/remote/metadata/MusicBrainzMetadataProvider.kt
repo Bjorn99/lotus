@@ -159,12 +159,13 @@ class MusicBrainzMetadataProvider(
                 }
             }
 
-            HttpStatusCode.TemporaryRedirect -> {
-                // Ktor's default config follows redirects automatically, so
-                // we shouldn't see this in practice. Log + treat as unknown
-                // so future regressions in redirect handling surface clearly.
-                Log.d(logTag, "Unexpected 307 from CoverArtArchive: ${response.bodyAsText()}")
-                return Result.Error(DataError.Network.Unknown)
+            HttpStatusCode.TemporaryRedirect, HttpStatusCode.PermanentRedirect -> {
+                // CoverArtArchive 30x-redirects to its CDN (archive.org / S3)
+                // for the actual image bytes. The shared HttpClient has
+                // followRedirects = false as a defence-in-depth measure, so
+                // we follow this one redirect ourselves with explicit checks
+                // on the destination URL.
+                return followCoverArtRedirect(response)
             }
 
             HttpStatusCode.BadRequest -> {
@@ -180,6 +181,59 @@ class MusicBrainzMetadataProvider(
             }
 
             else -> return Result.Error(DataError.Network.Unknown)
+        }
+    }
+
+    // Follows a single 30x from CoverArtArchive after validating the
+    // destination. Anything sketchy (missing Location, non-HTTPS scheme,
+    // unknown host) errors out instead of being followed. This is the only
+    // place in the app that follows a redirect — everywhere else uses the
+    // strict client default.
+    private suspend fun followCoverArtRedirect(
+        response: io.ktor.client.statement.HttpResponse,
+    ): Result<ByteArray, DataError> {
+        val location = response.headers[HttpHeaders.Location]
+        if (location.isNullOrBlank()) {
+            Log.w(logTag, "CoverArtArchive redirect missing Location header")
+            return Result.Error(DataError.Network.Unknown)
+        }
+        if (!location.startsWith("https://")) {
+            Log.w(logTag, "Refusing non-HTTPS CoverArtArchive redirect: $location")
+            return Result.Error(DataError.Network.Unknown)
+        }
+        // Allow-list of redirect targets that CoverArtArchive uses in
+        // practice. If they ever add a new CDN host we'll see this fail
+        // loudly rather than silently following somewhere unexpected.
+        val allowed = listOf("archive.org", "ia800", "ia801", "ia802", "ia803", "ia804", "ia902", "ia903", "ia904", "ia905")
+        val host = io.ktor.http.Url(location).host
+        if (allowed.none { host.contains(it) }) {
+            Log.w(logTag, "Refusing CoverArtArchive redirect to unexpected host: $host")
+            return Result.Error(DataError.Network.Unknown)
+        }
+
+        val final = try {
+            client.get(location) {
+                headers { append(HttpHeaders.UserAgent, userAgent) }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
+        }
+
+        return when (final.status) {
+            HttpStatusCode.OK -> {
+                try {
+                    Result.Success(final.body<ByteArray>())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    Log.w(logTag, "Failed to read cover-art body after redirect", e)
+                    Result.Error(DataError.Network.ParseError)
+                }
+            }
+            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
+            else -> Result.Error(DataError.Network.Unknown)
         }
     }
 

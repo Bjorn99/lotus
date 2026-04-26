@@ -1,19 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backup / device-transfer rules for API 31+. Same policy as
+  backup_rules.xml (which covers older versions): include only the
+  SharedPreferences, exclude the Room DB and crash logs.
+
+  cloud-backup is what gets uploaded to Google's servers when the
+  user has Auto Backup enabled. device-transfer is the local
+  device-to-device migration path.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <include domain="sharedpref" path="." />
+
+        <exclude domain="database" path="lotus.db" />
+        <exclude domain="database" path="lotus.db-journal" />
+        <exclude domain="database" path="lotus.db-shm" />
+        <exclude domain="database" path="lotus.db-wal" />
+
+        <exclude domain="file" path="crash-logs/" />
     </cloud-backup>
-    <!--
+
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="sharedpref" path="." />
+
+        <!-- Lyrics cache + crash logs stay local on device transfer too;
+             user can re-fetch lyrics on demand, and crash logs from a
+             previous device aren't useful on the new one. -->
+        <exclude domain="database" path="lotus.db" />
+        <exclude domain="database" path="lotus.db-journal" />
+        <exclude domain="database" path="lotus.db-shm" />
+        <exclude domain="database" path="lotus.db-wal" />
+
+        <exclude domain="file" path="crash-logs/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

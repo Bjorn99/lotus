@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Lyrics
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Radar
@@ -195,6 +196,14 @@ fun SettingsSheet(
                                     onClick = {
                                         navController.navigate(SettingsRoutes.Lyrics)
                                     }
+                                ),
+                                SettingsItem(
+                                    title = context.resources.getString(R.string.privacy),
+                                    supportingText = context.resources.getString(R.string.privacy_supporting_text),
+                                    icon = Icons.Rounded.Lock,
+                                    onClick = {
+                                        navController.navigate(SettingsRoutes.Privacy)
+                                    }
                                 )
                             )
                         }
@@ -285,6 +294,16 @@ fun SettingsSheet(
                     )
                 }
 
+                composable<SettingsRoutes.Privacy> {
+                    PrivacySettings(
+                        settings = state.settings,
+                        onBackClick = {
+                            navController.navigateUp()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
                 composable<SettingsRoutes.About> {
                     AboutPage(
                         onBackClick = {
@@ -320,6 +339,9 @@ sealed interface SettingsRoutes {
 
     @Serializable
     data object Lyrics : SettingsRoutes
+
+    @Serializable
+    data object Privacy : SettingsRoutes
 
     @Serializable
     data object About : SettingsRoutes
