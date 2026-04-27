@@ -31,7 +31,7 @@ val releaseSigningAvailable =
 
 android {
     namespace = "com.dn0ne.player"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dn0ne.lotus.community"
