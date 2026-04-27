@@ -100,6 +100,8 @@
     <string name="stop_timer">Stop</string>
     <string name="start_timer">Start</string>
     <string name="finish_current_track">Finish current track</string>
+    <string name="tile_label_play">Play</string>
+    <string name="tile_label_pause">Pause</string>
 
     <!-- Play queue -->
     <string name="remove_from_queue">Remove from queue</string>

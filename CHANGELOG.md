@@ -8,6 +8,20 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.3 — Quick Settings tile for play/pause
+
+Drag a **Play / Pause** tile into the system Quick Settings panel
+(swipe down twice → pencil icon → drag from "available tiles") and
+you can pause or resume Lotus without unlocking the phone.
+
+The tile reflects the current state — shows a play icon when nothing
+is playing, a pause icon while a track is going. Tapping it does the
+obvious thing.
+
+If Lotus has never started a playback session since the last reboot,
+the tile won't have anything to control yet; open the app and start
+a track once and it picks up from there.
+
 ## 1.5.2 — Sleep timer: presets and finish-current-track
 
 Two small additions to the existing sleep timer.
