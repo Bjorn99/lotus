@@ -12,6 +12,7 @@ import androidx.annotation.OptIn
 import androidx.compose.ui.util.fastForEach
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -238,7 +239,26 @@ class PlaybackService : MediaSessionService() {
         })
 
         SleepTimer.addOnFinishCallback {
-            player.stop()
+            if (SleepTimer.finishLastTrack.value && player.isPlaying) {
+                val pendingStop = object : Player.Listener {
+                    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                            player.stop()
+                            player.removeListener(this)
+                        }
+                    }
+
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            player.stop()
+                            player.removeListener(this)
+                        }
+                    }
+                }
+                player.addListener(pendingStop)
+            } else {
+                player.stop()
+            }
         }
 
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -296,6 +316,12 @@ object SleepTimer {
 
     private val _isRunning = MutableStateFlow(false)
     val isRunning = _isRunning.asStateFlow()
+
+    private val _finishLastTrack = MutableStateFlow(false)
+    val finishLastTrack = _finishLastTrack.asStateFlow()
+    fun updateFinishLastTrack(value: Boolean) {
+        _finishLastTrack.update { value }
+    }
 
     fun start() {
         stop()
