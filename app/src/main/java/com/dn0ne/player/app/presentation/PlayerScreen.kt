@@ -230,6 +230,11 @@ fun PlayerScreen(
                 val playlistSort by viewModel.playlistSort.collectAsState()
                 val playlistSortOrder by viewModel.playlistSortOrder.collectAsState()
 
+                // Hoisted to PlayerScreen scope so the NavHost composables and
+                // PlayerSheet (rendered outside the NavHost) can all read the
+                // same Set without duplicate collection.
+                val lovedUris by viewModel.lovedUris.collectAsState()
+
                 val replaceSearchWithFilter by viewModel.settings
                     .replaceSearchWithFilter.collectAsState()
 
@@ -294,11 +299,15 @@ fun PlayerScreen(
                         // stable within a session.
                         val recentlyAddedName = stringResource(R.string.smart_recently_added)
                         val randomMixName = stringResource(R.string.smart_random_mix)
+                        val lovedName = stringResource(R.string.smart_loved)
                         val smartPlaylists = remember(
-                            trackList, recentlyAddedName, randomMixName
+                            trackList, lovedUris, recentlyAddedName, randomMixName, lovedName
                         ) {
                             val seed = System.currentTimeMillis()
                             buildList {
+                                SmartPlaylists
+                                    .loved(trackList, lovedUris, lovedName)
+                                    ?.let(::add)
                                 SmartPlaylists
                                     .recentlyAdded(trackList, recentlyAddedName)
                                     ?.let(::add)
@@ -391,6 +400,8 @@ fun PlayerScreen(
                                 navController.popBackStack(PlayerRoutes.Main, false)
                                 navController.navigate(PlayerRoutes.Playlist)
                             },
+                            lovedUris = lovedUris,
+                            onToggleLovedClick = { viewModel.toggleLoved(it) },
                             onGoToArtistClick = {
                                 viewModel.onEvent(PlayerScreenEvent.OnGoToArtistClick(it))
                                 navController.popBackStack(PlayerRoutes.Main, false)
@@ -530,6 +541,7 @@ fun PlayerScreen(
                                 listState = listState,
                                 playlist = playlist,
                                 currentTrack = currentTrack,
+                                lovedUris = lovedUris,
                                 onTrackClick = { track, playlist ->
                                     viewModel.onEvent(
                                         PlayerScreenEvent.OnTrackClick(
@@ -538,6 +550,7 @@ fun PlayerScreen(
                                         )
                                     )
                                 },
+                                onToggleLovedClick = { viewModel.toggleLoved(it) },
                                 onPlayNextClick = {
                                     viewModel.onEvent(PlayerScreenEvent.OnPlayNextClick(it))
                                 },
@@ -639,6 +652,7 @@ fun PlayerScreen(
                                 listState = listState,
                                 playlist = playlist,
                                 currentTrack = currentTrack,
+                                lovedUris = lovedUris,
                                 onRenamePlaylistClick = {
                                     showRenameSheet = true
                                 },
@@ -653,6 +667,7 @@ fun PlayerScreen(
                                         )
                                     )
                                 },
+                                onToggleLovedClick = { viewModel.toggleLoved(it) },
                                 onPlayNextClick = {
                                     viewModel.onEvent(PlayerScreenEvent.OnPlayNextClick(it))
                                 },
@@ -857,6 +872,8 @@ fun PlayerScreen(
                                         )
                                     )
                                 },
+                                lovedUris = lovedUris,
+                                onToggleLovedClick = { viewModel.toggleLoved(it) },
                                 modifier = Modifier
                                     .align(alignment = Alignment.CenterHorizontally)
                                     .fillMaxWidth()
@@ -971,6 +988,8 @@ fun MainPlayerScreen(
     onViewTrackInfoClick: (Track) -> Unit,
     onGoToAlbumClick: (Track) -> Unit,
     onGoToArtistClick: (Track) -> Unit,
+    lovedUris: Set<String>,
+    onToggleLovedClick: (Track) -> Unit,
     playlists: List<Playlist>,
     smartPlaylists: List<Playlist>,
     albumPlaylists: List<Playlist>,
@@ -1327,6 +1346,7 @@ fun MainPlayerScreen(
                     trackList(
                         trackList = trackList.filterTracks(searchFieldValue),
                         currentTrack = currentTrack,
+                        lovedUris = lovedUris,
                         onTrackClick = {
                             onTrackClick(
                                 it,
@@ -1338,6 +1358,7 @@ fun MainPlayerScreen(
                                 )
                             )
                         },
+                        onToggleLovedClick = onToggleLovedClick,
                         onPlayNextClick = onPlayNextClick,
                         onAddToQueueClick = {
                             onAddToQueueClick(listOf(it))

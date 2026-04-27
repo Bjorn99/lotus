@@ -30,8 +30,10 @@ import com.dn0ne.player.app.domain.track.Track
 fun TrackListItem(
     track: Track,
     isCurrent: Boolean,
+    isLoved: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onToggleLovedClick: () -> Unit,
     onPlayNextClick: () -> Unit,
     onAddToQueueClick: () -> Unit,
     onAddToPlaylistClick: () -> Unit,
@@ -93,6 +95,8 @@ fun TrackListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TrackMenuButton(
+                isLoved = isLoved,
+                onToggleLovedClick = onToggleLovedClick,
                 onPlayNextClick = onPlayNextClick,
                 onAddToQueueClick = onAddToQueueClick,
                 onAddToPlaylistClick = onAddToPlaylistClick,

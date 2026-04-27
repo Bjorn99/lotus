@@ -8,6 +8,22 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.4 — Loved tracks
+
+Open the menu on any track (the dots on the right) and you'll see
+a new **Love** entry at the top. Tap it once to mark the track,
+tap it again to unmark. Loved tracks show up as a new
+**Loved tracks** section at the top of the Playlists tab, alongside
+Recently added and Random mix.
+
+The "Love" toggle is also available on the now-playing sheet menu,
+so you can mark a track without going back to the list.
+
+The state is local — nothing is sent anywhere — and it's stored in
+the same on-device database as your playlists. Existing data isn't
+touched; the database picks up a new table on first launch via a
+small Room migration.
+
 ## 1.5.3 — Quick Settings tile for play/pause
 
 Drag a **Play / Pause** tile into the system Quick Settings panel

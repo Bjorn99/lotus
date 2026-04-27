@@ -15,7 +15,9 @@ import com.dn0ne.player.app.domain.track.Track
 fun LazyListScope.trackList(
     trackList: List<Track>,
     currentTrack: Track?,
+    lovedUris: Set<String>,
     onTrackClick: (Track) -> Unit,
+    onToggleLovedClick: (Track) -> Unit,
     onPlayNextClick: (Track) -> Unit,
     onAddToQueueClick: (Track) -> Unit,
     onAddToPlaylistClick: (Track) -> Unit,
@@ -37,8 +39,10 @@ fun LazyListScope.trackList(
         TrackListItem(
             track = track,
             isCurrent = currentTrack == track,
+            isLoved = track.uri.toString() in lovedUris,
             onClick = { onTrackClick(track) },
             onLongClick = { onLongClick(track) },
+            onToggleLovedClick = { onToggleLovedClick(track) },
             onPlayNextClick = { onPlayNextClick(track) },
             onAddToQueueClick = { onAddToQueueClick(track) },
             onAddToPlaylistClick = { onAddToPlaylistClick(track) },
@@ -58,7 +62,9 @@ fun LazyListScope.trackList(
 fun LazyGridScope.trackList(
     trackList: List<Track>,
     currentTrack: Track?,
+    lovedUris: Set<String>,
     onTrackClick: (Track) -> Unit,
+    onToggleLovedClick: (Track) -> Unit,
     onPlayNextClick: (Track) -> Unit,
     onAddToQueueClick: (Track) -> Unit,
     onAddToPlaylistClick: (Track) -> Unit,
@@ -80,8 +86,10 @@ fun LazyGridScope.trackList(
         TrackListItem(
             track = track,
             isCurrent = currentTrack == track,
+            isLoved = track.uri.toString() in lovedUris,
             onClick = { onTrackClick(track) },
             onLongClick = { onLongClick(track) },
+            onToggleLovedClick = { onToggleLovedClick(track) },
             onPlayNextClick = { onPlayNextClick(track) },
             onAddToQueueClick = { onAddToQueueClick(track) },
             onAddToPlaylistClick = { onAddToPlaylistClick(track) },

@@ -123,6 +123,8 @@ fun PlayerSheet(
     onRemoveFromQueueClick: (Int) -> Unit,
     onReorderingQueue: (Int, Int) -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
+    lovedUris: Set<String>,
+    onToggleLovedClick: (Track) -> Unit,
     settings: Settings,
     modifier: Modifier = Modifier
 ) {
@@ -613,6 +615,12 @@ fun ExpandedPlayer(
                         }
 
                         TrackMenuButton(
+                            isLoved = playbackState.currentTrack?.let {
+                                it.uri.toString() in lovedUris
+                            } ?: false,
+                            onToggleLovedClick = {
+                                playbackState.currentTrack?.let(onToggleLovedClick)
+                            },
                             onPlayNextClick = onPlayNextClick,
                             onAddToQueueClick = onAddToQueueClick,
                             onAddToPlaylistClick = onAddToPlaylistClick,
@@ -812,6 +820,12 @@ fun ExpandedPlayer(
                                 }
 
                                 TrackMenuButton(
+                                    isLoved = playbackState.currentTrack?.let {
+                                        it.uri.toString() in lovedUris
+                                    } ?: false,
+                                    onToggleLovedClick = {
+                                        playbackState.currentTrack?.let(onToggleLovedClick)
+                                    },
                                     onPlayNextClick = onPlayNextClick,
                                     onAddToQueueClick = onAddToQueueClick,
                                     onAddToPlaylistClick = onAddToPlaylistClick,

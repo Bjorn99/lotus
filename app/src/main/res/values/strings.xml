@@ -67,6 +67,9 @@
     <string name="smart_playlists">Smart</string>
     <string name="smart_recently_added">Recently added</string>
     <string name="smart_random_mix">Random mix</string>
+    <string name="smart_loved">Loved tracks</string>
+    <string name="love_track">Love</string>
+    <string name="unlove_track">Unlove</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Tracks</string>
