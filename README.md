@@ -100,6 +100,28 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   30 days) and **Random mix** (up to 100 tracks shuffled). They feel
   like any other playlist — tap to open, play from, or export to M3U.
 
+### Privacy and security
+
+- **Network kill switch** — Settings → Privacy has a master toggle that
+  cuts all outbound calls (lyrics, cover art, and metadata). When it's
+  off, the app uses only what's already on disk. The optional NetEase
+  lyrics fallback has its own per-source toggle so you can pick what to
+  allow.
+- **HTTPS-only network policy** — release builds reject cleartext HTTP,
+  ignore user-installed CAs, and only talk to LRCLIB, NetEase,
+  MusicBrainz, and CoverArtArchive. Anything else fails closed.
+- **No silent redirects, response size cap** — the HTTP client follows
+  zero redirects by default; the CoverArtArchive 307 to archive.org goes
+  through an explicit handler with a host allow-list. Responses with a
+  declared length over 5 MB are refused so a misbehaving server can't
+  pin memory.
+- **Backup hygiene** — Android auto-backup and device-transfer copy
+  your settings but skip the music database and crash logs, so listening
+  history doesn't follow you to a Google account.
+- **In-app privacy disclosure** — Settings → Privacy lists exactly what
+  leaves the device (and what each upstream service sees) versus what
+  stays local. No hidden network behavior.
+
 ### Housekeeping
 
 - **Fork rebrand** — `applicationId` is `com.dn0ne.lotus.community`, so
@@ -111,9 +133,10 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
 - **MusicBrainz / LRCLIB contact** — the User-Agent sent with those
   API calls identifies this fork, so rate-limit or abuse reports reach
   us rather than the upstream author.
-- **Zero telemetry, zero analytics, phone-only** — no network calls
-  except LRCLIB (lyrics on demand) and MusicBrainz (optional metadata
-  search). No crash reporting SDKs, no analytics, no server.
+- **Zero telemetry, zero analytics, no server** — the only network
+  calls are the user-initiated lyrics and metadata lookups described
+  above, and all of them can be disabled. No crash reporting SDKs, no
+  analytics, no phone-home.
 
 ## Download
 

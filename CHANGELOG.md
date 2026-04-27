@@ -8,6 +8,25 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.2 — Sleep timer: presets and finish-current-track
+
+Two small additions to the existing sleep timer.
+
+Preset chips above the slider — 15, 30, 45, 60, 90 minutes. The
+slider still works for anything in between; the chips are there
+for the common cases so you don't have to fiddle when the answer
+is "thirty".
+
+A **Finish current track** toggle below the slider. When it's on,
+the timer doesn't stop the player the moment it hits zero. It
+waits for the song that's already playing to end naturally and
+stops then, so you don't get cut off mid-song.
+
+The slider is also disabled while the timer is running, which
+fixes a small rough edge where dragging it mid-countdown would
+flicker the displayed minutes without changing the actual expiry
+time.
+
 ## 1.5.1 — Privacy disclosure on the Privacy screen
 
 The Privacy screen added in 1.5.0 had only the master kill switch
