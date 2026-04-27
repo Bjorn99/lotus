@@ -51,4 +51,14 @@ object SmartPlaylists {
         val picked = tracks.shuffled(Random(seed)).take(MAX_ENTRIES)
         return Playlist(name = name, trackList = picked)
     }
+
+    fun loved(
+        tracks: List<Track>,
+        lovedUris: Set<String>,
+        name: String,
+    ): Playlist? {
+        if (lovedUris.isEmpty()) return null
+        val picked = tracks.filter { it.uri.toString() in lovedUris }
+        return if (picked.isEmpty()) null else Playlist(name = name, trackList = picked)
+    }
 }

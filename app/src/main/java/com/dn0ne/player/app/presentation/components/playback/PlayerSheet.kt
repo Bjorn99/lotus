@@ -123,6 +123,8 @@ fun PlayerSheet(
     onRemoveFromQueueClick: (Int) -> Unit,
     onReorderingQueue: (Int, Int) -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
+    lovedUris: Set<String>,
+    onToggleLovedClick: (Track) -> Unit,
     settings: Settings,
     modifier: Modifier = Modifier
 ) {
@@ -306,6 +308,8 @@ fun PlayerSheet(
                     onRemoveFromQueueClick = onRemoveFromQueueClick,
                     onReorderingQueue = onReorderingQueue,
                     onTrackClick = onTrackClick,
+                    lovedUris = lovedUris,
+                    onToggleLovedClick = onToggleLovedClick,
                     modifier = Modifier.clickable(
                         onClick = {},
                         interactionSource = null,
@@ -497,6 +501,8 @@ fun ExpandedPlayer(
     onRemoveFromQueueClick: (Int) -> Unit,
     onReorderingQueue: (Int, Int) -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
+    lovedUris: Set<String>,
+    onToggleLovedClick: (Track) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -613,6 +619,12 @@ fun ExpandedPlayer(
                         }
 
                         TrackMenuButton(
+                            isLoved = playbackState.currentTrack?.let {
+                                it.uri.toString() in lovedUris
+                            } ?: false,
+                            onToggleLovedClick = {
+                                playbackState.currentTrack?.let(onToggleLovedClick)
+                            },
                             onPlayNextClick = onPlayNextClick,
                             onAddToQueueClick = onAddToQueueClick,
                             onAddToPlaylistClick = onAddToPlaylistClick,
@@ -812,6 +824,12 @@ fun ExpandedPlayer(
                                 }
 
                                 TrackMenuButton(
+                                    isLoved = playbackState.currentTrack?.let {
+                                        it.uri.toString() in lovedUris
+                                    } ?: false,
+                                    onToggleLovedClick = {
+                                        playbackState.currentTrack?.let(onToggleLovedClick)
+                                    },
                                     onPlayNextClick = onPlayNextClick,
                                     onAddToQueueClick = onAddToQueueClick,
                                     onAddToPlaylistClick = onAddToPlaylistClick,

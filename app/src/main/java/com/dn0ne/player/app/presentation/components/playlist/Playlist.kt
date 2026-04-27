@@ -62,7 +62,9 @@ fun Playlist(
     listState: LazyListState = rememberLazyListState(),
     playlist: Playlist,
     currentTrack: Track?,
+    lovedUris: Set<String>,
     onTrackClick: (Track, Playlist) -> Unit,
+    onToggleLovedClick: (Track) -> Unit,
     onPlayNextClick: (Track) -> Unit,
     onAddToQueueClick: (List<Track>) -> Unit,
     onAddToPlaylistClick: (List<Track>) -> Unit,
@@ -360,6 +362,7 @@ fun Playlist(
             trackList(
                 trackList = playlist.trackList.filterTracks(searchFieldValue),
                 currentTrack = currentTrack,
+                lovedUris = lovedUris,
                 onTrackClick = { track ->
                     onTrackClick(
                         track,
@@ -370,6 +373,7 @@ fun Playlist(
                         } else playlist
                     )
                 },
+                onToggleLovedClick = onToggleLovedClick,
                 onPlayNextClick = onPlayNextClick,
                 onAddToQueueClick = { onAddToQueueClick(listOf(it)) },
                 onAddToPlaylistClick = { onAddToPlaylistClick(listOf(it)) },

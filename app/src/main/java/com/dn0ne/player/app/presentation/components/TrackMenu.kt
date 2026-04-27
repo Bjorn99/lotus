@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.AddToQueue
 import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Person
@@ -39,7 +41,9 @@ import com.dn0ne.player.R
 @Composable
 fun TrackMenu(
     isExpanded: Boolean,
+    isLoved: Boolean,
     onDismissRequest: () -> Unit,
+    onToggleLovedClick: () -> Unit,
     onPlayNextClick: () -> Unit,
     onAddToQueueClick: () -> Unit,
     onAddToPlaylistClick: () -> Unit,
@@ -56,6 +60,26 @@ fun TrackMenu(
         modifier = Modifier.width(IntrinsicSize.Min)
     ) {
         val context = LocalContext.current
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = context.resources.getString(
+                        if (isLoved) R.string.unlove_track else R.string.love_track
+                    )
+                )
+            },
+            onClick = {
+                onToggleLovedClick()
+                onDismissRequest()
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = if (isLoved) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    contentDescription = null
+                )
+            }
+        )
+
         DropdownMenuItem(
             text = {
                 Text(text = context.resources.getString(R.string.play_next))
@@ -214,6 +238,8 @@ fun TrackMenu(
 
 @Composable
 fun TrackMenuButton(
+    isLoved: Boolean,
+    onToggleLovedClick: () -> Unit,
     onPlayNextClick: () -> Unit,
     onAddToQueueClick: () -> Unit,
     onAddToPlaylistClick: () -> Unit,
@@ -243,7 +269,9 @@ fun TrackMenuButton(
 
         TrackMenu(
             isExpanded = isMenuExpanded,
+            isLoved = isLoved,
             onDismissRequest = { isMenuExpanded = false },
+            onToggleLovedClick = onToggleLovedClick,
             onPlayNextClick = onPlayNextClick,
             onAddToQueueClick = onAddToQueueClick,
             onAddToPlaylistClick = onAddToPlaylistClick,

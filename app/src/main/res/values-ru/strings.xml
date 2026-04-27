@@ -55,6 +55,9 @@
     <string name="smart_playlists">Автоплейлисты</string>
     <string name="smart_recently_added">Недавно добавленные</string>
     <string name="smart_random_mix">Случайная подборка</string>
+    <string name="smart_loved">Любимые треки</string>
+    <string name="love_track">В любимые</string>
+    <string name="unlove_track">Убрать из любимых</string>
 
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>

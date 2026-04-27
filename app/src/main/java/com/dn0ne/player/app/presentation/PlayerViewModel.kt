@@ -16,6 +16,7 @@ import com.dn0ne.player.app.data.LyricsReader
 import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
+import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
@@ -66,6 +67,7 @@ class PlayerViewModel(
     private val lyricsRepository: LyricsRepository,
     private val lyricsReader: LyricsReader,
     private val playlistRepository: PlaylistRepository,
+    private val lovedTracksRepository: LovedTracksRepository,
     private val unsupportedArtworkEditFormats: List<String>,
     val settings: Settings,
     private val musicScanner: MusicScanner,
@@ -126,6 +128,26 @@ class PlayerViewModel(
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = _playlistSortOrder.value
     )
+
+    // Loved-track URIs as a Set for O(1) "is this loved?" lookups in track
+    // rows. The DAO already orders by added_at DESC; we lose order here, but
+    // the smart-playlist builder reads the ordered Flow directly.
+    val lovedUris = lovedTracksRepository.observeLovedUris().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = emptySet()
+    )
+
+    fun toggleLoved(track: Track) {
+        viewModelScope.launch {
+            val uri = track.uri.toString()
+            if (lovedTracksRepository.isLoved(uri)) {
+                lovedTracksRepository.remove(uri)
+            } else {
+                lovedTracksRepository.add(uri)
+            }
+        }
+    }
 
     private val _trackList = MutableStateFlow(emptyList<Track>())
     val trackList = _trackList.stateIn(

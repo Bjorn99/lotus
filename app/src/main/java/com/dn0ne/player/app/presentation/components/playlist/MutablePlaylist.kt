@@ -80,9 +80,11 @@ fun MutablePlaylist(
     listState: LazyListState = rememberLazyListState(),
     playlist: Playlist,
     currentTrack: Track?,
+    lovedUris: Set<String>,
     onRenamePlaylistClick: () -> Unit,
     onDeletePlaylistClick: () -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
+    onToggleLovedClick: (Track) -> Unit,
     onPlayNextClick: (Track) -> Unit,
     onAddToQueueClick: (List<Track>) -> Unit,
     onAddToPlaylistClick: (List<Track>) -> Unit,
@@ -454,6 +456,7 @@ fun MutablePlaylist(
                     TrackListItem(
                         track = track,
                         isCurrent = currentTrack == track,
+                        isLoved = track.uri.toString() in lovedUris,
                         onClick = {
                             onTrackClick(
                                 track,
@@ -464,6 +467,7 @@ fun MutablePlaylist(
                                 } else playlist
                             )
                         },
+                        onToggleLovedClick = { onToggleLovedClick(track) },
                         onPlayNextClick = { onPlayNextClick(track) },
                         onAddToQueueClick = { onAddToQueueClick(listOf(track)) },
                         onAddToPlaylistClick = { onAddToPlaylistClick(listOf(track)) },
