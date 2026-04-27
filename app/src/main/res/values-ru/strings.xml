@@ -88,6 +88,8 @@
     <string name="stop_timer">Стоп</string>
     <string name="start_timer">Старт</string>
     <string name="finish_current_track">Доиграть текущий трек</string>
+    <string name="tile_label_play">Играть</string>
+    <string name="tile_label_pause">Пауза</string>
 
     <!-- Play queue -->
     <string name="remove_from_queue">Убрать из очереди</string>
