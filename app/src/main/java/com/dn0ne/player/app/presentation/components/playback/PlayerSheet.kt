@@ -308,6 +308,8 @@ fun PlayerSheet(
                     onRemoveFromQueueClick = onRemoveFromQueueClick,
                     onReorderingQueue = onReorderingQueue,
                     onTrackClick = onTrackClick,
+                    lovedUris = lovedUris,
+                    onToggleLovedClick = onToggleLovedClick,
                     modifier = Modifier.clickable(
                         onClick = {},
                         interactionSource = null,
@@ -499,6 +501,8 @@ fun ExpandedPlayer(
     onRemoveFromQueueClick: (Int) -> Unit,
     onReorderingQueue: (Int, Int) -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
+    lovedUris: Set<String>,
+    onToggleLovedClick: (Track) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
