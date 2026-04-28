@@ -8,6 +8,31 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.5 — Backup and restore
+
+A new **Backup** entry in Settings. Two buttons: save your data to a
+file, or restore from a file you saved earlier.
+
+The file is plain JSON. It contains your playlists (names and the
+tracks in them) and your loved tracks. Open it in any text editor
+if you want to see exactly what's in it. Settings, lyrics cache,
+and crash logs aren't part of it — those are easy to re-set or
+re-download.
+
+Where the file goes is up to you. The export button opens the
+system file picker; pick a folder on your device, in your cloud
+drive, or anywhere else you want it. Restore reads from the same
+kind of picker.
+
+Restore is additive on purpose. If a playlist with the same name
+already exists, the imported one is skipped. Loved tracks merge
+into your current set. Anything you've created since the backup
+stays where it is.
+
+For tracks whose files have moved or aren't on this device any
+more, the restore tells you how many couldn't be matched — those
+get skipped rather than left as dangling references.
+
 ## 1.5.4 — Loved tracks
 
 Open the menu on any track (the dots on the right) and you'll see

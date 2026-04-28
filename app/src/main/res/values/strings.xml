@@ -71,6 +71,23 @@
     <string name="love_track">Love</string>
     <string name="unlove_track">Unlove</string>
 
+    <!-- Backup -->
+    <string name="backup">Backup</string>
+    <string name="backup_supporting_text">Save your playlists and loved tracks to a file you control. Bring them back later.</string>
+    <string name="backup_export">Save backup</string>
+    <string name="backup_import">Restore from file</string>
+    <string name="backup_what_is_included">What\'s in the file</string>
+    <string name="backup_what_is_included_body">Your playlists (names + the tracks in them) and your loved tracks. Plain JSON — open it in any text editor if you want to see exactly what\'s saved. Settings, lyrics cache, and crash logs aren\'t included.</string>
+    <string name="backup_import_policy_title">How restore works</string>
+    <string name="backup_import_policy_body">Restore is additive. Existing playlists with the same name are kept; only new ones are added. Loved tracks are merged. Tracks whose files have moved off the device are skipped.</string>
+    <string name="backup_import_confirm_title">Restore from this file?</string>
+    <string name="backup_import_confirm_body">Lotus will read the file you picked and add anything new to your library. Nothing already on this device is removed.</string>
+    <string name="backup_import_confirm_yes">Restore</string>
+    <string name="backup_export_success">Saved %1$d playlists and %2$d loved tracks.</string>
+    <string name="backup_export_failure">Couldn\'t save backup: %1$s</string>
+    <string name="backup_import_success">Added %1$d playlists, skipped %2$d already-named, added %3$d loved tracks. %4$d entries didn\'t match any local file.</string>
+    <string name="backup_import_failure">Couldn\'t read backup: %1$s</string>
+
     <!-- Tabs' names -->
     <string name="tracks">Tracks</string>
     <string name="albums">Albums</string>

@@ -59,6 +59,23 @@
     <string name="love_track">В любимые</string>
     <string name="unlove_track">Убрать из любимых</string>
 
+    <!-- Backup -->
+    <string name="backup">Резервная копия</string>
+    <string name="backup_supporting_text">Сохраните плейлисты и любимые треки в файл, которым управляете вы. Восстановите позже.</string>
+    <string name="backup_export">Сохранить копию</string>
+    <string name="backup_import">Восстановить из файла</string>
+    <string name="backup_what_is_included">Что в файле</string>
+    <string name="backup_what_is_included_body">Плейлисты (названия и треки) и любимые треки. Обычный JSON — откройте в любом текстовом редакторе, чтобы увидеть содержимое. Настройки, кэш текстов и журналы сбоев не включены.</string>
+    <string name="backup_import_policy_title">Как работает восстановление</string>
+    <string name="backup_import_policy_body">Восстановление дополняет данные. Существующие плейлисты с теми же именами сохраняются — добавляются только новые. Любимые треки объединяются. Записи, чьи файлы недоступны, пропускаются.</string>
+    <string name="backup_import_confirm_title">Восстановить из этого файла?</string>
+    <string name="backup_import_confirm_body">Lotus прочитает выбранный файл и добавит новые записи. Ничего из имеющегося на устройстве не удаляется.</string>
+    <string name="backup_import_confirm_yes">Восстановить</string>
+    <string name="backup_export_success">Сохранено: %1$d плейлистов и %2$d любимых треков.</string>
+    <string name="backup_export_failure">Не удалось сохранить копию: %1$s</string>
+    <string name="backup_import_success">Добавлено %1$d плейлистов, пропущено по совпадению имён %2$d, любимых добавлено %3$d. %4$d записей не нашлись среди локальных файлов.</string>
+    <string name="backup_import_failure">Не удалось прочитать копию: %1$s</string>
+
     <!-- Tabs' names -->
     <string name="tracks">Треки</string>
     <string name="albums">Альбомы</string>

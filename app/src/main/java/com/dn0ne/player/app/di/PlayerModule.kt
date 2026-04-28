@@ -9,6 +9,7 @@ import com.dn0ne.player.app.data.LyricsReaderImpl
 import com.dn0ne.player.app.data.MetadataWriter
 import com.dn0ne.player.app.data.MetadataWriterImpl
 import com.dn0ne.player.app.data.SavedPlayerState
+import com.dn0ne.player.app.data.backup.BackupManager
 import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
@@ -183,6 +184,22 @@ val playerModule = module {
         RoomLovedTracksRepository(dao = get())
     }
 
+    single<BackupManager> {
+        val ctx = androidContext()
+        val versionName = try {
+            ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "unknown"
+        } catch (t: Throwable) {
+            "unknown"
+        }
+        BackupManager(
+            context = ctx,
+            playlistRepository = get(),
+            lovedTracksRepository = get(),
+            trackRepository = get(),
+            appVersionName = versionName,
+        )
+    }
+
     single<EqualizerController> {
         EqualizerController(
             context = androidContext()
@@ -205,6 +222,7 @@ val playerModule = module {
             lyricsReader = get(),
             playlistRepository = get(),
             lovedTracksRepository = get(),
+            backupManager = get(),
             unsupportedArtworkEditFormats = get<MetadataWriter>().unsupportedArtworkEditFormats,
             settings = get(),
             musicScanner = get(),

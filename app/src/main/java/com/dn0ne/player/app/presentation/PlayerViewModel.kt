@@ -14,6 +14,9 @@ import com.dn0ne.player.EqualizerController
 import com.dn0ne.player.R
 import com.dn0ne.player.app.data.LyricsReader
 import com.dn0ne.player.app.data.SavedPlayerState
+import com.dn0ne.player.app.data.backup.BackupManager
+import com.dn0ne.player.app.data.backup.ExportResult
+import com.dn0ne.player.app.data.backup.ImportResult
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
@@ -68,6 +71,7 @@ class PlayerViewModel(
     private val lyricsReader: LyricsReader,
     private val playlistRepository: PlaylistRepository,
     private val lovedTracksRepository: LovedTracksRepository,
+    private val backupManager: BackupManager,
     private val unsupportedArtworkEditFormats: List<String>,
     val settings: Settings,
     private val musicScanner: MusicScanner,
@@ -146,6 +150,18 @@ class PlayerViewModel(
             } else {
                 lovedTracksRepository.add(uri)
             }
+        }
+    }
+
+    fun exportBackup(uri: Uri, onResult: (ExportResult) -> Unit) {
+        viewModelScope.launch {
+            onResult(backupManager.export(uri))
+        }
+    }
+
+    fun importBackup(uri: Uri, onResult: (ImportResult) -> Unit) {
+        viewModelScope.launch {
+            onResult(backupManager.import(uri))
         }
     }
 
