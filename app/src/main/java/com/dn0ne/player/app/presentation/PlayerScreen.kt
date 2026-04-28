@@ -965,6 +965,8 @@ fun PlayerScreen(
                     onCloseClick = {
                         viewModel.onEvent(PlayerScreenEvent.OnCloseSettingsClick)
                     },
+                    onBackupExport = { uri, cb -> viewModel.exportBackup(uri, cb) },
+                    onBackupImport = { uri, cb -> viewModel.importBackup(uri, cb) },
                     dominantColorState = dominantColorState,
                     modifier = Modifier.fillMaxSize()
                 )

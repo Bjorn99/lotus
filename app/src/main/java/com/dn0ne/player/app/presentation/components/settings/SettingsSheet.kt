@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
@@ -49,6 +51,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dn0ne.player.R
+import com.dn0ne.player.app.data.backup.ExportResult
+import com.dn0ne.player.app.data.backup.ImportResult
 import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsibleTopBar
 import com.kmpalette.DominantColorState
 import kotlinx.serialization.Serializable
@@ -61,6 +65,8 @@ fun SettingsSheet(
     onPlaylistPick: () -> Unit,
     onScanFoldersClick: () -> Unit,
     onCloseClick: () -> Unit,
+    onBackupExport: (Uri, (ExportResult) -> Unit) -> Unit,
+    onBackupImport: (Uri, (ImportResult) -> Unit) -> Unit,
     dominantColorState: DominantColorState<ImageBitmap>,
     modifier: Modifier = Modifier
 ) {
@@ -204,6 +210,14 @@ fun SettingsSheet(
                                     onClick = {
                                         navController.navigate(SettingsRoutes.Privacy)
                                     }
+                                ),
+                                SettingsItem(
+                                    title = context.resources.getString(R.string.backup),
+                                    supportingText = context.resources.getString(R.string.backup_supporting_text),
+                                    icon = Icons.Rounded.Backup,
+                                    onClick = {
+                                        navController.navigate(SettingsRoutes.Backup)
+                                    }
                                 )
                             )
                         }
@@ -304,6 +318,17 @@ fun SettingsSheet(
                     )
                 }
 
+                composable<SettingsRoutes.Backup> {
+                    BackupSettings(
+                        onBackClick = {
+                            navController.navigateUp()
+                        },
+                        onExport = onBackupExport,
+                        onImport = onBackupImport,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
                 composable<SettingsRoutes.About> {
                     AboutPage(
                         onBackClick = {
@@ -342,6 +367,9 @@ sealed interface SettingsRoutes {
 
     @Serializable
     data object Privacy : SettingsRoutes
+
+    @Serializable
+    data object Backup : SettingsRoutes
 
     @Serializable
     data object About : SettingsRoutes
