@@ -25,7 +25,7 @@ scrollbars = "2.2.0"
 detekt = "1.23.8"
 ktlint = "12.1.2"
 room = "2.6.1"
-ksp = "2.0.20-1.0.25"
+ksp = "2.3.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
