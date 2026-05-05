@@ -91,6 +91,29 @@
       "groupSlug": "agp-kotlin"
     },
     {
+      "description": "Hold the AGP + Kotlin + KSP group on minor and major bumps while we're on Kotlin 2.0.20. Bumping any of these past the current minor pulls a kotlin-stdlib whose binary metadata kotlinc 2.0 cannot read, so the build dies before it even reaches our code. Patches still flow. When we plan a coordinated Kotlin upgrade (Gradle wrapper + AGP + Kotlin + KSP + a sweep of kotlin-coupled libs), remove this rule.",
+      "matchPackageNames": [
+        "com.android.application",
+        "com.android.library",
+        "com.android.tools.build:gradle",
+        "org.jetbrains.kotlin:**",
+        "org.jetbrains.kotlin.android",
+        "org.jetbrains.kotlin.plugin.compose",
+        "org.jetbrains.kotlin.plugin.serialization",
+        "com.google.devtools.ksp",
+        "com.google.devtools.ksp:**"
+      ],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "coil 3.4.0+ transitively pulls kotlin-stdlib 2.3 (and okio compiled with Kotlin 2.2), both incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
+      "matchPackageNames": [
+        "io.coil-kt.coil3:**"
+      ],
+      "allowedVersions": "<3.4.0"
+    },
+    {
       "description": "Detekt and ktlint can move on their own — they're CI-only and breakage is loud.",
       "matchPackageNames": [
         "io.gitlab.arturbosch.detekt",
