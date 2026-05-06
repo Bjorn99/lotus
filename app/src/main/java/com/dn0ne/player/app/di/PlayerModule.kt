@@ -14,6 +14,7 @@ import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
 import com.dn0ne.player.app.data.db.PlaylistDao
+import com.dn0ne.player.app.data.db.TrackStatsDao
 import com.dn0ne.player.app.data.remote.lyrics.ChainLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.GatedLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
@@ -29,8 +30,10 @@ import com.dn0ne.player.app.data.repository.PlaylistRepository
 import com.dn0ne.player.app.data.repository.RoomLovedTracksRepository
 import com.dn0ne.player.app.data.repository.RoomLyricsRepository
 import com.dn0ne.player.app.data.repository.RoomPlaylistRepository
+import com.dn0ne.player.app.data.repository.RoomTrackStatsRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.data.repository.TrackRepositoryImpl
+import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -59,6 +62,27 @@ private val MIGRATION_1_2 = object : Migration(1, 2) {
             "CREATE TABLE IF NOT EXISTS `loved_tracks` (" +
                 "`uri` TEXT NOT NULL, " +
                 "`added_at` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`uri`))"
+        )
+    }
+}
+
+// v2 → v3: add track_stats for play/skip counts and listening time. Also
+// purely additive; backfilled to empty (no historical events to recover).
+// Column definitions must match exactly what Room generates from
+// TrackStatsEntity — Room hashes the schema on open and rejects mismatches.
+// No DEFAULT clauses here since the entity doesn't declare @ColumnInfo
+// defaultValue; Kotlin-side defaults handle that at the entity level.
+private val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `track_stats` (" +
+                "`uri` TEXT NOT NULL, " +
+                "`play_count` INTEGER NOT NULL, " +
+                "`skip_count` INTEGER NOT NULL, " +
+                "`total_listening_ms` INTEGER NOT NULL, " +
+                "`first_played_at` INTEGER, " +
+                "`last_played_at` INTEGER, " +
                 "PRIMARY KEY(`uri`))"
         )
     }
@@ -165,12 +189,13 @@ val playerModule = module {
             LotusDatabase::class.java,
             LotusDatabase.NAME,
         )
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
     }
     single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
     single<LyricsDao> { get<LotusDatabase>().lyricsDao() }
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
+    single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
 
     single<LyricsRepository> {
         RoomLyricsRepository(dao = get())
@@ -182,6 +207,10 @@ val playerModule = module {
 
     single<LovedTracksRepository> {
         RoomLovedTracksRepository(dao = get())
+    }
+
+    single<TrackStatsRepository> {
+        RoomTrackStatsRepository(dao = get())
     }
 
     single<BackupManager> {
