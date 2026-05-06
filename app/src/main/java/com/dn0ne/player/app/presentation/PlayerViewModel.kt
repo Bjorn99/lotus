@@ -23,6 +23,7 @@ import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
+import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.domain.lyrics.Lyrics
 import com.dn0ne.player.app.domain.lyrics.LyricsFetcher
 import com.dn0ne.player.app.domain.playlist.PlaylistEditor
@@ -71,6 +72,7 @@ class PlayerViewModel(
     private val lyricsReader: LyricsReader,
     private val playlistRepository: PlaylistRepository,
     private val lovedTracksRepository: LovedTracksRepository,
+    private val trackStatsRepository: TrackStatsRepository,
     private val backupManager: BackupManager,
     private val unsupportedArtworkEditFormats: List<String>,
     val settings: Settings,
@@ -96,7 +98,9 @@ class PlayerViewModel(
         SettingsSheetState(
             settings = settings,
             musicScanner = musicScanner,
-            equalizerController = equalizerController
+            equalizerController = equalizerController,
+            trackStatsRepository = trackStatsRepository,
+            trackRepository = trackRepository,
         )
     )
     val settingsSheetState = _settingsSheetState.stateIn(

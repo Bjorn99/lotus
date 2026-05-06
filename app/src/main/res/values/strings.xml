@@ -409,4 +409,26 @@
     <string name="share_crash_log_explain">Attach this file when filing a bug. Crash logs stay on your device.</string>
     <string name="no_crash_log_available">No crash logs on this device</string>
     <string name="share_crash_log_subject">Lotus crash report</string>
+
+    <!-- Listening stats screen -->
+    <string name="stats_title">Listening stats</string>
+    <string name="stats_supporting_text">Most played, most listened to, recently played, top artists</string>
+    <string name="stats_summary_title">Overall</string>
+    <string name="stats_summary_total_time">Total time listened</string>
+    <string name="stats_summary_plays_skips">Plays / skips</string>
+    <string name="stats_summary_plays_skips_value">%1$d / %2$d</string>
+    <string name="stats_summary_tracks">Tracks with stats</string>
+    <string name="stats_section_most_played">Most played</string>
+    <string name="stats_section_most_listened">Most listened to</string>
+    <string name="stats_section_recently_played">Recently played</string>
+    <string name="stats_section_top_artists">Top artists</string>
+    <string name="stats_disabled_title">Listening stats are off</string>
+    <string name="stats_disabled_body">Recording is disabled in Settings → Privacy. Turn it back on to start counting plays and skips again.</string>
+    <string name="stats_disabled_action">Open Privacy settings</string>
+    <string name="stats_empty_title">Nothing to show yet</string>
+    <string name="stats_empty_body">Play a few tracks past their halfway mark and they\'ll appear here.</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$d play</item>
+        <item quantity="other">%1$d plays</item>
+    </plurals>
 </resources>

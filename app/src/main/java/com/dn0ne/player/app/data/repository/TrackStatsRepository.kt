@@ -4,6 +4,7 @@ import com.dn0ne.player.app.domain.track.TrackStats
 import kotlinx.coroutines.flow.Flow
 
 interface TrackStatsRepository {
+    fun observeAll(): Flow<List<TrackStats>>
     fun observeTopByPlayCount(limit: Int): Flow<List<TrackStats>>
     fun observeRecentlyPlayed(limit: Int): Flow<List<TrackStats>>
     suspend fun statsFor(uri: String): TrackStats?

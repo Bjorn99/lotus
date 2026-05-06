@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Lyrics
 import androidx.compose.material.icons.rounded.MusicNote
@@ -218,6 +219,14 @@ fun SettingsSheet(
                                     onClick = {
                                         navController.navigate(SettingsRoutes.Backup)
                                     }
+                                ),
+                                SettingsItem(
+                                    title = context.resources.getString(R.string.stats_title),
+                                    supportingText = context.resources.getString(R.string.stats_supporting_text),
+                                    icon = Icons.Rounded.Insights,
+                                    onClick = {
+                                        navController.navigate(SettingsRoutes.Stats)
+                                    }
                                 )
                             )
                         }
@@ -337,6 +346,21 @@ fun SettingsSheet(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
+                composable<SettingsRoutes.Stats> {
+                    LibraryStatsScreen(
+                        settings = state.settings,
+                        statsRepository = state.trackStatsRepository,
+                        trackRepository = state.trackRepository,
+                        onBackClick = {
+                            navController.navigateUp()
+                        },
+                        onOpenPrivacyClick = {
+                            navController.navigate(SettingsRoutes.Privacy)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
     }
@@ -373,4 +397,7 @@ sealed interface SettingsRoutes {
 
     @Serializable
     data object About : SettingsRoutes
+
+    @Serializable
+    data object Stats : SettingsRoutes
 }

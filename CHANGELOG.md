@@ -8,6 +8,31 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.7 — Listening stats screen
+
+The numbers Lotus has been quietly recording since 1.5.6 now have a
+home. Settings → **Listening stats** shows four sections plus a small
+summary card.
+
+The summary card across the top: total time you've spent listening to
+local music in this app, the running tally of plays vs skips, and how
+many distinct tracks have stats yet.
+
+**Most played** is the top ten tracks by play count. **Most listened
+to** is the top ten by time spent — different from "most played" if a
+single long track has only been heard once or two but for hours
+combined. **Recently played** is the last ten you crossed the halfway
+mark on, newest first. **Top artists** rolls all your tracks up by
+artist tag and sorts by total listening time, so the artists you keep
+coming back to surface even if no single track of theirs is in the
+top-ten.
+
+The screen reads from the same on-device database the recording
+writes to — no network, no analytics. If you've turned the privacy
+toggle off (Settings → Privacy → Record listening stats), the stats
+screen shows a stub linking back to the toggle instead of an empty
+list.
+
 ## 1.5.6 — Listening stats (groundwork)
 
 Lotus now records how often you play and skip each track, and how long

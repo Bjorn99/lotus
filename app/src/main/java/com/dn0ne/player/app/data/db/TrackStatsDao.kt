@@ -16,6 +16,12 @@ interface TrackStatsDao {
     @Query("SELECT * FROM track_stats WHERE uri = :uri")
     suspend fun getByUri(uri: String): TrackStatsEntity?
 
+    // Drives the stats screen — every section is derived in Kotlin from
+    // this single observation so we don't issue four parallel queries
+    // that all return overlapping subsets of the same table.
+    @Query("SELECT * FROM track_stats")
+    fun observeAll(): Flow<List<TrackStatsEntity>>
+
     @Query("SELECT * FROM track_stats ORDER BY play_count DESC, last_played_at DESC LIMIT :limit")
     fun observeTopByPlayCount(limit: Int): Flow<List<TrackStatsEntity>>
 

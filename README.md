@@ -99,13 +99,17 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   lists at the top: **Recently added** (files modified within the last
   30 days) and **Random mix** (up to 100 tracks shuffled). They feel
   like any other playlist — tap to open, play from, or export to M3U.
-- **Listening stats (groundwork)** — Lotus now records play count, skip
-  count, and listening time per track in the on-device database. Counts
-  follow the natural intuition: a play is +1 once you cross the halfway
-  mark of the track; a skip is +1 if you move on before that. The stats
-  screen that visualises this is the next planned release; for now it's
-  silent infrastructure that survives backup/restore and respects the
-  privacy toggle below.
+- **Listening stats** — Settings → Listening stats shows your top
+  played, top listened-to, recently played, and top artists, plus a
+  summary card with total time and play / skip counts. Counts follow
+  the natural intuition: +1 play once you cross the halfway mark of
+  the track, +1 skip if you move on before that. Seeking back after
+  crossing the halfway mark doesn't undo the play. All local — the
+  same on-device database as your playlists. Backup/restore carries
+  the stats too, with monotonic merge rules so re-importing the same
+  backup is a no-op. The whole feature can be turned off via the
+  privacy toggle below — flipping off both stops new recording and
+  drops the existing rows.
 
 ### Privacy and security
 
