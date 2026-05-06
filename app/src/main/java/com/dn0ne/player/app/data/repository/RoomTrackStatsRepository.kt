@@ -10,6 +10,9 @@ class RoomTrackStatsRepository(
     private val dao: TrackStatsDao,
 ) : TrackStatsRepository {
 
+    override fun observeAll(): Flow<List<TrackStats>> =
+        dao.observeAll().map { it.map(TrackStatsEntity::toDomain) }
+
     override fun observeTopByPlayCount(limit: Int): Flow<List<TrackStats>> =
         dao.observeTopByPlayCount(limit).map { it.map(TrackStatsEntity::toDomain) }
 
