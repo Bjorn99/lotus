@@ -83,9 +83,11 @@
     <string name="backup_import_confirm_title">Restore from this file?</string>
     <string name="backup_import_confirm_body">Lotus will read the file you picked and add anything new to your library. Nothing already on this device is removed.</string>
     <string name="backup_import_confirm_yes">Restore</string>
-    <string name="backup_export_success">Saved %1$d playlists and %2$d loved tracks.</string>
+    <string name="backup_export_success">Saved %1$d playlists, %2$d loved tracks, and %3$d listening-stats entries.</string>
     <string name="backup_export_failure">Couldn\'t save backup: %1$s</string>
     <string name="backup_import_success">Added %1$d playlists, skipped %2$d already-named, added %3$d loved tracks. %4$d entries didn\'t match any local file.</string>
+    <string name="backup_import_stats_added">Merged %1$d listening-stats entries.</string>
+    <string name="backup_import_stats_skipped">Listening-stats not imported (recording is off).</string>
     <string name="backup_import_failure">Couldn\'t read backup: %1$s</string>
 
     <!-- Tabs' names -->
@@ -280,6 +282,8 @@
     <string name="privacy_supporting_text">What leaves your device, network controls</string>
     <string name="network_lookups">Allow network lookups</string>
     <string name="network_lookups_explain">Master switch for LRCLIB lyrics, NetEase lyrics, and MusicBrainz metadata. Turn off for a strict-offline mode — the rest of the app keeps working from your local library.</string>
+    <string name="track_play_stats">Record listening stats</string>
+    <string name="track_play_stats_explain">Counts how often you play and skip tracks, and how long you\'ve listened to each one. Stored only on this device. Turning this off clears the existing counts.</string>
 
     <!-- Privacy disclosure -->
     <string name="privacy_what_leaves">What leaves your device</string>

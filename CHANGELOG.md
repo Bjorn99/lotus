@@ -8,6 +8,32 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.6 — Listening stats (groundwork)
+
+Lotus now records how often you play and skip each track, and how long
+you've spent listening. The numbers live only on this device, in the
+same SQLite database as your playlists. There's no stats screen yet —
+that's the next release — but the recording happens in the background
+from this version on, so by the time the screen lands you'll already
+have data to look at.
+
+A track counts as a *play* once you cross its halfway mark. Move on
+before that and it's a *skip*. Seeking back after you've crossed the
+halfway mark doesn't undo the play. Live streams and broken-metadata
+files (where the track length is unknown) are skipped over silently.
+
+Settings → Privacy has a new **Record listening stats** toggle. It's
+on by default. Flipping it off does both halves of "stop tracking":
+new events stop being written, and the existing counts are dropped.
+No half-state.
+
+Backup files (the export/restore feature from 1.5.5) now carry your
+listening stats too. Restore merges them carefully: re-importing the
+same backup is a no-op, and importing an older backup never rolls back
+counts you've earned since. If you have the privacy toggle off when you
+restore, the listening-stats portion is skipped silently and the rest
+of the backup imports as before.
+
 ## 1.5.5 — Backup and restore
 
 A new **Backup** entry in Settings. Two buttons: save your data to a

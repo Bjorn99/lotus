@@ -71,7 +71,7 @@
     <string name="backup_import_confirm_title">Відновити з цього файлу?</string>
     <string name="backup_import_confirm_body">Lotus прочитає обраний файл і додасть нові записи. Ніщо з наявного на пристрої не видаляється.</string>
     <string name="backup_import_confirm_yes">Відновити</string>
-    <string name="backup_export_success">Збережено: %1$d плейлістів і %2$d улюблених треків.</string>
+    <string name="backup_export_success">Збережено: %1$d плейлістів, %2$d улюблених треків і %3$d записів статистики.</string>
     <string name="backup_export_failure">Не вдалося зберегти копію: %1$s</string>
     <string name="backup_import_success">Додано %1$d плейлістів, пропущено за збігом імен %2$d, улюблених додано %3$d. %4$d записів не знайшлися серед локальних файлів.</string>
     <string name="backup_import_failure">Не вдалося прочитати копію: %1$s</string>

@@ -18,9 +18,12 @@ data class BackupData(
     val appVersionName: String,
     val playlists: List<BackupPlaylist>,
     val lovedTracks: List<BackupTrackRef>,
+    // Defaulted so v1 backups still parse cleanly. Bumped to v2 when this
+    // field was added in v1.5.6.
+    val trackStats: List<BackupTrackStats> = emptyList(),
 ) {
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
     }
 }
 
@@ -36,8 +39,26 @@ data class BackupTrackRef(
     val data: String,
 )
 
+@Serializable
+data class BackupTrackStats(
+    val uri: String,
+    val data: String,
+    val playCount: Int,
+    val skipCount: Int,
+    // Nullable so a stats row with only skips (no play timestamps yet)
+    // round-trips faithfully. Older backups that lacked this field are
+    // covered by the schema-default at parse time.
+    val firstPlayedAt: Long? = null,
+    val lastPlayedAt: Long? = null,
+    val totalListeningMs: Long,
+)
+
 sealed interface ExportResult {
-    data class Ok(val playlists: Int, val lovedTracks: Int) : ExportResult
+    data class Ok(
+        val playlists: Int,
+        val lovedTracks: Int,
+        val trackStats: Int,
+    ) : ExportResult
     data class Failure(val cause: Throwable) : ExportResult
 }
 
@@ -47,6 +68,8 @@ sealed interface ImportResult {
         val playlistsSkipped: Int,
         val lovedTracksAdded: Int,
         val tracksUnresolved: Int,
+        val statsImported: Int,
+        val statsSkippedDueToToggle: Boolean,
     ) : ImportResult
     data class Failure(val cause: Throwable) : ImportResult
 }

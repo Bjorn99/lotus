@@ -25,6 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -216,13 +220,19 @@ class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private val equalizerController = get<EqualizerController>()
     private val trackStatsRepository = get<TrackStatsRepository>()
-    private val statsScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val settings = get<Settings>()
+    // The tracker reads player.currentPosition from a periodic checkpoint;
+    // ExoPlayer requires single-threaded access from the player's thread,
+    // which is main. Room's suspend DAO calls dispatch their own work to
+    // the room executor, so a single Dispatchers.Main scope is enough for
+    // both checkpoints and DB writes.
+    private val statsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var playCountTracker: PlayCountTracker? = null
 
     override fun onCreate() {
         super.onCreate()
 
-        val shouldHandleAudioFocus = get<Settings>().handleAudioFocus
+        val shouldHandleAudioFocus = settings.handleAudioFocus
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -249,7 +259,17 @@ class PlaybackService : MediaSessionService() {
             player = player,
             repository = trackStatsRepository,
             scope = statsScope,
+            isTrackingEnabled = { settings.trackPlayStats.value },
         ).also { player.addListener(it) }
+
+        // Toggle-off semantics: stop tracking *and* drop existing rows.
+        // drop(1) skips the StateFlow's initial replay so we only act on
+        // an actual user toggle, not on every service start.
+        settings.trackPlayStats
+            .drop(1)
+            .filter { !it }
+            .onEach { trackStatsRepository.clearAll() }
+            .launchIn(statsScope)
 
         SleepTimer.addOnFinishCallback {
             if (SleepTimer.finishLastTrack.value && player.isPlaying) {

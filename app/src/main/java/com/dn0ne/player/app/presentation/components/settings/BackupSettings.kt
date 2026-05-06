@@ -67,6 +67,7 @@ fun BackupSettings(
                     R.string.backup_export_success,
                     result.playlists,
                     result.lovedTracks,
+                    result.trackStats,
                 )
                 is ExportResult.Failure -> context.resources.getString(
                     R.string.backup_export_failure,
@@ -94,13 +95,26 @@ fun BackupSettings(
                     pendingImportUri = null
                     onImport(uri) { result ->
                         val msg = when (result) {
-                            is ImportResult.Ok -> context.resources.getString(
-                                R.string.backup_import_success,
-                                result.playlistsAdded,
-                                result.playlistsSkipped,
-                                result.lovedTracksAdded,
-                                result.tracksUnresolved,
-                            )
+                            is ImportResult.Ok -> {
+                                val base = context.resources.getString(
+                                    R.string.backup_import_success,
+                                    result.playlistsAdded,
+                                    result.playlistsSkipped,
+                                    result.lovedTracksAdded,
+                                    result.tracksUnresolved,
+                                )
+                                val statsLine = when {
+                                    result.statsSkippedDueToToggle -> context.resources.getString(
+                                        R.string.backup_import_stats_skipped,
+                                    )
+                                    result.statsImported > 0 -> context.resources.getString(
+                                        R.string.backup_import_stats_added,
+                                        result.statsImported,
+                                    )
+                                    else -> ""
+                                }
+                                if (statsLine.isEmpty()) base else "$base $statsLine"
+                            }
                             is ImportResult.Failure -> context.resources.getString(
                                 R.string.backup_import_failure,
                                 result.cause.localizedMessage ?: result.cause::class.simpleName.orEmpty(),

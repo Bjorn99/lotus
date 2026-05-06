@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material3.Icon
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -92,6 +94,16 @@ fun PrivacySettings(
                 settings.networkLookupsEnabled = it
                 networkLookupsEnabled = it
             },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        val trackPlayStats by settings.trackPlayStats.collectAsState()
+        SettingSwitch(
+            title = context.resources.getString(R.string.track_play_stats),
+            supportingText = context.resources.getString(R.string.track_play_stats_explain),
+            icon = Icons.Rounded.Insights,
+            isChecked = trackPlayStats,
+            onCheckedChange = settings::updateTrackPlayStats,
             modifier = Modifier.fillMaxWidth(),
         )
 
