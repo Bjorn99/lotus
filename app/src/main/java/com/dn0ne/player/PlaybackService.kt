@@ -18,7 +18,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.core.data.Settings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -211,6 +215,9 @@ class EqualizerController(context: Context) {
 class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private val equalizerController = get<EqualizerController>()
+    private val trackStatsRepository = get<TrackStatsRepository>()
+    private val statsScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var playCountTracker: PlayCountTracker? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -237,6 +244,12 @@ class PlaybackService : MediaSessionService() {
                 }
             }
         })
+
+        playCountTracker = PlayCountTracker(
+            player = player,
+            repository = trackStatsRepository,
+            scope = statsScope,
+        ).also { player.addListener(it) }
 
         SleepTimer.addOnFinishCallback {
             if (SleepTimer.finishLastTrack.value && player.isPlaying) {
@@ -289,6 +302,11 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        // Capture any in-flight listening time before the player is gone.
+        // Don't cancel statsScope — it would kill the just-launched flush
+        // before it hits the DB. The IO dispatcher coroutine completes on
+        // its own.
+        playCountTracker?.flush()
         equalizerController.releaseEqualizer()
         SleepTimer.stop()
         mediaSession?.run {
