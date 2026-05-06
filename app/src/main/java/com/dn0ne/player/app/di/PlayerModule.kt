@@ -224,7 +224,9 @@ val playerModule = module {
             context = ctx,
             playlistRepository = get(),
             lovedTracksRepository = get(),
+            trackStatsRepository = get(),
             trackRepository = get(),
+            settings = get(),
             appVersionName = versionName,
         )
     }

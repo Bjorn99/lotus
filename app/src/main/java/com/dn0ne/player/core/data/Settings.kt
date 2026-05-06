@@ -34,6 +34,7 @@ class Settings(context: Context) {
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
     private val useNetEaseLyricsFallbackKey = "use-netease-lyrics-fallback"
     private val networkLookupsEnabledKey = "network-lookups-enabled"
+    private val trackPlayStatsKey = "track-play-stats"
 
     private val areRisksOfMetadataEditingAcceptedKey = "metadata-editing-dialog"
 
@@ -241,6 +242,22 @@ class Settings(context: Context) {
                 apply()
             }
         }
+
+    // Privacy toggle for the listening-stats feature. Default true so the
+    // backing track_stats table fills up by default; flipping off both
+    // halts new writes (the listener checks this on every event) and
+    // clears the existing rows (PlaybackService observes the flow).
+    private val _trackPlayStats = MutableStateFlow(
+        sharedPreferences.getBoolean(trackPlayStatsKey, true)
+    )
+    val trackPlayStats = _trackPlayStats.asStateFlow()
+    fun updateTrackPlayStats(value: Boolean) {
+        _trackPlayStats.update { value }
+        with(sharedPreferences.edit()) {
+            putBoolean(trackPlayStatsKey, value)
+            apply()
+        }
+    }
 
     var areRisksOfMetadataEditingAccepted: Boolean
         get() = sharedPreferences.getBoolean(areRisksOfMetadataEditingAcceptedKey, false)
