@@ -1,6 +1,13 @@
 <b>Features</b>
 <ul><li>Enjoy your favorite music in a variety of formats, including MP3, FLAC, OGG, WAV, and more</li>
+<li>No telemetry, no ads</li>
+<li>M3U playlist export</li>
+<li>Global Library Search</li>
+<li>Smart Playlists</li>
+<li> Listening Stats </li>
 <li>Easily browse tracks, albums, artists, and genres, and create custom playlists</li>
-<li>Enhance your listening experience with synchronized lyrics from LRCLIB</li>
+<li>Enhance your listening experience with synchronized lyrics from LRCLIB (Optional, can be disabled)</li>
 <li>Manually update track details or fetch accurate info from MusicBrainz</li>
 <li>Designed with Material You and supports dynamic color palettes</li></ul>
+
+All music stays on your device. Network access is limited to optional. LRCLIB lyrics lookups and optional MusicBrainz metadata queries — both can be turned off entirely.
