@@ -91,7 +91,7 @@ jobs:
           TAG_VERSION="${TAG#v}"
           BUILD_VERSION=$(
             grep 'versionName = ' app/build.gradle.kts \
-              | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+).*/\1/' \
+              | sed -E 's/.*"([^"]+)".*/\1/' \
               | head -n1
           )
           if [ "$TAG_VERSION" != "$BUILD_VERSION" ]; then
@@ -109,6 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${TAG#v}"
+          CHANGELOG_VERSION="${VERSION%-community}"
           NOTES_FILE="$RUNNER_TEMP/release-notes.md"
 
           # Standard fork-summary preamble on every release.
@@ -120,7 +121,7 @@ jobs:
           EOF
 
           # Extract "## <VERSION>" through the next "## " header.
-          awk -v ver="$VERSION" '
+          awk -v ver="$CHANGELOG_VERSION" '
               /^## / {
                   if (in_section) exit
                   if ($2 == ver) { in_section = 1 }
@@ -129,8 +130,8 @@ jobs:
           ' CHANGELOG.md >> "$NOTES_FILE"
 
           # Sanity-check that the extraction found something.
-          if ! grep -q "^## ${VERSION}" "$NOTES_FILE"; then
-            echo "::error::CHANGELOG.md has no '## ${VERSION}' section. Add one before tagging."
+          if ! grep -q "^## ${CHANGELOG_VERSION}" "$NOTES_FILE"; then
+            echo "::error::CHANGELOG.md has no '## ${CHANGELOG_VERSION}' section. Add one before tagging."
             exit 1
           fi
 
