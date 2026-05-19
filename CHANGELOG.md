@@ -8,6 +8,13 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.8 — Privacy tightening
+
+- Network lookups now **off by default** (opt in via Settings → Privacy).
+- **NetEase lyrics removed** — the fallback scraped music.163.com with a
+  spoofed User-Agent. LRCLIB remains and now handles all lyrics lookups.
+- Category corrected to **Local Media Player** (was Multimedia).
+
 ## 1.5.7 — Listening stats screen
 
 The numbers Lotus has been quietly recording since 1.5.6 now have a

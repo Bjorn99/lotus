@@ -113,14 +113,12 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
 
 ### Privacy and security
 
-- **Network kill switch** — Settings → Privacy has a master toggle that
-  cuts all outbound calls (lyrics, cover art, and metadata). When it's
-  off, the app uses only what's already on disk. The optional NetEase
-  lyrics fallback has its own per-source toggle so you can pick what to
-  allow.
+- **Network off by default** — all outbound calls (lyrics, cover art,
+  metadata) start disabled. Opt in via Settings → Privacy. When off, the
+  app uses only what's already on disk.
 - **HTTPS-only network policy** — release builds reject cleartext HTTP,
-  ignore user-installed CAs, and only talk to LRCLIB, NetEase,
-  MusicBrainz, and CoverArtArchive. Anything else fails closed.
+  ignore user-installed CAs, and only talk to LRCLIB, MusicBrainz,
+  and CoverArtArchive. Anything else fails closed.
 - **No silent redirects, response size cap** — the HTTP client follows
   zero redirects by default; the CoverArtArchive 307 to archive.org goes
   through an explicit handler with a host allow-list. Responses with a

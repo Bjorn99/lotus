@@ -10,4 +10,4 @@
 <li>Manually update track details or fetch accurate info from MusicBrainz</li>
 <li>Designed with Material You and supports dynamic color palettes</li></ul>
 
-All music stays on your device. Network access is limited to optional. LRCLIB lyrics lookups and optional MusicBrainz metadata queries — both can be turned off entirely.
+All music stays on your device. Network access is off by default and must be turned on in Settings — LRCLIB lyrics lookups and MusicBrainz metadata queries are opt-in only.
