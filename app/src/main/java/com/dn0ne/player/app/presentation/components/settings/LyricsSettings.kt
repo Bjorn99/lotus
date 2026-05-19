@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
-import androidx.compose.material.icons.rounded.CloudDownload
+
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -107,21 +107,6 @@ fun LyricsSettings(
             onCheckedChange = {
                 settings.useDarkPaletteOnLyricsSheet = it
                 useDarkPaletteOnLyricsSheet = it
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        var useNetEaseLyricsFallback by remember {
-            mutableStateOf(settings.useNetEaseLyricsFallback)
-        }
-        SettingSwitch(
-            title = context.resources.getString(R.string.netease_fallback),
-            supportingText = context.resources.getString(R.string.netease_fallback_explain),
-            icon = Icons.Rounded.CloudDownload,
-            isChecked = useNetEaseLyricsFallback,
-            onCheckedChange = {
-                settings.useNetEaseLyricsFallback = it
-                useNetEaseLyricsFallback = it
             },
             modifier = Modifier.fillMaxWidth()
         )

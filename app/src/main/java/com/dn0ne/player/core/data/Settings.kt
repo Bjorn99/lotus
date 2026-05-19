@@ -32,7 +32,6 @@ class Settings(context: Context) {
     private val lyricsLetterSpacingKey = "lyrics-letter-spacing"
     private val lyricsAlignmentKey = "lyrics-alignment"
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
-    private val useNetEaseLyricsFallbackKey = "use-netease-lyrics-fallback"
     private val networkLookupsEnabledKey = "network-lookups-enabled"
     private val trackPlayStatsKey = "track-play-stats"
 
@@ -222,20 +221,11 @@ class Settings(context: Context) {
             }
         }
 
-    var useNetEaseLyricsFallback: Boolean
-        get() = sharedPreferences.getBoolean(useNetEaseLyricsFallbackKey, true)
-        set(value) {
-            with(sharedPreferences.edit()) {
-                putBoolean(useNetEaseLyricsFallbackKey, value)
-                apply()
-            }
-        }
-
     // Master gate over every outbound HTTP call the app makes. When false,
     // lyrics + metadata providers short-circuit before touching the network.
-    // Default true to preserve the existing behaviour for upgrading users.
+    // Default false: network features are opt-in (F-Droid policy).
     var networkLookupsEnabled: Boolean
-        get() = sharedPreferences.getBoolean(networkLookupsEnabledKey, true)
+        get() = sharedPreferences.getBoolean(networkLookupsEnabledKey, false)
         set(value) {
             with(sharedPreferences.edit()) {
                 putBoolean(networkLookupsEnabledKey, value)

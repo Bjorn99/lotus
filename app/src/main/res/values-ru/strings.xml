@@ -222,8 +222,6 @@
     <string name="lyrics_not_found">К сожалению, текст к этому треку найти не удалось.</string>
     <string name="cant_find_lyrics">Текст не найден.</string>
     <string name="lyrics_provided_by">Текст предоставлен LRCLIB</string>
-    <string name="netease_fallback">Использовать NetEase как запасной источник</string>
-    <string name="netease_fallback_explain">Если на LRCLIB текста нет, попробовать NetEase Cloud Music. На music.163.com отправляются название трека и исполнитель.</string>
 
     <!-- Playback queue -->
     <string name="shuffle_disabled_for_play_next">Перемешивание выключено: этот трек воспроизведётся следующим</string>
@@ -267,15 +265,13 @@
     <string name="privacy">Конфиденциальность</string>
     <string name="privacy_supporting_text">Что покидает устройство, управление сетью</string>
     <string name="network_lookups">Разрешить сетевые запросы</string>
-    <string name="network_lookups_explain">Главный переключатель для LRCLIB, NetEase и MusicBrainz. Отключите для строго офлайн-режима — остальная часть приложения продолжит работать с локальной библиотекой.</string>
+    <string name="network_lookups_explain">Главный переключатель для LRCLIB и MusicBrainz. Отключите для строго офлайн-режима — остальная часть приложения продолжит работать с локальной библиотекой.</string>
 
     <!-- Privacy disclosure -->
     <string name="privacy_what_leaves">Что покидает устройство</string>
     <string name="privacy_what_stays">Что остаётся на устройстве</string>
     <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
     <string name="privacy_lrclib_body">Отправляется: название трека, исполнитель, альбом (если известен) и длительность. Используется для поиска синхронизированного или обычного текста. Запрос уходит только когда вы открываете экран текста для трека, текст которого ещё не закэширован.</string>
-    <string name="privacy_netease_title">NetEase (music.163.com)</string>
-    <string name="privacy_netease_body">Отправляется: название трека и исполнитель. Используется как запасной источник, если на LRCLIB ничего нет. Происходит, только если включён запасной источник NetEase (Настройки → Текст) и только после того, как LRCLIB вернул пусто.</string>
     <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
     <string name="privacy_musicbrainz_body">Отправляется: ваш поисковый запрос и длительность трека. Используется для поиска подходящего релиза с обложкой и метаданными. Запрос уходит только когда вы нажимаете «Поиск» на экране Информация о треке → Поиск — никогда автоматически.</string>
     <string name="privacy_local_title">Локальные данные</string>

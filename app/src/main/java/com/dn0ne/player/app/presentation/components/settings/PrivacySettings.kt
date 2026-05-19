@@ -123,17 +123,6 @@ fun PrivacySettings(
         }
 
         NoteCard(
-            label = context.resources.getString(R.string.privacy_netease_title),
-            leadingIcon = Icons.Rounded.Cloud,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = context.resources.getString(R.string.privacy_netease_body),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
-
-        NoteCard(
             label = context.resources.getString(R.string.privacy_musicbrainz_title),
             leadingIcon = Icons.Rounded.Public,
             modifier = Modifier.fillMaxWidth(),

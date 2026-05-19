@@ -236,8 +236,6 @@
     <string name="lyrics_not_found">Unfortunately, lyrics for this track can\'t be found.</string>
     <string name="cant_find_lyrics">Can\'t find lyrics.</string>
     <string name="lyrics_provided_by">Lyrics provided by LRCLIB</string>
-    <string name="netease_fallback">Use NetEase as a backup</string>
-    <string name="netease_fallback_explain">When LRCLIB has nothing, try NetEase Cloud Music. Sends the track\'s title and artist to music.163.com.</string>
 
     <!-- Playback queue -->
     <string name="shuffle_disabled_for_play_next">Shuffle turned off so this track plays next</string>
@@ -281,7 +279,7 @@
     <string name="privacy">Privacy</string>
     <string name="privacy_supporting_text">What leaves your device, network controls</string>
     <string name="network_lookups">Allow network lookups</string>
-    <string name="network_lookups_explain">Master switch for LRCLIB lyrics, NetEase lyrics, and MusicBrainz metadata. Turn off for a strict-offline mode — the rest of the app keeps working from your local library.</string>
+    <string name="network_lookups_explain">Master switch for LRCLIB lyrics and MusicBrainz metadata. Turn off for a strict-offline mode — the rest of the app keeps working from your local library.</string>
     <string name="track_play_stats">Record listening stats</string>
     <string name="track_play_stats_explain">Counts how often you play and skip tracks, and how long you\'ve listened to each one. Stored only on this device. Turning this off clears the existing counts.</string>
 
@@ -290,8 +288,6 @@
     <string name="privacy_what_stays">What stays on your device</string>
     <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
     <string name="privacy_lrclib_body">Sent: track title, artist, album if known, and duration. Used to look up matching synced or plain lyrics. Sent only when you open the lyrics view for a track that doesn\'t have lyrics cached.</string>
-    <string name="privacy_netease_title">NetEase (music.163.com)</string>
-    <string name="privacy_netease_body">Sent: track title and artist. Used as a fallback when LRCLIB has no lyrics. Only happens if you have the NetEase fallback enabled (Settings → Lyrics) and only after LRCLIB returned nothing.</string>
     <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
     <string name="privacy_musicbrainz_body">Sent: the search query you type, plus the track\'s duration. Used to find a matching release with cover art and metadata. Sent only when you tap Search on the Track info → Search screen — never automatically.</string>
     <string name="privacy_local_title">Local data</string>

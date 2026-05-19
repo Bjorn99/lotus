@@ -19,7 +19,6 @@ import com.dn0ne.player.app.data.remote.lyrics.ChainLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.GatedLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LrclibLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
-import com.dn0ne.player.app.data.remote.lyrics.NetEaseLyricsProvider
 import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
@@ -170,15 +169,8 @@ val playerModule = module {
             context = androidContext(),
             client = get(),
         )
-        val netEase = GatedLyricsProvider(
-            delegate = NetEaseLyricsProvider(client = get()),
-            isEnabled = { settings.useNetEaseLyricsFallback },
-        )
-        // Outer gate: master switch for all lyrics network calls. When the
-        // user has disabled network lookups in Settings → Privacy, the
-        // chain short-circuits before consulting either provider.
         GatedLyricsProvider(
-            delegate = ChainLyricsProvider(listOf(lrclib, netEase)),
+            delegate = ChainLyricsProvider(listOf(lrclib)),
             isEnabled = { settings.networkLookupsEnabled },
         )
     }
