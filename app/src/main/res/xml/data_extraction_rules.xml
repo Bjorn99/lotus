@@ -11,6 +11,8 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="sharedpref" path="." />
+        <include domain="database" path="." />
+        <include domain="file" path="." />
 
         <exclude domain="database" path="lotus.db" />
         <exclude domain="database" path="lotus.db-journal" />
