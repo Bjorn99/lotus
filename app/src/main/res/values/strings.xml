@@ -115,6 +115,12 @@
     <!-- Expanded player sheet -->
     <string name="close_player_sheet">Close player sheet</string>
     <string name="playback_mode_toggle">Toggle playback mode</string>
+    <string name="playback_mode_repeat">Repeat all</string>
+    <string name="playback_mode_repeat_one">Repeat one</string>
+    <string name="playback_mode_shuffle">Shuffle</string>
+    <string name="playback_mode_smart_shuffle">Smart shuffle</string>
+    <string name="shuffle_mode_pure_activated">Pure shuffle — truly random order</string>
+    <string name="shuffle_mode_smart_activated">Smart shuffle — reduces artist repeats</string>
     <string name="show_lyrics">Show lyrics</string>
     <string name="set_sleep_timer">Set sleep timer</string>
     <string name="sleep_timer">Sleep timer</string>

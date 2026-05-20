@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Lyrics
@@ -572,13 +573,13 @@ fun ExpandedPlayer(
                         }
 
                         AnimatedVisibility(
-                            visible = playbackState.playbackMode != PlaybackMode.Shuffle,
+                            visible = playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle,
                             enter = expandHorizontally(),
                             exit = shrinkHorizontally()
                         ) {
                             IconButton(
                                 onClick = {
-                                    if (playbackState.playbackMode != PlaybackMode.Shuffle) {
+                                    if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
                                         showQueue = true
                                     }
                                 }
@@ -612,8 +613,14 @@ fun ExpandedPlayer(
                                     PlaybackMode.Repeat -> Icons.Rounded.Repeat
                                     PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
                                     PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
+                                    PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
                                 },
-                                contentDescription = context.resources.getString(R.string.playback_mode_toggle),
+                                contentDescription = when (playbackMode) {
+                                    PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
+                                    PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
+                                    PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
+                                    PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
+                                },
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -777,13 +784,13 @@ fun ExpandedPlayer(
                                 }
 
                                 AnimatedVisibility(
-                                    visible = playbackState.playbackMode != PlaybackMode.Shuffle,
+                                    visible = playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle,
                                     enter = expandHorizontally(),
                                     exit = shrinkHorizontally()
                                 ) {
                                     IconButton(
                                         onClick = {
-                                            if (playbackState.playbackMode != PlaybackMode.Shuffle) {
+                                            if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
                                                 showQueue = true
                                             }
                                         }
@@ -817,8 +824,14 @@ fun ExpandedPlayer(
                                             PlaybackMode.Repeat -> Icons.Rounded.Repeat
                                             PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
                                             PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
+                                            PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
                                         },
-                                        contentDescription = context.resources.getString(R.string.playback_mode_toggle),
+                                        contentDescription = when (playbackMode) {
+                                            PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
+                                            PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
+                                            PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
+                                            PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
+                                        },
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }

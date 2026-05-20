@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ShuffleOrder
 import com.dn0ne.player.EqualizerController
 import com.dn0ne.player.R
 import com.dn0ne.player.app.data.LyricsReader
@@ -30,6 +32,7 @@ import com.dn0ne.player.app.domain.playlist.PlaylistEditor
 import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.playback.PlaybackMode
+import com.dn0ne.player.app.domain.playback.ShuffleEngine
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.sort.sortedBy
@@ -80,6 +83,9 @@ class PlayerViewModel(
     private val equalizerController: EqualizerController
 ) : ViewModel() {
     var player: Player? = null
+
+    private val shuffleEngine = ShuffleEngine()
+    private var currentShuffleOrder: IntArray? = null
 
     // Self-contained facade for reading embedded lyrics from tags and
     // fetching them from LRCLIB. Same behaviour as before, just moved out
@@ -386,6 +392,13 @@ class PlayerViewModel(
                             )
                         }
 
+                        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT) {
+                            val mode = _playbackState.value.playbackMode
+                            if (mode == PlaybackMode.Shuffle || mode == PlaybackMode.SmartShuffle) {
+                                regenerateShuffleOrder(mode)
+                            }
+                        }
+
                         if (_playbackState.value.isLyricsSheetExpanded) {
                             loadLyrics()
                         }
@@ -534,6 +547,16 @@ class PlayerViewModel(
                         )
                     }
                     savedPlayerState.playbackMode = mode
+                    val snackbarMessage = when (mode) {
+                        PlaybackMode.Shuffle -> R.string.shuffle_mode_pure_activated
+                        PlaybackMode.SmartShuffle -> R.string.shuffle_mode_smart_activated
+                        else -> null
+                    }
+                    if (snackbarMessage != null) {
+                        viewModelScope.launch {
+                            SnackbarController.sendEvent(SnackbarEvent(message = snackbarMessage))
+                        }
+                    }
                 }
             }
 
@@ -622,6 +645,7 @@ class PlayerViewModel(
                 // the playback-mode toggle afterwards.
                 val shuffleWasOn =
                     _playbackState.value.playbackMode == PlaybackMode.Shuffle
+                    || _playbackState.value.playbackMode == PlaybackMode.SmartShuffle
                 if (shuffleWasOn) {
                     setPlayerPlaybackMode(PlaybackMode.Repeat)
                     _playbackState.update { it.copy(playbackMode = PlaybackMode.Repeat) }
@@ -1414,17 +1438,57 @@ class PlayerViewModel(
             PlaybackMode.Repeat -> {
                 player?.repeatMode = Player.REPEAT_MODE_ALL
                 player?.shuffleModeEnabled = false
+                currentShuffleOrder = null
             }
 
             PlaybackMode.RepeatOne -> {
                 player?.repeatMode = Player.REPEAT_MODE_ONE
                 player?.shuffleModeEnabled = false
+                currentShuffleOrder = null
             }
 
-            PlaybackMode.Shuffle -> {
-                player?.repeatMode = Player.REPEAT_MODE_ALL
+            PlaybackMode.Shuffle,
+            PlaybackMode.SmartShuffle -> {
+                val tracks = _playbackState.value.playlist?.trackList
+                if (tracks != null && tracks.isNotEmpty()) {
+                    val previousIndices = currentShuffleOrder?.toSet() ?: emptySet()
+                    val order = shuffleEngine.generateOrder(
+                        trackCount = tracks.size,
+                        mode = playbackMode,
+                        artistForIndex = { tracks[it].artist ?: "" },
+                        albumForIndex = { tracks[it].album ?: "" },
+                        previousLoopIndices = previousIndices,
+                    )
+                    currentShuffleOrder = order
+                    val exoPlayer = player as? ExoPlayer
+                    if (exoPlayer != null) {
+                        exoPlayer.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
+                    } else {
+                        Log.w("PlayerViewModel", "Cannot set shuffle order: player is not an ExoPlayer instance")
+                    }
+                }
                 player?.shuffleModeEnabled = true
+                player?.repeatMode = Player.REPEAT_MODE_ALL
             }
+        }
+    }
+
+    private fun regenerateShuffleOrder(mode: PlaybackMode) {
+        val tracks = _playbackState.value.playlist?.trackList ?: return
+        val previousIndices = currentShuffleOrder?.toSet() ?: emptySet()
+        val order = shuffleEngine.generateOrder(
+            trackCount = tracks.size,
+            mode = mode,
+            artistForIndex = { tracks[it].artist ?: "" },
+            albumForIndex = { tracks[it].album ?: "" },
+            previousLoopIndices = previousIndices,
+        )
+        currentShuffleOrder = order
+        val exoPlayer = player as? ExoPlayer
+        if (exoPlayer != null) {
+            exoPlayer.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
+        } else {
+            Log.w("PlayerViewModel", "Cannot set shuffle order: player is not an ExoPlayer instance")
         }
     }
 
