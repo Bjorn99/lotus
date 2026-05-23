@@ -184,30 +184,6 @@ class MusicBrainzMetadataProvider(
         }
     }
 
-    // Extracted from followCoverArtRedirect so the allow-list logic can be
-    // unit-tested without a Ktor engine. Validates the Location header of a
-    // 30x response before we follow it — this is the only redirect path in
-    // the app, so the validation must be strict.
-    //
-    // The IA node hostnames (ia800–ia905) are all subdomains of archive.org,
-    // so the single "archive.org" entry covers them via the endsWith check.
-    internal fun validateCoverArtRedirect(
-        location: String?,
-        allowedHosts: List<String>,
-    ): Result<String, DataError.Network> {
-        if (location.isNullOrBlank()) {
-            return Result.Error(DataError.Network.Unknown)
-        }
-        if (!location.startsWith("https://")) {
-            return Result.Error(DataError.Network.Unknown)
-        }
-        val host = io.ktor.http.Url(location).host
-        if (allowedHosts.none { host == it || host.endsWith(".$it") }) {
-            return Result.Error(DataError.Network.Unknown)
-        }
-        return Result.Success(location)
-    }
-
     // Follows a single 30x from CoverArtArchive after validating the
     // destination. Delegates to validateCoverArtRedirect for the allow-list
     // check, then fetches the image from the validated URL.
@@ -282,6 +258,30 @@ class MusicBrainzMetadataProvider(
             }
         }
     }
+}
+
+// Extracted from followCoverArtRedirect so the allow-list logic can be
+// unit-tested without a Ktor engine. Validates the Location header of a
+// 30x response before we follow it — this is the only redirect path in
+// the app, so the validation must be strict.
+//
+// The IA node hostnames (ia800–ia905) are all subdomains of archive.org,
+// so the single "archive.org" entry covers them via the endsWith check.
+internal fun validateCoverArtRedirect(
+    location: String?,
+    allowedHosts: List<String>,
+): Result<String, DataError.Network> {
+    if (location.isNullOrBlank()) {
+        return Result.Error(DataError.Network.Unknown)
+    }
+    if (!location.startsWith("https://")) {
+        return Result.Error(DataError.Network.Unknown)
+    }
+    val host = io.ktor.http.Url(location).host
+    if (allowedHosts.none { host == it || host.endsWith(".$it") }) {
+        return Result.Error(DataError.Network.Unknown)
+    }
+    return Result.Success(location)
 }
 
 @Serializable
