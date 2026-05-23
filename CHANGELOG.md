@@ -8,11 +8,11 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
-## 1.5.9 — Lyrics reliability + test safety net
+## 1.5.9 — Smart shuffle, lyrics fixes, and test safety net
 
-The big one. Three layered bugs in lyrics fetching are fixed, and the
-app now has a proper automated test suite so regressions are caught
-before they reach you.
+Three layered bugs in lyrics fetching are fixed, a new Smart Shuffle
+mode joins the classic Pure Shuffle, and the app now has a proper
+automated test suite so regressions are caught before they reach you.
 
 ### Lyrics fetching — three fixes
 
@@ -44,6 +44,29 @@ The upshot: enable network lookups in Settings → Privacy, tap the lyrics
 button, and it should just work — for any track that exists on LRCLIB,
 with whatever metadata your files happen to have.
 
+### Dual shuffle mode — Pure and Smart
+
+The shuffle button now toggles between two modes instead of playing a
+single fixed random order. Tap the shuffle icon in the player sheet to
+cycle through Pure, Smart, and off.
+
+- **Pure Shuffle** is what shuffling should always have been —
+  mathematically unbiased. Every possible track ordering is equally
+  likely. Fresh permutation generated from scratch each time the
+  playlist loops around. Uses Fisher-Yates shuffle (the gold standard
+  for uniform random permutations).
+- **Smart Shuffle** tries to keep the playlist feeling varied without
+  needing an internet connection or a listening-history profile. It
+  generates five random permutations, scores each one on three
+  penalties — same-artist adjacency, same-album adjacency, and how
+  recently a track played — then plays the cleanest one. All
+  computation stays on-device. No ML, no server, no tracking.
+
+Backed by 25 unit tests covering uniformity, determinism, penalty math,
+and a 10,000-track benchmark that completes in under 50ms. The approach
+mirrors Spotify's two-mode model but uses only local metadata and
+session-local recency.
+
 ### Test safety net (9 new test files)
 
 The lyrics gating, provider chain, redirect validation, response-size cap,
@@ -57,6 +80,9 @@ these will be caught before merge.
 - **HTTP engine: CIO → OkHttp.** Besides fixing TLS, OkHttp properly
   enforces the app's `network_security_config.xml` (HTTPS-only, system
   CAs only) — the old CIO engine was bypassing those rules entirely.
+- **Cover-art redirect validation hardened.** The redirect allow-list check
+  now properly validates the host portion of the URL, preventing a potential
+  open-redirect through the cover-art proxy path. Backed by unit tests.
 - **Dead domain removed** from network security config (`music.163.com`,
   the NetEase service removed in v1.5.8).
 - **CI now runs instrumented tests** on a virtual Pixel 6 device, so

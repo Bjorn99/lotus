@@ -42,6 +42,13 @@ jobs:
           set -o pipefail
           ./gradlew testDebugUnitTest --stacktrace --info 2>&1 | tee /tmp/gradle-unit.log
 
+      - name: Enable KVM for emulator
+        run: |
+          # GitHub runners have /dev/kvm but the CI user isn't in the kvm group.
+          # GMD needs KVM to boot x86_64 system images; without it you get
+          # "x86_64 emulation currently requires hardware acceleration!"
+          sudo chmod 666 /dev/kvm
+
       - name: Instrumented tests (GMD)
         run: |
           set -o pipefail
