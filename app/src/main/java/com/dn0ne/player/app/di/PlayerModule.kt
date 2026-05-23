@@ -47,6 +47,16 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
+// Extracted so the size-cap check can be unit-tested without a Ktor engine.
+// Called by the HttpResponseValidator block in the HttpClient factory below.
+internal fun validateResponseSize(contentLength: Long?, maxBytes: Long) {
+    if (contentLength != null && contentLength > maxBytes) {
+        throw IOException(
+            "Refusing response: declared Content-Length $contentLength exceeds cap of $maxBytes"
+        )
+    }
+}
+
 // 5 MB is well above the largest legitimate response we make (album cover
 // art tops out around a couple hundred KB; lyrics and JSON metadata are
 // tiny). Picked to leave generous headroom while still catching the
@@ -136,13 +146,7 @@ val playerModule = module {
             // long before they fill anything significant.
             HttpResponseValidator {
                 validateResponse { response ->
-                    val length = response.contentLength()
-                    if (length != null && length > MAX_RESPONSE_BYTES) {
-                        throw IOException(
-                            "Refusing response: declared Content-Length " +
-                                "$length exceeds cap of $MAX_RESPONSE_BYTES",
-                        )
-                    }
+                    validateResponseSize(response.contentLength(), MAX_RESPONSE_BYTES)
                 }
             }
         }
