@@ -26,7 +26,6 @@
 
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">lrclib.net</domain>
-        <domain includeSubdomains="true">music.163.com</domain>
         <domain includeSubdomains="true">musicbrainz.org</domain>
         <domain includeSubdomains="true">coverartarchive.org</domain>
         <trust-anchors>

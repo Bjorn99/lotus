@@ -48,13 +48,13 @@ class LrclibLyricsProvider(
         val response = try {
             client.get(lrclibEndpoint) {
                 url {
-                    appendPathSegments("get")
+                    // /api/search uses fuzzy keyword matching — no album or
+                    // duration required. The old /api/get endpoint demanded
+                    // all four parameters and rejected queries whose duration
+                    // was off by >±2s from the LRCLIB database value.
+                    appendPathSegments("search")
                     parameters.append("track_name", track.title)
                     parameters.append("artist_name", track.artist)
-                    track.album?.let {
-                        parameters.append("album_name", it)
-                    }
-                    parameters.append("duration", (track.duration / 1000).toString())
                 }
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -70,16 +70,20 @@ class LrclibLyricsProvider(
         when (response.status) {
             HttpStatusCode.OK -> {
                 try {
-                    val lyricsDto: LyricsDto = response.body()
+                    // /api/search returns an array (up to 20 results).
+                    // Take the first match — it's the closest one.
+                    val results: List<LyricsDto> = response.body()
 
-                    val plainLyrics = lyricsDto.plainLyrics?.split('\n')
+                    val best = results.firstOrNull()
+                        ?: return Result.Error(DataError.Network.NotFound)
+
+                    val plainLyrics = best.plainLyrics?.split('\n')
                     var syncedLyrics: List<Pair<Int, String>>? = null
                     try {
-                        syncedLyrics = lyricsDto.syncedLyrics?.toSyncedLyrics()
+                        syncedLyrics = best.syncedLyrics?.toSyncedLyrics()
                     } catch (e: IllegalArgumentException) {
                         Log.i(logTag, e.message, e)
                     }
-
 
                     return Result.Success(
                         data = Lyrics(
