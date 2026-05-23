@@ -64,7 +64,7 @@ android {
 
     sourceSets {
         getByName("androidTest") {
-            assets.srcDirs += file("$projectDir/schemas")
+            assets.srcDirs("$projectDir/schemas")
         }
     }
 
