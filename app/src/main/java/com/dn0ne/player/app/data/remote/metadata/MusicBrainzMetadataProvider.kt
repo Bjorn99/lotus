@@ -184,32 +184,45 @@ class MusicBrainzMetadataProvider(
         }
     }
 
-    // Follows a single 30x from CoverArtArchive after validating the
-    // destination. Anything sketchy (missing Location, non-HTTPS scheme,
-    // unknown host) errors out instead of being followed. This is the only
-    // place in the app that follows a redirect — everywhere else uses the
-    // strict client default.
-    private suspend fun followCoverArtRedirect(
-        response: io.ktor.client.statement.HttpResponse,
-    ): Result<ByteArray, DataError> {
-        val location = response.headers[HttpHeaders.Location]
+    // Extracted from followCoverArtRedirect so the allow-list logic can be
+    // unit-tested without a Ktor engine. Validates the Location header of a
+    // 30x response before we follow it — this is the only redirect path in
+    // the app, so the validation must be strict.
+    //
+    // The IA node hostnames (ia800–ia905) are all subdomains of archive.org,
+    // so the single "archive.org" entry covers them via the endsWith check.
+    internal fun validateCoverArtRedirect(
+        location: String?,
+        allowedHosts: List<String>,
+    ): Result<String, DataError.Network> {
         if (location.isNullOrBlank()) {
-            Log.w(logTag, "CoverArtArchive redirect missing Location header")
             return Result.Error(DataError.Network.Unknown)
         }
         if (!location.startsWith("https://")) {
-            Log.w(logTag, "Refusing non-HTTPS CoverArtArchive redirect: $location")
             return Result.Error(DataError.Network.Unknown)
         }
-        // Allow-list of redirect targets that CoverArtArchive uses in
-        // practice. If they ever add a new CDN host we'll see this fail
-        // loudly rather than silently following somewhere unexpected.
-        val allowed = listOf("archive.org", "ia800", "ia801", "ia802", "ia803", "ia804", "ia902", "ia903", "ia904", "ia905")
         val host = io.ktor.http.Url(location).host
-        if (allowed.none { host.contains(it) }) {
-            Log.w(logTag, "Refusing CoverArtArchive redirect to unexpected host: $host")
+        if (allowedHosts.none { host == it || host.endsWith(".$it") }) {
             return Result.Error(DataError.Network.Unknown)
         }
+        return Result.Success(location)
+    }
+
+    // Follows a single 30x from CoverArtArchive after validating the
+    // destination. Delegates to validateCoverArtRedirect for the allow-list
+    // check, then fetches the image from the validated URL.
+    // This is the only place in the app that follows a redirect — everywhere
+    // else uses the strict client default.
+    private suspend fun followCoverArtRedirect(
+        response: io.ktor.client.statement.HttpResponse,
+    ): Result<ByteArray, DataError> {
+        val validation = validateCoverArtRedirect(
+            location = response.headers[HttpHeaders.Location],
+            allowedHosts = listOf("archive.org"),
+        )
+        if (validation is Result.Error) return Result.Error(validation.error)
+
+        val location = (validation as Result.Success).data
 
         val final = try {
             client.get(location) {
