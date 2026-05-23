@@ -65,7 +65,7 @@ private const val MAX_RESPONSE_BYTES = 5L * 1024 * 1024
 
 // v1 → v2: add the loved_tracks table for the Loved-tracks feature.
 // Pure additive — no existing-data transformation, safe on every device.
-private val MIGRATION_1_2 = object : Migration(1, 2) {
+internal val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS `loved_tracks` (" +
@@ -82,7 +82,7 @@ private val MIGRATION_1_2 = object : Migration(1, 2) {
 // TrackStatsEntity — Room hashes the schema on open and rejects mismatches.
 // No DEFAULT clauses here since the entity doesn't declare @ColumnInfo
 // defaultValue; Kotlin-side defaults handle that at the entity level.
-private val MIGRATION_2_3 = object : Migration(2, 3) {
+internal val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS `track_stats` (" +

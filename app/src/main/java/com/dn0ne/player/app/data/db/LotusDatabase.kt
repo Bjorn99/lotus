@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         TrackStatsEntity::class,
     ],
     version = 3,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class LotusDatabase : RoomDatabase() {
     abstract fun playlistDao(): PlaylistDao

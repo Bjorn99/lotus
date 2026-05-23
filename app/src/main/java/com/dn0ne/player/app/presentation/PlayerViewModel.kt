@@ -1274,7 +1274,7 @@ class PlayerViewModel(
 
                     _playbackState.update {
                         it.copy(
-                            lyrics = null
+                            lyrics = lyrics ?: it.lyrics
                         )
                     }
                 }
@@ -1494,7 +1494,15 @@ class PlayerViewModel(
 
     private fun loadLyrics() {
         _playbackState.value.currentTrack?.let { currentTrack ->
-            if (currentTrack.uri.toString() == _playbackState.value.lyrics?.uri) return
+            // Skip only if we already have remote lyrics for this track.
+            // Lyrics from embedded tags (areFromRemote = false) shouldn't
+            // block a network fetch — the user may have just enabled
+            // network and deserves a chance at better synced lyrics.
+            val current = _playbackState.value.lyrics
+            if (current != null &&
+                current.uri == currentTrack.uri.toString() &&
+                current.areFromRemote
+            ) return
 
             viewModelScope.launch {
                 _playbackState.update {

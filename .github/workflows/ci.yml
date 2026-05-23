@@ -42,6 +42,26 @@ jobs:
           set -o pipefail
           ./gradlew testDebugUnitTest --stacktrace --info 2>&1 | tee /tmp/gradle-unit.log
 
+      - name: Instrumented tests (GMD)
+        run: |
+          set -o pipefail
+          ./gradlew pixel6Api34DebugAndroidTest \
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect \
+            --stacktrace --info 2>&1 | tee /tmp/gradle-instrumented.log
+
+      - name: Dump instrumented test reports on failure
+        if: failure()
+        run: |
+          echo "::group::Gradle output — last 400 lines"
+          tail -n 400 /tmp/gradle-instrumented.log || true
+          echo "::endgroup::"
+          echo "::group::Instrumented test XML reports"
+          find app/build/outputs/androidTest-results -type f -name '*.xml' -print -exec cat {} \; || true
+          echo "::endgroup::"
+          echo "::group::Instrumented test text output"
+          find app/build/reports/androidTests -type f -name '*.txt' -print -exec cat {} \; || true
+          echo "::endgroup::"
+
       - name: Dump unit test reports on failure
         if: failure()
         run: |

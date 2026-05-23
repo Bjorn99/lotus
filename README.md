@@ -165,15 +165,20 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
 
 ## Download
 
-Community builds of this fork are published as signed APKs on the
-[Bjorn99/lotus releases page](https://github.com/Bjorn99/lotus/releases/latest).
-Each release includes per-ABI APKs plus a universal APK, and a
-`SHA256SUMS.txt` you can verify against.
+[<img src="https://f-droid.org/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/packages/com.dn0ne.lotus.community/)
 
-F-Droid and itch.io distribution channels are documented in
-[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md). For users who want
-auto-updates, the F-Droid client is the recommended channel once we
-land on f-droid.org.
+**F-Droid is the recommended channel** for most users — auto-updates,
+signature verification, and no manual APK sideloading.
+
+Signed APKs are also published on the
+[Bjorn99/lotus releases page](https://github.com/Bjorn99/lotus/releases/latest)
+if you prefer direct download. Each release includes per-ABI APKs plus a
+universal APK, and a `SHA256SUMS.txt` you can verify against.
+
+F-Droid and itch.io distribution details are in
+[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md).
 
 The original upstream build (different application ID) is still on
 [F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) and the

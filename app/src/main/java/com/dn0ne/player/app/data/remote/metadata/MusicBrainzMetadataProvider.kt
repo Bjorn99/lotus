@@ -196,7 +196,10 @@ class MusicBrainzMetadataProvider(
             location = response.headers[HttpHeaders.Location],
             allowedHosts = listOf("archive.org"),
         )
-        if (validation is Result.Error) return Result.Error(validation.error)
+        if (validation is Result.Error) {
+            Log.w(logTag, "CoverArtArchive redirect validation failed: ${validation.error}")
+            return Result.Error(validation.error)
+        }
 
         val location = (validation as Result.Success).data
 
