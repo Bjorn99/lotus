@@ -8,6 +8,61 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.5.9 — Lyrics reliability + test safety net
+
+The big one. Three layered bugs in lyrics fetching are fixed, and the
+app now has a proper automated test suite so regressions are caught
+before they reach you.
+
+### Lyrics fetching — three fixes
+
+Lyrics lookups from LRCLIB were broken in several ways at once. If you
+enabled network lookups and tapped the lyrics button, the app would
+often show "lyrics not found" even for songs that exist on LRCLIB.
+
+- **Fixed: too-strict API endpoint.** The app was asking LRCLIB for an
+  exact match on four pieces of metadata (track, artist, album, duration
+  in seconds). If the duration in your file was off by more than two
+  seconds from what LRCLIB had, or if the file was missing an album tag,
+  the request returned 404. Now uses LRCLIB's fuzzy search, which needs
+  only track name and artist.
+- **Fixed: HTTP engine TLS failures.** The underlying HTTP engine (CIO)
+  bypasses Android's TLS stack and has known certificate-validation bugs
+  on some devices. If your device was affected, no HTTPS request could
+  complete at all — lyrics and MusicBrainz would both silently fail.
+  Switched to OkHttp, the same engine used by virtually every production
+  Android app. It delegates TLS to the OS and respects Android's network
+  security policy.
+- **Fixed: re-fetch blocked after embedded-lyrics fallback.** If a track
+  had lyrics embedded in its ID3 tags, and you opened the lyrics sheet
+  while network was off, the app would show the embedded lyrics and then
+  *permanently* skip network lookup for that track even after you enabled
+  networking. Now the app distinguishes "came from the network" from
+  "came from the file" and only skips re-fetch in the first case.
+
+The upshot: enable network lookups in Settings → Privacy, tap the lyrics
+button, and it should just work — for any track that exists on LRCLIB,
+with whatever metadata your files happen to have.
+
+### Test safety net (9 new test files)
+
+The lyrics gating, provider chain, redirect validation, response-size cap,
+backup schema compatibility, loved-tracks DAO, track-stats DAO, and Room
+database migrations now all have automated tests. CI runs them on every
+pull request. A future dependency upgrade or refactor that breaks any of
+these will be caught before merge.
+
+### Other changes
+
+- **HTTP engine: CIO → OkHttp.** Besides fixing TLS, OkHttp properly
+  enforces the app's `network_security_config.xml` (HTTPS-only, system
+  CAs only) — the old CIO engine was bypassing those rules entirely.
+- **Dead domain removed** from network security config (`music.163.com`,
+  the NetEase service removed in v1.5.8).
+- **CI now runs instrumented tests** on a virtual Pixel 6 device, so
+  database migrations and DAO queries are verified in an Android
+  environment, not just on the desktop JVM.
+
 ## 1.5.8 — Privacy tightening
 
 - Network lookups now **off by default** (opt in via Settings → Privacy).
