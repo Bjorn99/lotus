@@ -35,7 +35,7 @@ import com.dn0ne.player.app.data.repository.TrackRepositoryImpl
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -113,7 +113,7 @@ val playerModule = module {
     }
 
     single<HttpClient> {
-        HttpClient(CIO) {
+        HttpClient(OkHttp) {
             // Strict redirect policy: don't auto-follow. A poisoned DNS
             // response or a misbehaving upstream that returns a 30x can
             // divert the request anywhere; we'd rather see that as an error
