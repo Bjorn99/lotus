@@ -62,6 +62,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDirs += file("$projectDir/schemas")
+        }
+    }
+
     androidComponents {
         onVariants { variant ->
             variant.outputs.forEach { output ->

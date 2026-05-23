@@ -86,10 +86,9 @@ class TrackStatsDaoTest {
         dao.addListenedMs("content://song/1", ms = 0L)
         dao.addListenedMs("content://song/1", ms = -1L)
 
+        // The guard returns before insertIfMissing, so no row is created at all
         val row = dao.getByUri("content://song/1")
-        // insertIfMissing is called but no ms is added — row exists with defaults
-        assertNotNull(row)
-        assertEquals(0L, row!!.totalListeningMs)
+        assertNull(row)
     }
 
     @Test
