@@ -26,12 +26,7 @@ import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
-import com.dn0ne.player.app.data.repository.RoomLovedTracksRepository
-import com.dn0ne.player.app.data.repository.RoomLyricsRepository
-import com.dn0ne.player.app.data.repository.RoomPlaylistRepository
-import com.dn0ne.player.app.data.repository.RoomTrackStatsRepository
 import com.dn0ne.player.app.data.repository.TrackRepository
-import com.dn0ne.player.app.data.repository.TrackRepositoryImpl
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
@@ -99,8 +94,8 @@ internal val MIGRATION_2_3 = object : Migration(2, 3) {
 
 val playerModule = module {
 
-    single<TrackRepository> {
-        TrackRepositoryImpl(
+    single {
+        TrackRepository(
             context = androidContext(),
             settings = get()
         )
@@ -193,20 +188,20 @@ val playerModule = module {
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
     single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
 
-    single<LyricsRepository> {
-        RoomLyricsRepository(dao = get())
+    single {
+        LyricsRepository(dao = get())
     }
 
-    single<PlaylistRepository> {
-        RoomPlaylistRepository(dao = get())
+    single {
+        PlaylistRepository(dao = get())
     }
 
-    single<LovedTracksRepository> {
-        RoomLovedTracksRepository(dao = get())
+    single {
+        LovedTracksRepository(dao = get())
     }
 
-    single<TrackStatsRepository> {
-        RoomTrackStatsRepository(dao = get())
+    single {
+        TrackStatsRepository(dao = get())
     }
 
     single<BackupManager> {
