@@ -94,26 +94,6 @@ class MusicScanner(
                         )
                     )
                 )
-            } catch (e: java.lang.Exception) {
-                if (!showMessages) return@withContext
-                SnackbarController.sendEvent(
-                    SnackbarEvent(
-                        message = R.string.failed_to_refresh,
-                        action = SnackbarAction(
-                            name = R.string.copy_error,
-                            action = {
-                                val clipboardManager =
-                                    context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-                                val clip =
-                                    ClipData.newPlainText(
-                                        null,
-                                        e.message + "\n" + e.stackTrace.joinToString("\n")
-                                    )
-                                clipboardManager?.setPrimaryClip(clip)
-                            }
-                        )
-                    )
-                )
             }
             onComplete()
         }
@@ -148,22 +128,6 @@ class MusicScanner(
                                         null,
                                         e.message + "\n" + e.stackTrace.joinToString("\n")
                                     )
-                                clipboardManager?.setPrimaryClip(clip)
-                            }
-                        )
-                    )
-                )
-            } catch (e: java.lang.Exception) {
-                SnackbarController.sendEvent(
-                    SnackbarEvent(
-                        message = R.string.failed_to_scan,
-                        action = SnackbarAction(
-                            name = R.string.copy_error,
-                            action = {
-                                val clipboardManager =
-                                    context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-                                val clip =
-                                    ClipData.newPlainText(null, e.stackTrace.joinToString("\n"))
                                 clipboardManager?.setPrimaryClip(clip)
                             }
                         )

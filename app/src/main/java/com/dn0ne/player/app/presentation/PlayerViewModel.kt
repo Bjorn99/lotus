@@ -439,7 +439,32 @@ class PlayerViewModel(
     }
 
     fun onEvent(event: PlayerScreenEvent) {
+        when (event) {
+            is OnTrackClick, is OnPauseClick, is OnPlayClick, is OnSeekToNextClick,
+            is OnSeekToPreviousClick, is OnSeekTo, is OnResetPlayback,
+            is OnPlaybackModeClick, is OnPlayerExpandedChange, is OnLyricsSheetExpandedChange,
+            is OnRemoveFromQueueClick, is OnReorderingQueue, is OnPlayNextClick,
+            is OnAddToQueueClick -> handlePlaybackEvent(event)
 
+            is OnViewTrackInfoClick, is OnGoToAlbumClick, is OnGoToArtistClick,
+            is OnCloseTrackInfoSheetClick, is OnAcceptingRisksOfMetadataEditing,
+            is OnMatchDurationWhenSearchMetadataClick, is OnSearchInfo,
+            is OnMetadataSearchResultPick, is OnOverwriteMetadataClick,
+            is OnRestoreCoverArtClick, is OnConfirmMetadataEditClick -> handleTrackInfoEvent(event)
+
+            is OnPlaylistSelection, is OnTrackSortChange, is OnPlaylistSortChange,
+            is OnCreatePlaylistClick, is OnRenamePlaylistClick, is OnDeletePlaylistClick,
+            is OnAddToPlaylist, is OnRemoveFromPlaylist, is OnPlaylistReorder -> handlePlaylistEvent(event)
+
+            is OnLyricsClick, is OnLyricsControlClick, is OnDeleteLyricsClick,
+            is OnCopyLyricsFromTagClick, is OnWriteLyricsToTagClick,
+            is OnFetchLyricsFromRemoteClick, is OnPublishLyricsOnRemoteClick -> handleLyricsEvent(event)
+
+            is OnSettingsClick, is OnCloseSettingsClick, is OnScanFoldersClick -> handleSettingsEvent(event)
+        }
+    }
+
+    private fun handlePlaybackEvent(event: PlayerScreenEvent) {
         when (event) {
             is OnTrackClick -> {
                 player?.let { player ->
@@ -575,10 +600,6 @@ class PlayerViewModel(
                         isLyricsSheetExpanded = event.isExpanded
                     )
                 }
-            }
-
-            OnLyricsClick -> {
-                loadLyrics()
             }
 
             is OnRemoveFromQueueClick -> {
@@ -762,6 +783,12 @@ class PlayerViewModel(
                 }
             }
 
+            else -> {}
+        }
+    }
+
+    private fun handleTrackInfoEvent(event: PlayerScreenEvent) {
+        when (event) {
             is OnViewTrackInfoClick -> {
                 _trackInfoSheetState.update {
                     it.copy(
@@ -1031,6 +1058,12 @@ class PlayerViewModel(
                 }
             }
 
+            else -> {}
+        }
+    }
+
+    private fun handlePlaylistEvent(event: PlayerScreenEvent) {
+        when (event) {
             is OnPlaylistSelection -> {
                 _selectedPlaylist.update {
                     event.playlist
@@ -1145,28 +1178,14 @@ class PlayerViewModel(
                 }
             }
 
-            OnSettingsClick -> {
-                _settingsSheetState.update {
-                    it.copy(
-                        isShown = true
-                    )
-                }
-            }
+            else -> {}
+        }
+    }
 
-            OnCloseSettingsClick -> {
-                _settingsSheetState.update {
-                    it.copy(
-                        isShown = false
-                    )
-                }
-            }
-
-            OnScanFoldersClick -> {
-                _settingsSheetState.update {
-                    it.copy(
-                        foldersWithAudio = trackRepository.getFoldersWithAudio()
-                    )
-                }
+    private fun handleLyricsEvent(event: PlayerScreenEvent) {
+        when (event) {
+            OnLyricsClick -> {
+                loadLyrics()
             }
 
             OnLyricsControlClick -> {
@@ -1363,6 +1382,38 @@ class PlayerViewModel(
                     }
                 }
             }
+
+            else -> {}
+        }
+    }
+
+    private fun handleSettingsEvent(event: PlayerScreenEvent) {
+        when (event) {
+            OnSettingsClick -> {
+                _settingsSheetState.update {
+                    it.copy(
+                        isShown = true
+                    )
+                }
+            }
+
+            OnCloseSettingsClick -> {
+                _settingsSheetState.update {
+                    it.copy(
+                        isShown = false
+                    )
+                }
+            }
+
+            OnScanFoldersClick -> {
+                _settingsSheetState.update {
+                    it.copy(
+                        foldersWithAudio = trackRepository.getFoldersWithAudio()
+                    )
+                }
+            }
+
+            else -> {}
         }
     }
 
