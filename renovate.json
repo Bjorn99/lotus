@@ -97,21 +97,23 @@
         "com.android.library",
         "com.android.tools.build:gradle",
         "org.jetbrains.kotlin:**",
+        "org.jetbrains.kotlinx:**",
         "org.jetbrains.kotlin.android",
         "org.jetbrains.kotlin.plugin.compose",
         "org.jetbrains.kotlin.plugin.serialization",
         "com.google.devtools.ksp",
-        "com.google.devtools.ksp:**"
+        "com.google.devtools.ksp:**",
+        "io.insert-koin:**"
       ],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
     },
     {
-      "description": "coil 3.4.0+ transitively pulls kotlin-stdlib 2.3 (and okio compiled with Kotlin 2.2), both incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
+      "description": "coil 3.1.0+ transitively pulls kotlin-stdlib 2.1+, incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
       "matchPackageNames": [
         "io.coil-kt.coil3:**"
       ],
-      "allowedVersions": "<3.4.0"
+      "allowedVersions": "<3.1.0"
     },
     {
       "description": "Detekt and ktlint can move on their own — they're CI-only and breakage is loud.",
