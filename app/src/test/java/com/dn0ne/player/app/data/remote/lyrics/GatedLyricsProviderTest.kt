@@ -58,9 +58,20 @@ class GatedLyricsProviderTest {
     }
 
     @Test
-    fun `postLyrics always delegates regardless of gate`() = runBlocking {
+    fun `disabled gate returns NotFound for postLyrics without calling delegate`() = runBlocking {
         val delegate = FakeLyricsProvider()
         val gated = GatedLyricsProvider(delegate, isEnabled = { false })
+
+        val result = gated.postLyrics(dummyTrack, Lyrics(uri = "test"))
+
+        assertTrue(result is Result.Error)
+        assertEquals(DataError.Network.NotFound, (result as Result.Error).error)
+    }
+
+    @Test
+    fun `enabled gate calls delegate postLyrics and passes result through`() = runBlocking {
+        val delegate = FakeLyricsProvider()
+        val gated = GatedLyricsProvider(delegate, isEnabled = { true })
 
         val result = gated.postLyrics(dummyTrack, Lyrics(uri = "test"))
 
