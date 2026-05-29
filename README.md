@@ -86,7 +86,8 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   **Pure Shuffle** is mathematically unbiased Fisher-Yates: every permutation
   equally likely, no history, no weighting. **Smart Shuffle** generates five
   random permutations, scores each against a penalty function that penalizes
-  back-to-back tracks from the same artist (weight 10) or album (weight 3),
+  back-to-back tracks from the same artist (weight 10), or if the artists
+  differ but the albums match (weight 3),
   and plays the cleanest one. No ML, no network, no persistent listening
   history — all on-device, works fully offline. The approach adapts Monte
   Carlo sampling patterns from computational biology (MCMC for constrained
