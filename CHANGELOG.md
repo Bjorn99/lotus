@@ -8,6 +8,15 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.6.0 — Privacy gate fix
+
+- **Fixed: publish-lyrics bypassed the network toggle.** When network
+  lookups were turned off in Settings → Privacy, the app correctly
+  blocked lyrics lookups but still allowed publishing lyrics to LRCLIB.
+  Now the publish path is gated the same way — with network off, no
+  outbound traffic of any kind reaches LRCLIB. The in-app privacy
+  disclosure has been updated to describe both paths.
+
 ## 1.5.9 — Smart shuffle, lyrics fixes, and test safety net
 
 Three layered bugs in lyrics fetching are fixed, a new Smart Shuffle

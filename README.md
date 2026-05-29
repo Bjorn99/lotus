@@ -12,7 +12,7 @@ This is a community continuation of [Lotus](https://github.com/dn0ne/lotus) by
 **[dn0ne](https://github.com/dn0ne)**, who built the original app. All design,
 branding, and prior work are theirs — huge thanks. Upstream is no longer
 actively maintained, so this fork picks up bug fixes, stability work, and
-small features while keeping the app true to its original spirit.
+new features while keeping the app true to its original spirit.
 
 - Upstream repository: https://github.com/dn0ne/lotus
 - Upstream license: GPLv3 (preserved)
@@ -38,11 +38,18 @@ an issue — we'll respect your wishes.
 </div>
 
 ## Features
-- Enjoy your favorite music in a variety of formats, including MP3, FLAC, OGG, WAV, and more
-- Easily browse tracks, albums, artists, and genres, and create custom playlists
-- Enhance your listening experience with synchronized lyrics from [LRCLIB](https://lrclib.net/)
-- Manually update track details or fetch accurate info from [MusicBrainz](https://musicbrainz.org/)
-- Designed with [Material You](https://m3.material.io/) and supports dynamic color palettes
+- Play MP3, FLAC, OGG, WAV, and more
+- Browse tracks, albums, artists, genres, and custom playlists
+- **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation)
+- Synchronized lyrics from [LRCLIB](https://lrclib.net/), plus publish your own
+- Manually edit track details or fetch metadata from [MusicBrainz](https://musicbrainz.org/)
+- **Global library search** across tracks, albums, artists, genres, and playlists
+- **Export playlists to M3U** for use in other players
+- **Smart playlists** — Recently Added and Random Mix, auto-generated
+- **Listening stats** — top played, top listened, recently played, per-artist breakdowns
+- **Share track** — send any audio file via the Android share sheet
+- **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
+- Material You dynamic color palettes
 
 ## What this fork adds (vs upstream dn0ne/lotus)
 
@@ -79,6 +86,10 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   Kotlin analysers (detekt + ktlint) run on every PR in "report-only"
   mode. Findings surface as downloadable HTML reports without gating the
   build, so the backlog can be burned down deliberately.
+- **Test safety net** — 25+ unit tests covering shuffle logic, lyrics
+  gating, provider chains, redirect validation, response-size caps, Room
+  migrations, loved-tracks DAO, track-stats DAO, and backup schema
+  compatibility. CI runs the full suite on every push.
 
 ### Features
 
@@ -99,6 +110,10 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   sends the current track to any app via Android's share sheet (audio
   file + title subject line). Works from the track list and from the
   now-playing sheet.
+- **Publish lyrics to LRCLIB** — if a track has no lyrics on LRCLIB, you
+  can publish yours from the lyrics control sheet. The app solves a
+  proof-of-work challenge, then posts synced or plain lyrics. Gated by the
+  same network toggle as lookups — off means no outbound traffic at all.
 - **Global library search** — a magnifying-globe icon in the top bar
   opens a single search field that queries across tracks, albums,
   artists, genres, and playlists at once. Results are grouped by
@@ -126,9 +141,10 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
 
 ### Privacy and security
 
-- **Network off by default** — all outbound calls (lyrics, cover art,
-  metadata) start disabled. Opt in via Settings → Privacy. When off, the
-  app uses only what's already on disk.
+- **Network off by default** — all outbound calls (lyrics lookup, lyrics
+  publish, cover art, metadata) start disabled. Opt in via Settings →
+  Privacy. When off, the app uses only what's already on disk — no traffic
+  of any kind leaves the device.
 - **HTTPS-only network policy** — release builds reject cleartext HTTP,
   ignore user-installed CAs, and only talk to LRCLIB, MusicBrainz,
   and CoverArtArchive. Anything else fails closed.
@@ -160,9 +176,9 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
   API calls identifies this fork, so rate-limit or abuse reports reach
   us rather than the upstream author.
 - **Zero telemetry, zero analytics, no server** — the only network
-  calls are the user-initiated lyrics and metadata lookups described
-  above, and all of them can be disabled. No crash reporting SDKs, no
-  analytics, no phone-home.
+  calls are the user-initiated lyrics lookup, lyrics publish, and
+  metadata lookups described above, and all of them can be disabled.
+  No crash reporting SDKs, no analytics, no phone-home.
 
 ## Download
 
@@ -235,7 +251,12 @@ debug keystore with a visible warning — **do not distribute those APKs**.
 
 Public releases are built and published by
 [`.github/workflows/release.yml`](.github/workflows/release.yml) whenever a
-`v*` tag is pushed. One-time setup:
+`v*` tag is pushed. The tag must match the committed `versionName` exactly
+(e.g. `v1.6.0-community` ↔ `versionName = "1.6.0-community"`). The workflow
+also extracts release notes from CHANGELOG.md — a `## 1.6.0` section must
+exist at the tagged commit or the workflow fails before building.
+
+One-time setup:
 
 1. Generate a release keystore (keep the file off GitHub):
 
@@ -255,18 +276,19 @@ Public releases are built and published by
    | `LOTUS_KEY_ALIAS` | key alias (`lotus` above) |
    | `LOTUS_KEY_PASSWORD` | key password |
 
-3. Bump `versionCode` / `versionName` in `app/build.gradle.kts`, commit, and
-   tag:
+3. Bump `versionCode` / `versionName` in `app/build.gradle.kts`, add a
+   `## X.Y.Z` section to `CHANGELOG.md` for the version **without** the
+   `-community` suffix, commit, and tag:
 
    ```bash
-   git tag -a v1.2.0 -m "Lotus 1.2.0"
-   git push origin v1.2.0
+   git tag -a v1.6.0-community -m "Lotus 1.6.0"
+   git push origin v1.6.0-community
    ```
 
 The workflow runs unit tests, assembles per-ABI + universal APKs, verifies
 they are signed with the release key, publishes them to a new GitHub Release
-with autogenerated notes, and attaches a `SHA256SUMS.txt` for verification.
-The decoded keystore is scrubbed from the runner after the job.
+with notes extracted from CHANGELOG.md, and attaches a `SHA256SUMS.txt` for
+verification. The decoded keystore is scrubbed from the runner after the job.
 
 ## Credits
 Some UI elements are inspired by [Vanilla](https://github.com/vanilla-music/vanilla)
