@@ -293,7 +293,7 @@
     <string name="privacy_what_leaves">What leaves your device</string>
     <string name="privacy_what_stays">What stays on your device</string>
     <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
-    <string name="privacy_lrclib_body">Sent: track title, artist, album if known, and duration. Used to look up matching synced or plain lyrics. Sent only when you open the lyrics view for a track that doesn\'t have lyrics cached.</string>
+    <string name="privacy_lrclib_body">Sent: track title, artist, album if known, and duration. For lookup: sent when you open the lyrics view for a track that doesn\'t have lyrics cached. For publish: sent when you explicitly tap \"Publish on LRCLIB\" on the lyrics control sheet. Neither path is active when network lookups are turned off.</string>
     <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
     <string name="privacy_musicbrainz_body">Sent: the search query you type, plus the track\'s duration. Used to find a matching release with cover art and metadata. Sent only when you tap Search on the Track info → Search screen — never automatically.</string>
     <string name="privacy_local_title">Local data</string>

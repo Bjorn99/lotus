@@ -18,5 +18,6 @@ class GatedLyricsProvider(
     override suspend fun postLyrics(
         track: Track,
         lyrics: Lyrics,
-    ): Result<Unit, DataError.Network> = delegate.postLyrics(track, lyrics)
+    ): Result<Unit, DataError.Network> =
+        if (isEnabled()) delegate.postLyrics(track, lyrics) else Result.Error(DataError.Network.NotFound)
 }
