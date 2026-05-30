@@ -195,7 +195,7 @@ class PlayerViewModel(
         initialValue = emptyList()
     )
     val artistPlaylists = _trackList.map {
-        it.groupBy { it.artist }.entries.map {
+        it.groupBy { it.albumArtist?.takeIf { it.isNotBlank() } ?: it.artist }.entries.map {
             Playlist(
                 name = it.key,
                 trackList = it.value
@@ -815,8 +815,10 @@ class PlayerViewModel(
 
             is OnGoToArtistClick -> {
                 _selectedPlaylist.update {
+                    val artistKey = event.track.albumArtist?.takeIf { it.isNotBlank() }
+                        ?: event.track.artist
                     artistPlaylists.value.fastFirstOrNull {
-                        it.name == event.track.artist
+                        it.name == artistKey
                     }
                 }
             }
@@ -1509,7 +1511,7 @@ class PlayerViewModel(
                     val order = shuffleEngine.generateOrder(
                         trackCount = tracks.size,
                         mode = playbackMode,
-                        artistForIndex = { tracks[it].artist ?: "" },
+                        artistForIndex = { tracks[it].albumArtist?.takeIf { it.isNotBlank() } ?: (tracks[it].artist ?: "") },
                         albumForIndex = { tracks[it].album ?: "" },
                         previousLoopIndices = previousIndices,
                     )
@@ -1533,7 +1535,7 @@ class PlayerViewModel(
         val order = shuffleEngine.generateOrder(
             trackCount = tracks.size,
             mode = mode,
-            artistForIndex = { tracks[it].artist ?: "" },
+            artistForIndex = { tracks[it].albumArtist?.takeIf { it.isNotBlank() } ?: (tracks[it].artist ?: "") },
             albumForIndex = { tracks[it].album ?: "" },
             previousLoopIndices = previousIndices,
         )

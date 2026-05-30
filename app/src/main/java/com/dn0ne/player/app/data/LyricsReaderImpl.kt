@@ -3,6 +3,7 @@ package com.dn0ne.player.app.data
 import android.content.Context
 import android.util.Log
 import com.dn0ne.player.app.domain.lyrics.Lyrics
+import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
@@ -31,12 +32,21 @@ class LyricsReaderImpl(private val context: Context) : LyricsReader {
 
             val lyricsText = tag.getFirst(FieldKey.LYRICS)
             val lyrics = if (lyricsText?.isNotBlank() == true) {
-                Lyrics(
-                    uri = track.uri.toString(),
-                    plain = lyricsText.split('\n'),
-                    synced = null,
-                    areFromRemote = false
-                )
+                try {
+                    val syncedLyrics = lyricsText.toSyncedLyrics()
+                    Lyrics(
+                        uri = track.uri.toString(),
+                        synced = syncedLyrics,
+                        plain = syncedLyrics.map { it.second },
+                        areFromRemote = false
+                    )
+                } catch (_: IllegalArgumentException) {
+                    Lyrics(
+                        uri = track.uri.toString(),
+                        plain = lyricsText.split('\n'),
+                        areFromRemote = false
+                    )
+                }
             } else {
                 null
             }
