@@ -145,7 +145,7 @@ fun LyricsSheet(
 
         if (showSyncedLyrics == true) {
             LaunchedEffect(Unit) {
-                val index = lyrics?.synced?.indexOfFirst { playbackState.position < it.first } ?: -1
+                val index = lyrics?.synced?.indexOfLast { it.first <= playbackState.position } ?: -1
                 if (index >= 0) {
                     listState.animateScrollToItem(
                         index = index,
