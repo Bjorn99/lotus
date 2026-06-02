@@ -69,41 +69,32 @@
     },
     {
       "description": "AGP and Kotlin move together. Kotlin major/minor changes usually require an AGP bump and vice versa; bundling avoids two PRs that have to land in lockstep.",
-      "matchPackageNames": [
+      "matchDepNames": [
         "com.android.application",
-        "com.android.library",
         "com.android.tools.build:gradle",
-        "org.jetbrains.kotlin:**",
-        "org.jetbrains.kotlin.android",
-        "org.jetbrains.kotlin.plugin.compose",
-        "org.jetbrains.kotlin.plugin.serialization"
-      ],
-      "groupName": "agp + kotlin",
-      "groupSlug": "agp-kotlin"
-    },
-    {
-      "description": "KSP versions are pinned to a specific Kotlin version (e.g. 2.0.20-1.0.25). Group with the kotlin/agp PR so the two land together — KSP without a matching kotlin will fail to load.",
-      "matchPackageNames": [
-        "com.google.devtools.ksp",
-        "com.google.devtools.ksp:**"
-      ],
-      "groupName": "agp + kotlin",
-      "groupSlug": "agp-kotlin"
-    },
-    {
-      "description": "Hold the AGP + Kotlin + KSP group on minor and major bumps while we're on Kotlin 2.0.20. Bumping any of these past the current minor pulls a kotlin-stdlib whose binary metadata kotlinc 2.0 cannot read, so the build dies before it even reaches our code. Patches still flow. When we plan a coordinated Kotlin upgrade (Gradle wrapper + AGP + Kotlin + KSP + a sweep of kotlin-coupled libs), remove this rule.",
-      "matchPackageNames": [
-        "com.android.application",
-        "com.android.library",
-        "com.android.tools.build:gradle",
-        "org.jetbrains.kotlin:**",
-        "org.jetbrains.kotlinx:**",
         "org.jetbrains.kotlin.android",
         "org.jetbrains.kotlin.plugin.compose",
         "org.jetbrains.kotlin.plugin.serialization",
+        "com.google.devtools.ksp"
+      ],
+      "groupName": "agp + kotlin",
+      "groupSlug": "agp-kotlin"
+    },
+    {
+      "description": "Hold the AGP + Kotlin + KSP group on minor and major bumps while we're on Kotlin 2.0.20. Bumping any of these past the current minor pulls a kotlin-stdlib whose binary metadata kotlinc 2.0 cannot read, so the build dies before it even reaches our code. Patches still flow. When we plan a coordinated Kotlin upgrade (Gradle wrapper + AGP + Kotlin + KSP + a sweep of kotlin-coupled libs), remove this rule. matchDepNames is used because matchPackageNames does not catch version-catalog refs like the 'kotlin' key in libs.versions.toml.",
+      "matchDepNames": [
+        "com.android.application",
+        "com.android.tools.build:gradle",
+        "org.jetbrains.kotlin.android",
+        "org.jetbrains.kotlin.plugin.compose",
+        "org.jetbrains.kotlin.plugin.serialization",
+        "org.jetbrains.kotlin:kotlin-stdlib",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json",
         "com.google.devtools.ksp",
-        "com.google.devtools.ksp:**",
-        "io.insert-koin:**"
+        "io.insert-koin:koin-bom",
+        "io.insert-koin:koin-androidx-compose",
+        "io.insert-koin:koin-core",
+        "io.insert-koin:koin-android"
       ],
       "matchUpdateTypes": ["major", "minor"],
       "enabled": false
