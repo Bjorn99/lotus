@@ -31,7 +31,7 @@ class MetadataWriterImpl(
 ) : MetadataWriter {
     private val logTag = "Metadata Writer"
 
-    override val unsupportedArtworkEditFormats: List<String>
+    override val unsupportedWriteFormats: List<String>
         get() = listOf("flac", "ogg", "opus")
 
     override fun writeMetadata(

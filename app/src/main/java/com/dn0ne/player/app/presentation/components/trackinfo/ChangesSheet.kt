@@ -58,6 +58,7 @@ import com.dn0ne.player.app.presentation.components.NoteCard
 fun ChangesSheet(
     track: Track,
     state: ChangesSheetState,
+    isMetadataWritable: Boolean,
     onBackClick: () -> Unit,
     onOverwriteClick: (Metadata) -> Unit,
     modifier: Modifier = Modifier
@@ -242,8 +243,14 @@ fun ChangesSheet(
 
         FloatingActionButton(
             onClick = {
-                onOverwriteClick(metadataToOverwrite)
+                if (isMetadataWritable) {
+                    onOverwriteClick(metadataToOverwrite)
+                }
             },
+            containerColor = if (isMetadataWritable)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .safeDrawingPadding()
@@ -256,12 +263,25 @@ fun ChangesSheet(
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Edit,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = if (isMetadataWritable)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(text = context.resources.getString(R.string.overwrite))
+                Text(
+                    text = if (isMetadataWritable)
+                        context.resources.getString(R.string.overwrite)
+                    else
+                        context.resources.getString(R.string.format_not_supported_for_writing),
+                    color = if (isMetadataWritable)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }

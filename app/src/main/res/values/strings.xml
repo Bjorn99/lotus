@@ -159,6 +159,7 @@
     <string name="search_results_provided_by">Results provided by MusicBrainz</string>
 
     <string name="match_duration">Match duration</string>
+    <string name="format_not_supported_for_writing">This file format is not supported for metadata editing.</string>
 
     <!-- Search tips dialog -->
     <string name="got_it">Got it</string>

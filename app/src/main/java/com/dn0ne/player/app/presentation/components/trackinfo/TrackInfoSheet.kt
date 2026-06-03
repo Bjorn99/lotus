@@ -342,6 +342,7 @@ fun TrackInfoSheet(
                     ChangesSheet(
                         track = track,
                         state = state.changesSheetState,
+                        isMetadataWritable = state.isMetadataWritable,
                         onBackClick = {
                             navController.navigateUp()
                         },
@@ -361,7 +362,7 @@ fun TrackInfoSheet(
                     ManualInfoEditSheet(
                         track = track,
                         state = state.manualInfoEditSheetState,
-                        isCoverArtEditable = state.isCoverArtEditable,
+                        isMetadataWritable = state.isMetadataWritable,
                         onPickCoverArtClick = onPickCoverArtClick,
                         onRestoreCoverArtClick = onRestoreCoverArtClick,
                         onNextClick = {

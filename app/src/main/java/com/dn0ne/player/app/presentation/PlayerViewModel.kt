@@ -77,7 +77,7 @@ class PlayerViewModel(
     private val lovedTracksRepository: LovedTracksRepository,
     private val trackStatsRepository: TrackStatsRepository,
     private val backupManager: BackupManager,
-    private val unsupportedArtworkEditFormats: List<String>,
+    private val unsupportedWriteFormats: List<String>,
     val settings: Settings,
     private val musicScanner: MusicScanner,
     private val equalizerController: EqualizerController
@@ -794,7 +794,7 @@ class PlayerViewModel(
                     it.copy(
                         isShown = true,
                         track = event.track,
-                        isCoverArtEditable = event.track.format !in unsupportedArtworkEditFormats
+                        isMetadataWritable = event.track.format !in unsupportedWriteFormats
                     )
                 }
 
@@ -933,7 +933,7 @@ class PlayerViewModel(
 
             is OnMetadataSearchResultPick -> {
                 viewModelScope.launch {
-                    if (_trackInfoSheetState.value.isCoverArtEditable) {
+                    if (_trackInfoSheetState.value.isMetadataWritable) {
                         _changesSheetState.update {
                             it.copy(
                                 isLoadingArt = true
@@ -1032,15 +1032,24 @@ class PlayerViewModel(
             }
 
             is OnOverwriteMetadataClick -> {
+                val track = _trackInfoSheetState.value.track ?: return
+                if (track.format in unsupportedWriteFormats) {
+                    viewModelScope.launch {
+                        SnackbarController.sendEvent(
+                            SnackbarEvent(
+                                message = R.string.format_not_supported_for_writing
+                            )
+                        )
+                    }
+                    return
+                }
                 _manualInfoEditSheetState.update {
                     it.copy(
                         pickedCoverArtBytes = null
                     )
                 }
                 viewModelScope.launch {
-                    _trackInfoSheetState.value.track?.let { track ->
-                        _pendingMetadata.send(track to event.metadata)
-                    }
+                    _pendingMetadata.send(track to event.metadata)
                 }
             }
 

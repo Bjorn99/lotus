@@ -7,6 +7,6 @@ import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
 
 interface MetadataWriter {
-    val unsupportedArtworkEditFormats: List<String>
+    val unsupportedWriteFormats: List<String>
     fun writeMetadata(track: Track, metadata: Metadata, onSecurityError: (IntentSender) -> Unit): Result<Unit, DataError.Local>
 }
