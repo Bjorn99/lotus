@@ -32,6 +32,10 @@ class MetadataWriterImpl(
     private val logTag = "Metadata Writer"
 
     override val unsupportedWriteFormats: List<String>
+        get() = emptyList()
+
+    // jaudiotagger cover-art handling is unreliable for FLAC and OGG Vorbis.
+    val unsupportedCoverArtFormats: List<String>
         get() = listOf("flac", "ogg")
 
     override fun writeMetadata(
@@ -57,7 +61,12 @@ class MetadataWriterImpl(
                 // headers, rejecting OpusHead. Use a minimal OGG
                 // page-level editor that modifies the OpusTags
                 // (VorbisComment) packet directly.
-                OpusTagEditor.update(file, metadata)
+                try {
+                    OpusTagEditor.update(file, metadata)
+                } catch (e: Exception) {
+                    Log.w(logTag, "Failed to write OPUS tags", e)
+                    return Result.Error(DataError.Local.FailedToRead)
+                }
             } else {
                 val audioFile =
                     AudioFileIO.read(file) ?: return Result.Error(DataError.Local.FailedToRead)

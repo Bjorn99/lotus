@@ -222,38 +222,40 @@ internal object OpusTagEditor {
     }
 
     internal fun buildOggPageBytes(page: OggPage): ByteArray {
-        // Segment table: split payload into 255-byte segments
-        val numSegments = ((page.payload.size + 254) / 255).coerceAtLeast(1)
-        val segmentTable = ByteArray(numSegments)
+        // Segment table per RFC 3533: split payload into 255-byte lacing
+        // values. A 255-byte segment MUST be followed by a zero-length
+        // segment to signal end-of-packet.
+        val segmentTable = mutableListOf<Byte>()
         var remaining = page.payload.size
-        for (i in 0 until numSegments) {
-            segmentTable[i] = remaining.coerceAtMost(255).toByte()
-            remaining -= 255
+        if (remaining == 0) {
+            segmentTable.add(0)
+        } else {
+            while (remaining > 0) {
+                val len = remaining.coerceAtMost(255)
+                segmentTable.add(len.toByte())
+                remaining -= len
+                if (len == 255 && remaining == 0) {
+                    segmentTable.add(0)
+                }
+            }
         }
+        if (segmentTable.size > 255) return ByteArray(0)
 
+        val numSegments = segmentTable.size
         val headerSize = 27 + numSegments
         val totalSize = headerSize + page.payload.size
         val buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN)
 
-        // Capture pattern
         buf.put("OggS".toByteArray())
-        // Version
-        buf.put(0)
-        // Header type: BOS if page 0, normal otherwise
+        buf.put(0)                         // version
         val headerType = if (page.pageSequence == 0) 0x02 else 0x00
         buf.put(headerType.toByte())
-        // Granule position (0 for header pages)
-        buf.putLong(0)
-        // Serial number
+        buf.putLong(0)                     // granule position
         buf.putInt(page.serialNumber)
-        // Page sequence number
         buf.putInt(page.pageSequence)
-        // CRC — zeroed for calculation
-        buf.putInt(0)
-        // Number of segments
+        buf.putInt(0)                      // CRC — zeroed for calculation
         buf.put(numSegments.toByte())
-        // Segment table
-        buf.put(segmentTable)
+        for (s in segmentTable) buf.put(s)
         // Payload
         buf.put(page.payload)
 

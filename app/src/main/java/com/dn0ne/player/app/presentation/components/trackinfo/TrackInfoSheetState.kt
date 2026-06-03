@@ -6,6 +6,7 @@ data class TrackInfoSheetState(
     val isShown: Boolean = false,
     val track: Track? = null,
     val showRisksOfMetadataEditingDialog: Boolean = true,
+    val isCoverArtEditable: Boolean = true,
     val isMetadataWritable: Boolean = true,
     val infoSearchSheetState: InfoSearchSheetState = InfoSearchSheetState(),
     val changesSheetState: ChangesSheetState = ChangesSheetState(),

@@ -61,7 +61,7 @@ import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsible
 fun ManualInfoEditSheet(
     track: Track,
     state: ManualInfoEditSheetState,
-    isMetadataWritable: Boolean,
+    isCoverArtEditable: Boolean,
     onPickCoverArtClick: () -> Unit,
     onRestoreCoverArtClick: () -> Unit,
     onNextClick: (Metadata) -> Unit,
@@ -135,7 +135,7 @@ fun ManualInfoEditSheet(
         ) {
             val context = LocalContext.current
 
-            if (isMetadataWritable) {
+            if (isCoverArtEditable) {
                 AnimatedContent(
                     targetState = state.pickedCoverArtBytes,
                     label = "art fade animation",

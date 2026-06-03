@@ -362,7 +362,7 @@ fun TrackInfoSheet(
                     ManualInfoEditSheet(
                         track = track,
                         state = state.manualInfoEditSheetState,
-                        isMetadataWritable = state.isMetadataWritable,
+                        isCoverArtEditable = state.isCoverArtEditable,
                         onPickCoverArtClick = onPickCoverArtClick,
                         onRestoreCoverArtClick = onRestoreCoverArtClick,
                         onNextClick = {

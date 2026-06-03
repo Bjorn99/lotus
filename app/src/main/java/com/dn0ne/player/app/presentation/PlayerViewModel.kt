@@ -78,6 +78,7 @@ class PlayerViewModel(
     private val trackStatsRepository: TrackStatsRepository,
     private val backupManager: BackupManager,
     private val unsupportedWriteFormats: List<String>,
+    private val unsupportedCoverArtFormats: List<String>,
     val settings: Settings,
     private val musicScanner: MusicScanner,
     private val equalizerController: EqualizerController
@@ -794,7 +795,8 @@ class PlayerViewModel(
                     it.copy(
                         isShown = true,
                         track = event.track,
-                        isMetadataWritable = event.track.format !in unsupportedWriteFormats
+                        isCoverArtEditable = event.track.format !in unsupportedCoverArtFormats,
+                        isMetadataWritable = event.track.format !in unsupportedWriteFormats,
                     )
                 }
 
@@ -933,7 +935,7 @@ class PlayerViewModel(
 
             is OnMetadataSearchResultPick -> {
                 viewModelScope.launch {
-                    if (_trackInfoSheetState.value.isMetadataWritable) {
+                    if (_trackInfoSheetState.value.isCoverArtEditable) {
                         _changesSheetState.update {
                             it.copy(
                                 isLoadingArt = true
