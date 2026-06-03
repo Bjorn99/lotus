@@ -42,13 +42,7 @@ class MetadataWriterImpl(
         try {
             var file: File? = null
             context.contentResolver.openInputStream(track.uri)?.use { input ->
-                // jaudiotagger dispatches readers/writers by file extension
-                // and has no opus mapping. OPUS uses the same OGG container
-                // and VorbisComment tags as Vorbis, so the OGG reader/writer
-                // handles it correctly (the identification header is
-                // preserved byte-for-byte).
-                val ext = if (track.format == "opus") ".ogg" else ".${track.format}"
-                val temp = File.createTempFile("temp_audio", ext, context.cacheDir)
+                val temp = File.createTempFile("temp_audio", ".${track.format}", context.cacheDir)
                 FileOutputStream(temp).use { output ->
                     input.copyTo(output)
                 }
@@ -57,8 +51,13 @@ class MetadataWriterImpl(
 
             if (file == null) return Result.Error(DataError.Local.NoReadPermission)
 
+            // OPUS uses the same OGG container and VorbisComment tags as
+            // Vorbis (RFC 7845 §5.2). jaudiotagger has no .opus mapping
+            // but the OGG reader/writer handles it correctly — the
+            // identification header is preserved byte-for-byte.
+            val readAs = if (track.format == "opus") "ogg" else track.format
             val audioFile =
-                AudioFileIO.read(file) ?: return Result.Error(DataError.Local.FailedToRead)
+                AudioFileIO.readAs(file, readAs) ?: return Result.Error(DataError.Local.FailedToRead)
             val tag = audioFile.tagAndConvertOrCreateAndSetDefault
                 ?: return Result.Error(DataError.Local.FailedToRead)
 
@@ -109,7 +108,7 @@ class MetadataWriterImpl(
 
             try {
                 context.contentResolver.openOutputStream(track.uri)?.use { output ->
-                    AudioFileIO.write(audioFile)
+                    AudioFileIO.writeAs(audioFile, readAs)
                     FileInputStream(audioFile.file).use { input ->
                         input.copyTo(output)
                     }
