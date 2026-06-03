@@ -31,6 +31,16 @@ import javax.net.ssl.SSLException
 import com.dn0ne.player.R
 import com.dn0ne.player.core.util.getAppVersionName
 
+internal val MBID_REGEX =
+    Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+internal val LUCENE_SPECIAL =
+    Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^\"~*?:\\\\/])")
+internal val HAS_LUCENE_SYNTAX = Regex("\"")
+
+internal fun escapeLuceneQuery(query: String): String {
+    return query.replace(LUCENE_SPECIAL, "\\\\$1")
+}
+
 class MusicBrainzMetadataProvider(
     context: Context,
     private val client: HttpClient
@@ -45,19 +55,35 @@ class MusicBrainzMetadataProvider(
 
     override suspend fun searchMetadata(
         query: String,
-        trackDuration: Long
+        trackDuration: Long,
+        matchDuration: Boolean,
     ): Result<List<MetadataSearchResult>, DataError> {
         delay(1100)
-        val query = query + if (trackDuration > 0) {
-            " AND dur:[${trackDuration - 5000} TO ${trackDuration + 5000}]"
-        } else ""
+
+        if (MBID_REGEX.matches(query)) {
+            return lookupByMbid(query)
+        }
+
+        val escapedQuery = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
+            query
+        } else {
+            escapeLuceneQuery(query)
+        }
+
+        val finalQuery = buildString {
+            append(escapedQuery)
+            if (matchDuration && trackDuration > 0) {
+                append(" AND dur:[${trackDuration - 15000} TO ${trackDuration + 15000}]")
+            }
+        }
 
         val response = try {
             client.get(musicBrainzEndpoint) {
                 url {
                     appendPathSegments("recording")
                     parameters.append("fmt", "json")
-                    parameters.append("query", query)
+                    parameters.append("query", finalQuery)
+                    parameters.append("limit", "50")
                 }
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -122,6 +148,51 @@ class MusicBrainzMetadataProvider(
             else -> {
                 return Result.Error(DataError.Network.Unknown)
             }
+        }
+    }
+
+    private suspend fun lookupByMbid(mbid: String): Result<List<MetadataSearchResult>, DataError> {
+        val response = try {
+            client.get(musicBrainzEndpoint) {
+                url {
+                    appendPathSegments("recording", mbid)
+                    parameters.append("fmt", "json")
+                    parameters.append("inc", "artist-credits releases media")
+                }
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    append(HttpHeaders.UserAgent, userAgent)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                try {
+                    val recording: Recording = response.body()
+                    Result.Success(
+                        SearchResultDto(listOf(recording)).toMetadataSearchResultList()
+                    )
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: JsonConvertException) {
+                    Log.d(logTag, e.message, e)
+                    Result.Error(DataError.Network.ParseError)
+                } catch (e: Throwable) {
+                    Log.w(logTag, "Failed to parse MusicBrainz lookup response", e)
+                    Result.Error(DataError.Network.ParseError)
+                }
+            }
+            HttpStatusCode.BadRequest -> Result.Error(DataError.Network.BadRequest)
+            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
+            HttpStatusCode.RequestTimeout -> Result.Error(DataError.Network.RequestTimeout)
+            HttpStatusCode.InternalServerError -> Result.Error(DataError.Network.InternalServerError)
+            HttpStatusCode.ServiceUnavailable -> Result.Error(DataError.Network.ServiceUnavailable)
+            else -> Result.Error(DataError.Network.Unknown)
         }
     }
 
@@ -288,27 +359,24 @@ internal fun validateCoverArtRedirect(
 }
 
 @Serializable
-private data class SearchResultDto(
+internal data class SearchResultDto(
     val recordings: List<Recording>
 )
 
-private fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
+internal fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
     var results = mutableListOf<MetadataSearchResult>()
     recordings.fastForEach { recording ->
-        val artist = recording.artistCredit.map {
+        val artist = recording.artistCredit.ifEmpty { null }?.map {
             it.name + (it.joinphrase ?: "")
-        }.joinToString(separator = "")
+        }?.joinToString(separator = "") ?: ""
         val genres = recording.tags?.map { it.name }
 
-        recording.releases?.mapNotNull { release ->
-            val artistCredit = release.artistCredit ?: return@mapNotNull null
-            val media = release.media ?: return@mapNotNull null
-            val trackNumber = media.firstOrNull()?.track?.firstOrNull()?.number
-                ?: return@mapNotNull null
-            val albumArtist = artistCredit.map {
+        recording.releases?.forEach { release ->
+            val albumArtist = release.artistCredit?.map {
                 it.name + (it.joinphrase ?: "")
-            }.joinToString(separator = "")
-            MetadataSearchResult(
+            }?.joinToString(separator = "") ?: artist
+            val trackNumber = release.media?.firstOrNull()?.track?.firstOrNull()?.number
+            results += MetadataSearchResult(
                 id = recording.id,
                 title = recording.title,
                 artist = artist,
@@ -321,8 +389,6 @@ private fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchRes
                 description = recording.disambiguation,
                 albumDescription = release.disambiguation
             )
-        }?.let { searchResults ->
-            results += searchResults
         }
     }
 
@@ -330,7 +396,7 @@ private fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchRes
 }
 
 @Serializable
-private data class Recording(
+internal data class Recording(
     val id: String,
     val title: String,
     @SerialName("artist-credit")
@@ -343,13 +409,13 @@ private data class Recording(
 )
 
 @Serializable
-private data class Artist(
+internal data class Artist(
     val name: String,
     val joinphrase: String? = null
 )
 
 @Serializable
-private data class Release(
+internal data class Release(
     val id: String,
     val title: String,
     @SerialName("artist-credit")
@@ -359,16 +425,16 @@ private data class Release(
 )
 
 @Serializable
-private data class Media(
+internal data class Media(
     val track: List<MediaTrack>
 )
 
 @Serializable
-private data class MediaTrack(
+internal data class MediaTrack(
     val number: String? = null
 )
 
 @Serializable
-private data class Tag(
+internal data class Tag(
     val name: String
 )

@@ -927,6 +927,10 @@ fun PlayerScreen(
                     onPublishLyricsOnRemoteClick = {
                         viewModel.onEvent(PlayerScreenEvent.OnPublishLyricsOnRemoteClick)
                     },
+                    matchDurationWhenSearchMetadata = viewModel.settings.matchDurationWhenSearchMetadata,
+                    onMatchDurationWhenSearchMetadataClick = {
+                        viewModel.onEvent(PlayerScreenEvent.OnMatchDurationWhenSearchMetadataClick)
+                    },
                     modifier = Modifier
                         .fillMaxSize()
                 )

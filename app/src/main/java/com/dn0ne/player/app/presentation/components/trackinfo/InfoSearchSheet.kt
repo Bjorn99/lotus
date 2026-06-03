@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
@@ -70,6 +71,8 @@ fun InfoSearchSheet(
     onBackClick: () -> Unit,
     onSearch: (String) -> Unit,
     onSearchResultClick: (MetadataSearchResult) -> Unit,
+    matchDuration: Boolean,
+    onMatchDurationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showSearchHint by remember {
@@ -95,6 +98,8 @@ fun InfoSearchSheet(
             onHintClick = {
                 showSearchHint = true
             },
+            matchDuration = matchDuration,
+            onMatchDurationClick = onMatchDurationClick,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -144,6 +149,8 @@ fun SearchBox(
     onSearch: (String) -> Unit,
     onBackClick: () -> Unit,
     onHintClick: () -> Unit,
+    matchDuration: Boolean,
+    onMatchDurationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -204,6 +211,23 @@ fun SearchBox(
                 },
                 shape = ShapeDefaults.Medium
             ) {
+                DropdownMenuItem(
+                    text = {
+                        Text(text = context.resources.getString(R.string.match_duration))
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Check,
+                            contentDescription = null,
+                            tint = if (matchDuration) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0f)
+                        )
+                    },
+                    onClick = {
+                        onMatchDurationClick()
+                        showDropdownMenu = false
+                    }
+                )
                 DropdownMenuItem(
                     text = {
                         Text(text = context.resources.getString(R.string.search_tips))
@@ -521,6 +545,34 @@ fun SearchHintDialog(
                         .background(color = MaterialTheme.colorScheme.secondaryContainer)
                         .padding(8.dp)
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = context.resources.getString(R.string.mbid_lookup_header),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(text = context.resources.getString(R.string.mbid_lookup_explain))
+
+                Text(
+                    text = context.resources.getString(R.string.mbid_example),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clip(ShapeDefaults.Small)
+                        .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = context.resources.getString(R.string.duration_toggle_header),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(text = context.resources.getString(R.string.duration_toggle_explain))
             }
         },
         icon = {

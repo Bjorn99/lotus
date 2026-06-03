@@ -158,6 +158,8 @@
     <string name="search_menu">Info search dropdown menu</string>
     <string name="search_results_provided_by">Results provided by MusicBrainz</string>
 
+    <string name="match_duration">Match duration</string>
+
     <!-- Search tips dialog -->
     <string name="got_it">Got it</string>
     <string name="search_tips">Search tips</string>
@@ -173,6 +175,11 @@
     <string name="combine_explain_header">Combine searches</string>
     <string name="combine_explain">Use \"AND\" to connect different search terms:</string>
     <string name="combine_example">\"4:44\" AND artist:\"Jay-Z\" AND release:\"4:44\"</string>
+    <string name="mbid_lookup_header">MusicBrainz ID lookup</string>
+    <string name="mbid_lookup_explain">Paste a MusicBrainz ID (UUID) to find the exact recording, even when text search fails:</string>
+    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
+    <string name="duration_toggle_header">Duration matching</string>
+    <string name="duration_toggle_explain">When enabled, search results are filtered to tracks within ±15 seconds of your file\'s duration. Disable from the overflow menu if you can\'t find what you\'re looking for.</string>
 
     <!-- Search errors -->
     <string name="unknown_error_occurred">Unknown error occurred. Please try again.</string>

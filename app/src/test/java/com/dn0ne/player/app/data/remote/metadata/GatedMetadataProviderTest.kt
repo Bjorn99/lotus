@@ -22,6 +22,7 @@ class GatedMetadataProviderTest {
         override suspend fun searchMetadata(
             query: String,
             trackDuration: Long,
+            matchDuration: Boolean,
         ): Result<List<MetadataSearchResult>, DataError> {
             searchCallCount++
             return searchResult

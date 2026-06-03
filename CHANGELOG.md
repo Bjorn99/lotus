@@ -8,6 +8,60 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
+## 1.6.1 — MusicBrainz search, embedded lyrics, and lyric scrolling
+
+### MusicBrainz search — five fixes
+
+MusicBrainz lookup from the track info sheet was returning empty results
+for obscure artists, even when the song existed in MusicBrainz and you
+pasted its exact MusicBrainz ID. Five layered bugs were responsible.
+
+- **Fixed: duration filter was silent and always-on.** A ±5 second
+  duration filter was applied to every search even though a setting
+  existed to toggle it. The filter was never wired to anything — no UI
+  toggle was ever rendered, and the provider ignored the setting
+  completely. For small-label recordings that lack duration metadata on
+  MusicBrainz, this silently dropped every result. The filter is now off
+  by default (widened to ±15 seconds when enabled) and a "Match
+  duration" toggle is available in the search overflow menu.
+- **Fixed: MusicBrainz IDs broken.** Pasting a MusicBrainz UUID into the
+  search field returned nothing because Lucene's query parser treats
+  hyphens as NOT operators. UUIDs are now detected and routed directly
+  to MusicBrainz's recording lookup endpoint — exact match, no Lucene.
+- **Fixed: special characters in track and artist names produced empty
+  results.** Characters like `:`, `-`, `(`, `)` and others were passed
+  straight to Lucene's query parser unescaped. Plain queries are now
+  escaped automatically; quoted queries (from the tips dialog examples)
+  pass through so field syntax continues to work.
+- **Fixed: valid results silently dropped.** The response parser required
+  release track-listing data to be present, but MusicBrainz's search
+  endpoint often omits it — especially for singles and demos. Missing
+  media/track data no longer drops the result.
+- **Fixed: default 25-result limit.** MusicBrainz now returns up to 50
+  results per search, giving more headroom alongside the other fixes.
+
+### Lyrics fixes
+
+- **Fixed: embedded LRC lyrics were shown as raw text.** Files tagged
+  with LRC-format lyrics (timestamped lines like `[00:12.50]Lyric text`,
+  common in J-pop, K-pop, C-pop, and vocaloid music) were displayed as
+  raw timestamps instead of karaoke-style timed lyrics. The embedded
+  lyrics reader now parses LRC content the same way the network provider
+  does, so embedded synced lyrics highlight in time with playback.
+- **Fixed: compilation albums showed phantom artist entries.** The
+  Artists tab and artist navigation now use the Album Artist tag with
+  a fallback to Artist, so compilations don't shatter into one-entry
+  per-track artist listings.
+- **Fixed: lyric sync scrolled to the wrong line.** The lyrics sheet now
+  scrolls to the currently-synced line rather than the next one, so
+  you can read what's being sung right now.
+
+### Search tips expanded
+
+The info-search tips dialog now explains MusicBrainz ID lookup and
+duration matching, alongside the existing quote and field-syntax
+guidance.
+
 ## 1.6.0 — Privacy gate fix
 
 - **Fixed: publish-lyrics bypassed the network toggle.** When network

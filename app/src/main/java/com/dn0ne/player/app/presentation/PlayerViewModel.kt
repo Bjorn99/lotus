@@ -855,7 +855,8 @@ class PlayerViewModel(
                     val result = metadataProvider.searchMetadata(
                         query = event.query,
                         trackDuration = _trackInfoSheetState.value.track?.duration?.toLong()
-                            ?: return@launch
+                            ?: return@launch,
+                        matchDuration = settings.matchDurationWhenSearchMetadata,
                     )
                     when (result) {
                         is Result.Error -> {

@@ -14,9 +14,10 @@ class GatedMetadataProvider(
     override suspend fun searchMetadata(
         query: String,
         trackDuration: Long,
+        matchDuration: Boolean,
     ): Result<List<MetadataSearchResult>, DataError> =
         if (isEnabled()) {
-            delegate.searchMetadata(query, trackDuration)
+            delegate.searchMetadata(query, trackDuration, matchDuration)
         } else {
             Result.Error(DataError.Network.NoInternet)
         }

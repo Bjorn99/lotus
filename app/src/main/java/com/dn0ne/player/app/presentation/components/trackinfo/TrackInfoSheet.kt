@@ -76,6 +76,8 @@ fun TrackInfoSheet(
     onCopyLyricsFromTagClick: () -> Unit,
     onWriteLyricsToTagClick: () -> Unit,
     onPublishLyricsOnRemoteClick: () -> Unit,
+    matchDurationWhenSearchMetadata: Boolean,
+    onMatchDurationWhenSearchMetadataClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -325,6 +327,8 @@ fun TrackInfoSheet(
                             onSearchResultClick(it)
                             navController.navigate(TrackInfoRoutes.Changes)
                         },
+                        matchDuration = matchDurationWhenSearchMetadata,
+                        onMatchDurationClick = onMatchDurationWhenSearchMetadataClick,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

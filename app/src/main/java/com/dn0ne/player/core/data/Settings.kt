@@ -259,7 +259,7 @@ class Settings(context: Context) {
         }
 
     var matchDurationWhenSearchMetadata: Boolean
-        get() = sharedPreferences.getBoolean(matchDurationWhenSearchMetadataKey, true)
+        get() = sharedPreferences.getBoolean(matchDurationWhenSearchMetadataKey, false)
         set(value) {
             with(sharedPreferences.edit()) {
                 putBoolean(matchDurationWhenSearchMetadataKey, value)
