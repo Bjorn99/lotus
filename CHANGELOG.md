@@ -8,7 +8,7 @@ newest first. For the full picture of how this fork diverges from upstream
 Each release page on GitHub is built from the matching section below, so
 the wording is deliberately aimed at the end user.
 
-## 1.6.1 — MusicBrainz search, embedded lyrics, and lyric scrolling
+## 1.6.1 — MusicBrainz search, OPUS editing, embedded lyrics, and more
 
 ### MusicBrainz search — five fixes
 
@@ -76,11 +76,22 @@ pasted its exact MusicBrainz ID. Five layered bugs were responsible.
   `release:`, etc.) so the tips-dialog syntax works regardless of
   capitalization.
 
-### Search tips expanded
+### UI and usability improvements
 
-The info-search tips dialog now explains MusicBrainz ID lookup and
-duration matching, alongside the existing quote and field-syntax
-guidance.
+- **"Match duration" toggle added to the search overflow menu.** The
+  duration filter (which restricts MusicBrainz results to tracks within
+  ±15 seconds of your file) was previously hidden and always-on. It is
+  now off by default, and a toggle with a visible checkmark sits in the
+  three-dot menu of the info-search screen.
+- **Search tips dialog expanded.** Now covers MusicBrainz ID lookup
+  (paste a UUID to find the exact recording), duration matching (what
+  the toggle does and when to turn it off), and the existing quote and
+  field-syntax guidance (`artist:"Name"`, `release:"Title"`, combined
+  with `AND`).
+- **Overwrite button shows a disabled state for unsupported formats.**
+  If a file format can't be written to, the Changes screen now shows a
+  greyed-out "This file format is not supported for metadata editing"
+  button instead of letting you tap through to an error.
 
 ## 1.6.0 — Privacy gate fix
 
