@@ -32,7 +32,7 @@ class MetadataWriterImpl(
     private val logTag = "Metadata Writer"
 
     override val unsupportedWriteFormats: List<String>
-        get() = listOf("flac", "ogg", "opus")
+        get() = listOf("flac", "ogg")
 
     override fun writeMetadata(
         track: Track,
@@ -42,7 +42,13 @@ class MetadataWriterImpl(
         try {
             var file: File? = null
             context.contentResolver.openInputStream(track.uri)?.use { input ->
-                val temp = File.createTempFile("temp_audio", ".${track.format}", context.cacheDir)
+                // jaudiotagger dispatches readers/writers by file extension
+                // and has no opus mapping. OPUS uses the same OGG container
+                // and VorbisComment tags as Vorbis, so the OGG reader/writer
+                // handles it correctly (the identification header is
+                // preserved byte-for-byte).
+                val ext = if (track.format == "opus") ".ogg" else ".${track.format}"
+                val temp = File.createTempFile("temp_audio", ext, context.cacheDir)
                 FileOutputStream(temp).use { output ->
                     input.copyTo(output)
                 }
