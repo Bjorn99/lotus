@@ -51,65 +51,48 @@ class MetadataWriterImpl(
 
             if (file == null) return Result.Error(DataError.Local.NoReadPermission)
 
-            // OPUS uses the same OGG container and VorbisComment tags as
-            // Vorbis (RFC 7845 §5.2). jaudiotagger has no .opus mapping
-            // but the OGG reader/writer handles it correctly — the
-            // identification header is preserved byte-for-byte.
-            val readAs = if (track.format == "opus") "ogg" else track.format
-            val audioFile =
-                AudioFileIO.readAs(file, readAs) ?: return Result.Error(DataError.Local.FailedToRead)
-            val tag = audioFile.tagAndConvertOrCreateAndSetDefault
-                ?: return Result.Error(DataError.Local.FailedToRead)
+            if (track.format == "opus") {
+                // jaudiotagger 3.0.1 has no .opus mapping and its
+                // OggFileReader validates for Vorbis identification
+                // headers, rejecting OpusHead. Use a minimal OGG
+                // page-level editor that modifies the OpusTags
+                // (VorbisComment) packet directly.
+                OpusTagEditor.update(file, metadata)
+            } else {
+                val audioFile =
+                    AudioFileIO.read(file) ?: return Result.Error(DataError.Local.FailedToRead)
+                val tag = audioFile.tagAndConvertOrCreateAndSetDefault
+                    ?: return Result.Error(DataError.Local.FailedToRead)
 
-            metadata.run {
-                title?.let {
-                    tag.setField(FieldKey.TITLE, it)
+                metadata.run {
+                    title?.let { tag.setField(FieldKey.TITLE, it) }
+                    album?.let { tag.setField(FieldKey.ALBUM, it) }
+                    artist?.let { tag.setField(FieldKey.ARTIST, it) }
+                    albumArtist?.let { tag.setField(FieldKey.ALBUM_ARTIST, it) }
+                    genre?.let { tag.setField(FieldKey.GENRE, it) }
+                    year?.let { tag.setField(FieldKey.YEAR, it) }
+                    trackNumber?.let { tag.setField(FieldKey.TRACK, it) }
+
+                    coverArtBytes?.let { artBytes ->
+                        val cover = AndroidArtwork.createArtworkFromFile(file)
+                        cover.binaryData = artBytes
+                        cover.mimeType =
+                            ImageFormats.getMimeTypeForBinarySignature(artBytes)
+                        cover.pictureType = PictureTypes.DEFAULT_ID
+                        cover.description = ""
+                        tag.deleteArtworkField()
+                        tag.setField(cover)
+                    }
+
+                    lyrics?.let { tag.setField(FieldKey.LYRICS, it) }
                 }
 
-                album?.let {
-                    tag.setField(FieldKey.ALBUM, it)
-                }
-
-                artist?.let {
-                    tag.setField(FieldKey.ARTIST, it)
-                }
-
-                albumArtist?.let {
-                    tag.setField(FieldKey.ALBUM_ARTIST, it)
-                }
-
-                genre?.let {
-                    tag.setField(FieldKey.GENRE, it)
-                }
-
-                year?.let {
-                    tag.setField(FieldKey.YEAR, it)
-                }
-
-                trackNumber?.let {
-                    tag.setField(FieldKey.TRACK, it)
-                }
-
-                coverArtBytes?.let { artBytes ->
-                    val cover = AndroidArtwork.createArtworkFromFile(file)
-                    cover.binaryData = artBytes
-                    cover.mimeType =
-                        ImageFormats.getMimeTypeForBinarySignature(artBytes)
-                    cover.pictureType = PictureTypes.DEFAULT_ID
-                    cover.description = ""
-                    tag.deleteArtworkField()
-                    tag.setField(cover)
-                }
-
-                lyrics?.let {
-                    tag.setField(FieldKey.LYRICS, it)
-                }
+                AudioFileIO.write(audioFile)
             }
 
             try {
                 context.contentResolver.openOutputStream(track.uri)?.use { output ->
-                    AudioFileIO.writeAs(audioFile, readAs)
-                    FileInputStream(audioFile.file).use { input ->
+                    FileInputStream(file).use { input ->
                         input.copyTo(output)
                     }
                 }
