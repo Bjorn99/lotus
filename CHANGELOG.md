@@ -56,6 +56,26 @@ pasted its exact MusicBrainz ID. Five layered bugs were responsible.
   scrolls to the currently-synced line rather than the next one, so
   you can read what's being sung right now.
 
+### OPUS metadata editing
+
+- **Fixed: OPUS (.opus) files could not be edited.** The metadata editor
+  (jaudiotagger) has no support for the OPUS format and rejected files
+  with "No reader associated with this extension:opus." A custom OGG
+  container-level tag editor now handles OPUS files directly — it
+  modifies the OpusTags (VorbisComment) packet in-place without touching
+  the audio data. Title, album, artist, album artist, genre, year,
+  track number, and lyrics can all be written to OPUS files. Cover art
+  editing is not yet supported for OPUS.
+
+### MusicBrainz field qualifier case normalization
+
+- **Fixed: capitalized field names like `Artist:` or `Release:` were
+  treated as literal text** because MusicBrainz's Lucene field names are
+  case-sensitive. The search provider now automatically lowercases
+  recognized field qualifiers (`Artist:` → `artist:`, `Release:` →
+  `release:`, etc.) so the tips-dialog syntax works regardless of
+  capitalization.
+
 ### Search tips expanded
 
 The info-search tips dialog now explains MusicBrainz ID lookup and
