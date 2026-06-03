@@ -36,6 +36,8 @@ internal val MBID_REGEX =
 internal val LUCENE_SPECIAL =
     Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^\"~*?:\\\\/])")
 internal val HAS_LUCENE_SYNTAX = Regex("\"")
+internal val FIELD_NORMALIZE =
+    Regex("""\b(Artist|Release|Recording|Track|Dur|Tag|Alias|Arid|Reid|Rgid):""")
 
 internal fun escapeLuceneQuery(query: String): String {
     return query.replace(LUCENE_SPECIAL, "\\\\$1")
@@ -65,7 +67,7 @@ class MusicBrainzMetadataProvider(
         }
 
         val escapedQuery = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
-            query
+            query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
         } else {
             escapeLuceneQuery(query)
         }

@@ -98,6 +98,25 @@ class MusicBrainzMetadataProviderTest {
         ))
     }
 
+    // ---- FIELD_NORMALIZE ----
+
+    @Test
+    fun `capitalized field qualifiers are lowercased`() {
+        val result = "Artist:\"Alanis Morissette\" AND Release:\"Wunderkind\""
+            .replace(FIELD_NORMALIZE) { it.value.lowercase() }
+        assertEquals(
+            "artist:\"Alanis Morissette\" AND release:\"Wunderkind\"",
+            result
+        )
+    }
+
+    @Test
+    fun `already-lowercase field qualifiers are unchanged`() {
+        val result = "artist:\"Jay-Z\""
+            .replace(FIELD_NORMALIZE) { it.value.lowercase() }
+        assertEquals("artist:\"Jay-Z\"", result)
+    }
+
     // ---- toMetadataSearchResultList ----
 
     @Test
