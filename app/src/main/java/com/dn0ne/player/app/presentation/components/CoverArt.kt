@@ -24,7 +24,9 @@ import coil3.toBitmap
 fun CoverArt(
     uri: Uri,
     onCoverArtLoaded: (ImageBitmap?) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    trackUri: Uri? = null,
+    perTrackArtwork: Boolean = false,
 ) {
     Box(
         modifier = modifier
@@ -41,9 +43,14 @@ fun CoverArt(
         )
 
         val context = LocalContext.current
+        val model = if (perTrackArtwork && trackUri != null) {
+            EmbeddedArtModel(trackUri = trackUri, fallbackUri = uri)
+        } else {
+            uri
+        }
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(uri)
+                .data(model)
                 .build(),
             onSuccess = {
                 onCoverArtLoaded(it.result.image.toBitmap().asImageBitmap())

@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Contrast
@@ -389,6 +390,20 @@ fun ThemeSettings(
             isChecked = useAlbumArtColor,
             onCheckedChange = {
                 settings.updateUseAlbumArtColor(it)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        )
+
+        val perTrackArtwork = settings.perTrackArtwork
+        SettingSwitch(
+            title = context.resources.getString(R.string.per_track_artwork),
+            supportingText = context.resources.getString(R.string.per_track_artwork_explain),
+            icon = Icons.Rounded.LibraryMusic,
+            isChecked = perTrackArtwork,
+            onCheckedChange = {
+                settings.perTrackArtwork = it
             },
             modifier = Modifier
                 .fillMaxWidth()

@@ -242,7 +242,8 @@ fun PlayerSheet(
                     onPlayClick = onPlayClick,
                     onPauseClick = onPauseClick,
                     onSeekToNextClick = onSeekToNextClick,
-                    onCoverArtLoaded = onCoverArtLoaded
+                    onCoverArtLoaded = onCoverArtLoaded,
+                    perTrackArtwork = settings.perTrackArtwork,
                 )
             }
 
@@ -330,6 +331,7 @@ fun BottomPlayer(
     onPauseClick: () -> Unit,
     onSeekToNextClick: () -> Unit,
     onCoverArtLoaded: (ImageBitmap?) -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -399,6 +401,8 @@ fun BottomPlayer(
                 ) {
                     CoverArt(
                         uri = currentTrack.coverArtUri,
+                        trackUri = currentTrack.uri,
+                        perTrackArtwork = perTrackArtwork,
                         onCoverArtLoaded = onCoverArtLoaded,
                         modifier = Modifier
                             .size(48.dp)

@@ -42,6 +42,9 @@ import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.presentation.PlayerScreen
 import com.dn0ne.player.app.presentation.PlayerViewModel
+import com.dn0ne.player.app.presentation.components.EmbeddedArtFetcher
+import com.dn0ne.player.app.presentation.components.EmbeddedArtInterceptor
+import com.dn0ne.player.app.presentation.components.EmbeddedArtKeyer
 import com.dn0ne.player.app.presentation.components.settings.Theme
 import com.dn0ne.player.app.presentation.components.snackbar.ObserveAsEvents
 import com.dn0ne.player.app.presentation.components.snackbar.ScaffoldWithSnackbarEvents
@@ -74,6 +77,11 @@ class MainActivity : ComponentActivity() {
                     MemoryCache.Builder()
                         .maxSizePercent(applicationContext, 0.25)
                         .build()
+                }
+                .components {
+                    add(EmbeddedArtFetcher.Factory(applicationContext))
+                    add(EmbeddedArtKeyer())
+                    add(EmbeddedArtInterceptor())
                 }
                 .build()
         }
