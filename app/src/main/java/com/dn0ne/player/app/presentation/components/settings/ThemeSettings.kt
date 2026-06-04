@@ -39,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -396,7 +397,7 @@ fun ThemeSettings(
                 .padding(top = 8.dp)
         )
 
-        val perTrackArtwork = settings.perTrackArtwork
+        var perTrackArtwork by remember { mutableStateOf(settings.perTrackArtwork) }
         SettingSwitch(
             title = context.resources.getString(R.string.per_track_artwork),
             supportingText = context.resources.getString(R.string.per_track_artwork_explain),
@@ -404,6 +405,7 @@ fun ThemeSettings(
             isChecked = perTrackArtwork,
             onCheckedChange = {
                 settings.perTrackArtwork = it
+                perTrackArtwork = it
             },
             modifier = Modifier
                 .fillMaxWidth()
