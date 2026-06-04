@@ -7,20 +7,13 @@
   
 </div>
 
-## About this fork
-This is a community continuation of [Lotus](https://github.com/dn0ne/lotus) by
-**[dn0ne](https://github.com/dn0ne)**, who built the original app. All design,
-branding, and prior work are theirs — huge thanks. Upstream is no longer
-actively maintained, so this fork picks up bug fixes, stability work, and
-new features while keeping the app true to its original spirit.
-
-- Upstream repository: https://github.com/dn0ne/lotus
-- Upstream license: GPLv3 (preserved)
-- Application ID: `com.dn0ne.lotus.community` (so it can coexist with the
-  upstream build if you already have it installed)
-
-If you are the original author and would prefer any change here, please open
-an issue — we'll respect your wishes.
+Lotus is a clean, offline-first music player with Material You design.
+This is a community continuation of [dn0ne's original app](https://github.com/dn0ne/lotus).
+I fell in love with Lotus because of what dn0ne built — the design, the
+feel, the attention to detail. When upstream development paused, I chose
+to maintain it so the app could keep going. All design, branding, and
+prior work are theirs. Application ID:
+`com.dn0ne.lotus.community`.
 
 ## Screenshots
 
@@ -38,147 +31,39 @@ an issue — we'll respect your wishes.
 </div>
 
 ## Features
-- Play MP3, FLAC, OGG, WAV, and more
+
+- Play MP3, FLAC, OGG, OPUS, WAV, and more
 - Browse tracks, albums, artists, genres, and custom playlists
 - **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation)
+- **Per-track artwork** — display embedded cover art from individual audio files (opt-in)
 - Synchronized lyrics from [LRCLIB](https://lrclib.net/), plus publish your own
-- Manually edit track details or fetch metadata from [MusicBrainz](https://musicbrainz.org/)
+- Edit track metadata or fetch it from [MusicBrainz](https://musicbrainz.org/)
 - **Global library search** across tracks, albums, artists, genres, and playlists
-- **Export playlists to M3U** for use in other players
 - **Smart playlists** — Recently Added and Random Mix, auto-generated
-- **Listening stats** — top played, top listened, recently played, per-artist breakdowns
+- **Export playlists to M3U** for use in other players
+- **Backup and restore** — save your playlists and loved tracks to a JSON file
+- **Loved tracks** — mark tracks as loved, browse them as a playlist
+- **Sleep timer** — presets (15/30/45/60/90 min) with optional finish-current-track
 - **Share track** — send any audio file via the Android share sheet
-- **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
+- **Listening stats** — top played, top listened, recently played, per-artist breakdowns
 - Material You dynamic color palettes
+- **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
 
-## What this fork adds (vs upstream dn0ne/lotus)
+## What sets this fork apart
 
-Each item appears in the order it was introduced. Per-version notes live
-in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
+- **Room storage** — migrated from Realm to Android's official Room library, dropping ~10 MB from the APK
+- **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation), all on-device
+- **Per-track artwork** — display cover art embedded in individual audio files, with album-art fallback
+- **Improved lyrics and metadata** — multi-source fetching from LRCLIB and MusicBrainz, hardened network layer, embedded LRC parsing, plus publish your own lyrics
+- **Global library search** — single search field across tracks, albums, artists, genres, and playlists
+- **Backup and restore** — export playlists and loved tracks to JSON, restore on any device
+- **CI pipeline** — unit tests, linting (detekt + ktlint + Android lint), and signed release builds on every tag
+- **Crash logging** — uncaught exceptions written to a private log, shareable from the About page
+- **Network hardening** — HTTPS-only, zero redirects without a host allow-list, response size caps
+- **Listening stats** — play/skip counts and top charts, with a privacy toggle that stops counting and clears data
+- **25+ unit tests** covering shuffle logic, Room migrations, lyrics gating, and backup compatibility
 
-### Stability and infrastructure
-
-- **Continuous Integration pipeline** — every pull request runs unit tests,
-  builds debug + release APKs, runs Android lint + detekt + ktlint, and
-  uploads reports as artifacts. Broken code never reaches master.
-- **Signed release pipeline** — pushing a `v*` tag triggers a GitHub
-  Actions workflow that builds per-ABI + universal APKs, signs them with
-  the release keystore, verifies with `apksigner`, generates
-  `SHA256SUMS.txt`, and publishes everything to a GitHub Release.
-- **Room-only storage (was Realm)** — the upstream app used Realm (an
-  embedded mobile database that had been deprecated). v1.2.0 migrated
-  to Android's official [Room](https://developer.android.com/training/data-storage/room)
-  via a one-shot in-place migrator; v1.3.0 dropped the Realm dependency
-  and migrator entirely. Result: ~10–15 MB smaller APK per ABI, faster
-  cold start, and no deprecated SDKs in the build graph.
-- **Crash reporter** — uncaught exceptions are written to a private log
-  file instead of just killing the process. From the About page you can
-  share the most recent crash log via the Android share sheet, which
-  makes "it crashed for me" bug reports actually actionable. No network,
-  no analytics, no telemetry.
-- **Lyrics reader hardening** — the upstream reader could crash on
-  malformed files and also nuked the shared cache directory (which Coil
-  uses for album-art thumbnails) on every read. Lotus catches the
-  jaudiotagger exceptions, deletes only its own temp file, and logs
-  rather than crashing. Fewer crashes, no more surprise re-downloaded
-  artwork.
-- **Release-build lint posture flipped** — Android lint and the two
-  Kotlin analysers (detekt + ktlint) run on every PR in "report-only"
-  mode. Findings surface as downloadable HTML reports without gating the
-  build, so the backlog can be burned down deliberately.
-- **Test safety net** — 25+ unit tests covering shuffle logic, lyrics
-  gating, provider chains, redirect validation, response-size caps, Room
-  migrations, loved-tracks DAO, track-stats DAO, and backup schema
-  compatibility. CI runs the full suite on every push.
-
-### Features
-
-- **Dual shuffle mode** — two shuffle strategies for different listening styles.
-  **Pure Shuffle** is mathematically unbiased Fisher-Yates: every permutation
-  equally likely, no history, no weighting. **Smart Shuffle** generates five
-  random permutations, scores each against a penalty function that penalizes
-  back-to-back tracks from the same artist (weight 10), or if the artists
-  differ but the albums match (weight 3),
-  and plays the cleanest one. No ML, no network, no persistent listening
-  history — all on-device, works fully offline. The approach adapts Monte
-  Carlo sampling patterns from computational biology (MCMC for constrained
-  randomization in genomics; Pauws et al. 2008 penalty-function playlist
-  optimization) and mirrors Spotify's "Fewer Repeats" architecture at mobile
-  scale. Tap the playback-mode button to cycle through all four modes:
-  Repeat → Repeat One → Pure Shuffle → Smart Shuffle.
-- **Share track** — the track-dropdown menu has a "Share" entry that
-  sends the current track to any app via Android's share sheet (audio
-  file + title subject line). Works from the track list and from the
-  now-playing sheet.
-- **Publish lyrics to LRCLIB** — if a track has no lyrics on LRCLIB, you
-  can publish yours from the lyrics control sheet. The app solves a
-  proof-of-work challenge, then posts synced or plain lyrics. Gated by the
-  same network toggle as lookups — off means no outbound traffic at all.
-- **Global library search** — a magnifying-globe icon in the top bar
-  opens a single search field that queries across tracks, albums,
-  artists, genres, and playlists at once. Results are grouped by
-  category; tap anything to jump to it. The existing per-tab search
-  still works unchanged.
-- **Export playlist to M3U** — a Download icon on every playlist view
-  (user playlists plus album/artist/genre views) writes the playlist as
-  a standard `.m3u8` file to a folder you pick. Open the file in VLC,
-  PowerAmp, Musicolet, Foobar2000, or anywhere else M3U is supported.
-- **Smart playlists** — the Playlists tab now shows auto-generated
-  lists at the top: **Recently added** (files modified within the last
-  30 days) and **Random mix** (up to 100 tracks shuffled). They feel
-  like any other playlist — tap to open, play from, or export to M3U.
-- **Listening stats** — Settings → Listening stats shows your top
-  played, top listened-to, recently played, and top artists, plus a
-  summary card with total time and play / skip counts. Counts follow
-  the natural intuition: +1 play once you cross the halfway mark of
-  the track, +1 skip if you move on before that. Seeking back after
-  crossing the halfway mark doesn't undo the play. All local — the
-  same on-device database as your playlists. Backup/restore carries
-  the stats too, with monotonic merge rules so re-importing the same
-  backup is a no-op. The whole feature can be turned off via the
-  privacy toggle below — flipping off both stops new recording and
-  drops the existing rows.
-
-### Privacy and security
-
-- **Network off by default** — all outbound calls (lyrics lookup, lyrics
-  publish, cover art, metadata) start disabled. Opt in via Settings →
-  Privacy. When off, the app uses only what's already on disk — no traffic
-  of any kind leaves the device.
-- **HTTPS-only network policy** — release builds reject cleartext HTTP,
-  ignore user-installed CAs, and only talk to LRCLIB, MusicBrainz,
-  and CoverArtArchive. Anything else fails closed.
-- **No silent redirects, response size cap** — the HTTP client follows
-  zero redirects by default; the CoverArtArchive 307 to archive.org goes
-  through an explicit handler with a host allow-list. Responses with a
-  declared length over 5 MB are refused so a misbehaving server can't
-  pin memory.
-- **Backup hygiene** — Android auto-backup and device-transfer copy
-  your settings but skip the music database and crash logs, so listening
-  history doesn't follow you to a Google account.
-- **In-app privacy disclosure** — Settings → Privacy lists exactly what
-  leaves the device (and what each upstream service sees) versus what
-  stays local. No hidden network behavior.
-- **Listening-stats opt-out** — Settings → Privacy has a "Record listening
-  stats" toggle. Flipping it off means both halves: stop counting *and*
-  erase what's already been counted. On by default, but a single tap
-  drops the table so disabling doesn't leave stale rows behind.
-
-### Housekeeping
-
-- **Fork rebrand** — `applicationId` is `com.dn0ne.lotus.community`, so
-  the community build coexists with the original upstream build side-by-side
-  on the same device.
-- **In-app links point at the right place** — Repository / Feedback
-  buttons open this fork's GitHub repo and issue tracker, not the
-  upstream author's personal email.
-- **MusicBrainz / LRCLIB contact** — the User-Agent sent with those
-  API calls identifies this fork, so rate-limit or abuse reports reach
-  us rather than the upstream author.
-- **Zero telemetry, zero analytics, no server** — the only network
-  calls are the user-initiated lyrics lookup, lyrics publish, and
-  metadata lookups described above, and all of them can be disabled.
-  No crash reporting SDKs, no analytics, no phone-home.
+Full version history in [CHANGELOG.md](CHANGELOG.md).
 
 ## Download
 
@@ -186,122 +71,37 @@ in [CHANGELOG.md](CHANGELOG.md); summaries below are cumulative.
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/com.dn0ne.lotus.community/)
 
-**F-Droid is the recommended channel** for most users — auto-updates,
-signature verification, and no manual APK sideloading.
+F-Droid is the recommended channel — auto-updates, signature verification, and no manual APK sideloading.
 
-Signed APKs are also published on the
-[Bjorn99/lotus releases page](https://github.com/Bjorn99/lotus/releases/latest)
-if you prefer direct download. Each release includes per-ABI APKs plus a
-universal APK, and a `SHA256SUMS.txt` you can verify against.
-
-F-Droid and itch.io distribution details are in
-[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md).
-
-The original upstream build (different application ID) is still on
-[F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) and the
-[upstream releases page](https://github.com/dn0ne/lotus/releases/latest) —
-those are *not* produced by this fork.
+The original upstream build (different application ID) is also on
+[F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) — that is not produced by this fork.
 
 ## Support the original author
 
-This community fork exists because of the original Lotus by **dn0ne**. If
-you'd like to thank them for the underlying app, you can do so on
-[Liberapay](https://en.liberapay.com/dn0ne/donate). This fork does not
-solicit donations of its own.
+This fork exists because of [dn0ne](https://github.com/dn0ne)'s work. If
+Lotus has been useful to you, consider thanking them on
+[Liberapay](https://en.liberapay.com/dn0ne/donate).
 
 ## Build
-1. **Get the Source Code**  
-   - Clone the repository or download the source code:
-     ```bash
-     git clone https://github.com/Bjorn99/lotus.git
-     ```
 
-2. **Open project in Android Studio**  
-   - Launch Android Studio.  
-   - Select **File > Open** and navigate to the project's folder.  
-   - Click **OK** to open the project.
-
-3. **Run the project**  
-   - Wait for the project to sync and build (Gradle sync may take some time).  
-   - Ensure a device or emulator is connected.  
-   - Click the **Run** button or press `Shift + F10` to build and launch the app.  
-
-That's it! The app should now be running.
-
-## Release builds
-
-### Local signed builds
-
-For local use, create `keystore.properties` at the repo root (gitignored):
-
-```properties
-storeFile=/absolute/path/to/lotus-release.jks
-storePassword=...
-keyAlias=lotus
-keyPassword=...
-```
-
-Or set the same values as environment variables:
-`LOTUS_KEYSTORE_FILE`, `LOTUS_KEYSTORE_PASSWORD`, `LOTUS_KEY_ALIAS`, `LOTUS_KEY_PASSWORD`.
-
-If neither is configured, `assembleRelease` still works but falls back to the
-debug keystore with a visible warning — **do not distribute those APKs**.
-
-### Cutting a public release
-
-Public releases are built and published by
-[`.github/workflows/release.yml`](.github/workflows/release.yml) whenever a
-`v*` tag is pushed. The tag must match the committed `versionName` exactly
-(e.g. `v1.6.0-community` ↔ `versionName = "1.6.0-community"`). The workflow
-also extracts release notes from CHANGELOG.md — a `## 1.6.0` section must
-exist at the tagged commit or the workflow fails before building.
-
-One-time setup:
-
-1. Generate a release keystore (keep the file off GitHub):
-
+1. Clone the repository:
    ```bash
-   keytool -genkeypair -v \
-     -keystore lotus-release.jks \
-     -alias lotus \
-     -keyalg RSA -keysize 2048 -validity 10000
+   git clone https://github.com/Bjorn99/lotus.git
    ```
+2. Open the project in Android Studio.
+3. Wait for Gradle sync, then click **Run** or press `Shift + F10`.
 
-2. Add four repo secrets under **Settings → Secrets and variables → Actions**:
-
-   | Secret | Value |
-   | --- | --- |
-   | `LOTUS_KEYSTORE_BASE64` | `base64 -w0 lotus-release.jks` (the keystore file, base64-encoded) |
-   | `LOTUS_KEYSTORE_PASSWORD` | keystore password |
-   | `LOTUS_KEY_ALIAS` | key alias (`lotus` above) |
-   | `LOTUS_KEY_PASSWORD` | key password |
-
-3. Bump `versionCode` / `versionName` in `app/build.gradle.kts`, add a
-   `## X.Y.Z` section to `CHANGELOG.md` for the version **without** the
-   `-community` suffix, commit, and tag:
-
-   ```bash
-   git tag -a v1.6.0-community -m "Lotus 1.6.0"
-   git push origin v1.6.0-community
-   ```
-
-The workflow runs unit tests, assembles per-ABI + universal APKs, verifies
-they are signed with the release key, publishes them to a new GitHub Release
-with notes extracted from CHANGELOG.md, and attaches a `SHA256SUMS.txt` for
-verification. The decoded keystore is scrubbed from the runner after the job.
+Release builds are automated via CI — see [docs/RELEASING.md](docs/RELEASING.md)
+for the full process.
 
 ## Credits
-Some UI elements are inspired by [Vanilla](https://github.com/vanilla-music/vanilla)
 
-Lyrics UI is inspired by [Beautiful Lyrics](https://github.com/surfbryce/beautiful-lyrics)
+Some UI elements inspired by [Vanilla](https://github.com/vanilla-music/vanilla).
 
-[MaterialKolor](https://github.com/jordond/materialkolor)
+Lyrics UI inspired by [Beautiful Lyrics](https://github.com/surfbryce/beautiful-lyrics).
 
-[kmpalette](https://github.com/jordond/kmpalette)
-
-[Reorderable](https://github.com/Calvin-LL/Reorderable)
-
-[jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger/src/master/)
+Libraries: [MaterialKolor](https://github.com/jordond/materialkolor), [kmpalette](https://github.com/jordond/kmpalette), [Reorderable](https://github.com/Calvin-LL/Reorderable), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger/src/master/).
 
 ## License
-Lotus is licensed under [GPLv3](LICENSE.md)
+
+Lotus is licensed under [GPLv3](LICENSE.md).
