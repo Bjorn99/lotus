@@ -11,8 +11,8 @@ import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.intercept.Interceptor
 import coil3.request.ErrorResult
-import coil3.request.ImageRequest
 import coil3.request.Options
+import kotlinx.coroutines.CancellationException
 import okio.Buffer
 import okio.FileSystem
 
@@ -30,9 +30,11 @@ class EmbeddedArtFetcher(
             buffer.write(picture)
             SourceFetchResult(
                 source = ImageSource(buffer, FileSystem.SYSTEM),
-                mimeType = "image/jpeg",
+                mimeType = null,
                 dataSource = DataSource.MEMORY,
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             null
         } finally {
@@ -57,9 +59,8 @@ class EmbeddedArtInterceptor : Interceptor {
         val result = chain.proceed()
         if (result !is ErrorResult) return result
         val model = chain.request.data as? EmbeddedArtModel ?: return result
-        val fallbackRequest = ImageRequest.Builder(chain.request.context)
+        val fallbackRequest = chain.request.newBuilder()
             .data(model.fallbackUri)
-            .memoryCacheKey(chain.request.memoryCacheKey)
             .build()
         return chain.withRequest(fallbackRequest).proceed()
     }
