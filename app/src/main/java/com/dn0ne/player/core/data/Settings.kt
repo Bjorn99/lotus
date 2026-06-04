@@ -39,6 +39,8 @@ class Settings(context: Context) {
 
     private val matchDurationWhenSearchMetadataKey = "match-duration"
 
+    private val perTrackArtworkKey = "per-track-artwork"
+
     private val trackSortKey = "track-sort-key"
     private val trackSortOrderKey = "track-sort-order-key"
     private val playlistSortKey = "playlist-sort-key"
@@ -263,6 +265,15 @@ class Settings(context: Context) {
         set(value) {
             with(sharedPreferences.edit()) {
                 putBoolean(matchDurationWhenSearchMetadataKey, value)
+                apply()
+            }
+        }
+
+    var perTrackArtwork: Boolean
+        get() = sharedPreferences.getBoolean(perTrackArtworkKey, false)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putBoolean(perTrackArtworkKey, value)
                 apply()
             }
         }
