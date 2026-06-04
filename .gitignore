@@ -22,3 +22,4 @@ keystore.properties
 *.keystore
 docs/research/
 docs/superpowers/
+.worktrees/
