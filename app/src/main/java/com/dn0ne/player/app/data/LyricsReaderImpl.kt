@@ -31,24 +31,24 @@ class LyricsReaderImpl(private val context: Context) : LyricsReader {
                 ?: return Result.Error(DataError.Local.FailedToRead)
 
             val lyricsText = tag.getFirst(FieldKey.LYRICS)
-            val lyrics = if (lyricsText?.isNotBlank() == true) {
-                try {
-                    val syncedLyrics = lyricsText.toSyncedLyrics()
-                    Lyrics(
-                        uri = track.uri.toString(),
-                        synced = syncedLyrics,
-                        plain = syncedLyrics.map { it.second },
-                        areFromRemote = false
-                    )
-                } catch (_: IllegalArgumentException) {
-                    Lyrics(
-                        uri = track.uri.toString(),
-                        plain = lyricsText.split('\n'),
-                        areFromRemote = false
-                    )
-                }
-            } else {
-                null
+            if (lyricsText?.isNotBlank() != true) {
+                return Result.Error(DataError.Local.NoLyricsFound)
+            }
+
+            val lyrics = try {
+                val syncedLyrics = lyricsText.toSyncedLyrics()
+                Lyrics(
+                    uri = track.uri.toString(),
+                    synced = syncedLyrics,
+                    plain = syncedLyrics.map { it.second },
+                    areFromRemote = false
+                )
+            } catch (_: IllegalArgumentException) {
+                Lyrics(
+                    uri = track.uri.toString(),
+                    plain = lyricsText.split('\n'),
+                    areFromRemote = false
+                )
             }
 
             Result.Success(lyrics)

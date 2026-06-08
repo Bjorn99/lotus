@@ -21,6 +21,7 @@ sealed interface DataError: Error {
         NoWritePermission,
         FailedToRead,
         FailedToWrite,
+        NoLyricsFound,
         Unknown
     }
 }

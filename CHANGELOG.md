@@ -7,7 +7,7 @@ first. For the full picture of how this fork differs from upstream
 Each release page is built from the matching section below, so the
 wording is aimed at the end user.
 
-## 1.7.0 — Per-track artwork
+## 1.7.0 — Per-track artwork and lyrics fixes
 
 Lotus can now display the cover art embedded inside each audio file
 instead of the album-level cover from Android's media database. The
@@ -30,13 +30,24 @@ This matters for:
 - Audiobooks and podcasts saved as music files
 - Libraries where songs in the same album folder have different covers
 
+### Lyrics fixes
+
+- **Fixed: importing an LRC file saved in Latin-1 showed garbled text.**
+  The manual lyrics importer now detects when a file isn't valid UTF-8
+  and falls back to ISO-8859-1, so LRC files saved by older Windows
+  editors display correctly.
+- **Fixed: "Failed to read file" shown when a track simply has no lyrics.**
+  Tracks that don't carry an embedded lyrics tag now show "No lyrics
+  found for this track" instead of the misleading error message.
+
 ### Technical notes
 
-The feature uses Android's built-in `MediaMetadataRetriever` (no new
-dependencies) and Coil's Fetcher + Interceptor pipeline. Extraction
-takes ~5–30ms per track and results are memory-cached. The fallback
-path is identical to the pre-1.7 code path, so nothing changes for
-tracks without embedded art or when the toggle is off.
+The per-track artwork feature uses Android's built-in
+`MediaMetadataRetriever` (no new dependencies) and Coil's Fetcher +
+Interceptor pipeline. Extraction takes ~5–30ms per track and results
+are memory-cached. The fallback path is identical to the pre-1.7 code
+path, so nothing changes for tracks without embedded art or when the
+toggle is off.
 
 ## 1.6.1 — MusicBrainz search, OPUS editing, embedded lyrics, and more
 

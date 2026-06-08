@@ -212,6 +212,7 @@
     <string name="no_read_permission">No read permission. Please grant it or try again.</string>
     <string name="no_write_permission">No write permission. Please grant it or try again.</string>
     <string name="failed_to_read">Failed to read file. Please try again.</string>
+    <string name="no_lyrics_found">No lyrics found for this track</string>
     <string name="failed_to_write">Failed to write file. Please try again.</string>
 
     <!-- Manual editing screen -->

@@ -184,6 +184,7 @@
     <string name="no_read_permission">Немає дозволу на читання. Будь ласка, надайте його або спробуйте ще раз.</string>
     <string name="no_write_permission">Немає дозволу на запис. Будь ласка, надайте його або спробуйте ще раз.</string>
     <string name="failed_to_read">Не вдалося прочитати файл. Будь ласка, cпробуйте ще раз.</string>
+    <string name="no_lyrics_found">Текст пісні не знайдено для цього треку</string>
     <string name="failed_to_write">Не вдалося записати файл. Будь ласка, cпробуйте ще раз.</string>
 
     <!-- Manual editing screen -->

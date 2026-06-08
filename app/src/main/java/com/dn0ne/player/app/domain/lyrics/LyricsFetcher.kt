@@ -39,6 +39,7 @@ class LyricsFetcher(
                 val messageRes = when (readResult.error) {
                     DataError.Local.NoReadPermission -> R.string.no_read_permission
                     DataError.Local.FailedToRead -> R.string.failed_to_read
+                    DataError.Local.NoLyricsFound -> R.string.no_lyrics_found
                     else -> R.string.unknown_error_occurred
                 }
                 scope.launch {

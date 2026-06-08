@@ -184,6 +184,7 @@
     <string name="no_read_permission">Нет разрешения на чтение. Пожалуйста, предоставьте его или попробуйте еще раз.</string>
     <string name="no_write_permission">Нет разрешения на запись. Пожалуйста, предоставьте его или попробуйте еще раз.</string>
     <string name="failed_to_read">Не удалось прочитать файл. Пожалуйста, попробуйте еще раз.</string>
+    <string name="no_lyrics_found">Текст песни не найден для этого трека</string>
     <string name="failed_to_write">Не удалось записать файл. Пожалуйста, попробуйте еще раз.</string>
 
     <!-- Manual editing screen -->

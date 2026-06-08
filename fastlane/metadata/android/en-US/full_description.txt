@@ -1,13 +1,24 @@
 <b>Features</b>
-<ul><li>Enjoy your favorite music in a variety of formats, including MP3, FLAC, OGG, WAV, and more</li>
-<li>No telemetry, no ads</li>
-<li>M3U playlist export</li>
-<li>Global Library Search</li>
-<li>Smart Playlists</li>
-<li> Listening Stats </li>
-<li>Easily browse tracks, albums, artists, and genres, and create custom playlists</li>
-<li>Enhance your listening experience with synchronized lyrics from LRCLIB (Optional, can be disabled)</li>
-<li>Manually update track details or fetch accurate info from MusicBrainz</li>
-<li>Designed with Material You and supports dynamic color palettes</li></ul>
+<ul><li>Enjoy your music in MP3, FLAC, OGG, OPUS, WAV, M4A, and more</li>
+<li>No ads, no telemetry, no analytics — ever</li>
+<li>Network access is off by default and must be turned on in Settings</li>
+<li>Smart Shuffle — Pure (mathematically unbiased) and Smart (avoids repeating artists)</li>
+<li>Per-track embedded artwork — show the cover stored inside each file</li>
+<li>Synchronized lyrics from LRCLIB with karaoke-style timed display</li>
+<li>Manual lyrics import with automatic charset detection (UTF-8 and Latin-1)</li>
+<li>Browse tracks, albums, artists, and genres; create and manage playlists</li>
+<li>Smart Playlists — Recently Added and Random Mix, always up to date</li>
+<li>Export playlists to M3U files for use in other music apps</li>
+<li>Global search across tracks, albums, artists, genres, and playlists</li>
+<li>Loved tracks — mark favorites and browse them in one place</li>
+<li>Listening Stats — most played, most listened, recently played, top artists</li>
+<li>Backup and restore playlists and loved tracks to a JSON file</li>
+<li>Sleep timer with presets (15/30/45/60/90 min) and finish-current-track</li>
+<li>Quick Settings tile for play/pause</li>
+<li>Edit metadata tags or fetch accurate info from MusicBrainz</li>
+<li>OPUS metadata editing — title, album, artist, genre, year, track number, lyrics</li>
+<li>Share tracks via the system share sheet</li>
+<li>Crash logs saved locally — share them manually, nothing is sent automatically</li>
+<li>Designed with Material You and dynamic color palettes</li></ul>
 
 All music stays on your device. Network access is off by default and must be turned on in Settings — LRCLIB lyrics lookups and MusicBrainz metadata queries are opt-in only.

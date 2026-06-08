@@ -36,6 +36,7 @@ import coil3.memory.MemoryCache
 import coil3.request.transitionFactory
 import coil3.transition.CrossfadeTransition
 import com.dn0ne.player.app.data.MetadataWriter
+import com.dn0ne.player.app.data.decodeLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
@@ -159,7 +160,7 @@ class MainActivity : ComponentActivity() {
                 uri?.let {
                     var lyrics: String? = null
                     contentResolver.openInputStream(it)?.use { input ->
-                        lyrics = input.readBytes().toString(Charsets.UTF_8)
+                        lyrics = input.readBytes().decodeLyrics()
                     }
 
                     lyrics?.let {
@@ -493,6 +494,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        DataError.Local.NoLyricsFound,
                         DataError.Local.Unknown -> {
                             SnackbarController.sendEvent(
                                 SnackbarEvent(
