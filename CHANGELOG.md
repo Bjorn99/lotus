@@ -32,13 +32,8 @@ This matters for:
 
 ### Lyrics fixes
 
-- **Fixed: importing an LRC file saved in Latin-1 showed garbled text.**
-  The manual lyrics importer now detects when a file isn't valid UTF-8
-  and falls back to ISO-8859-1, so LRC files saved by older Windows
-  editors display correctly.
-- **Fixed: "Failed to read file" shown when a track simply has no lyrics.**
-  Tracks that don't carry an embedded lyrics tag now show "No lyrics
-  found for this track" instead of the misleading error message.
+- **Fixed: importing an LRC file saved in Latin-1 showed garbled text.** The manual lyrics importer now detects when a file isn't valid UTF-8 and falls back to ISO-8859-1, so LRC files saved by older Windows editors display correctly.
+- **Fixed: "Failed to read file" shown when a track simply has no lyrics.** Tracks that don't carry an embedded lyrics tag now show "No lyrics found for this track" instead of the misleading error message.
 
 ### Technical notes
 
