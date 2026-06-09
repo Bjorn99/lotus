@@ -32,9 +32,7 @@ The per-track artwork feature uses Android's built-in `MediaMetadataRetriever` (
 
 ### MusicBrainz search — five fixes
 
-MusicBrainz lookup from the track info sheet was returning empty results
-for obscure artists, even when the song existed in MusicBrainz and you
-pasted its exact MusicBrainz ID. Five layered bugs were responsible.
+MusicBrainz lookup from the track info sheet was returning empty results for obscure artists, even when the song existed in MusicBrainz and you pasted its exact MusicBrainz ID. Five layered bugs were responsible.
 
 - **Fixed: duration filter was silent and always-on.** A ±5 second
   duration filter was applied to every search even though a setting
