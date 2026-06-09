@@ -107,6 +107,20 @@
       "allowedVersions": "<3.1.0"
     },
     {
+      "description": "androidx.core 1.19+ ships an AAR metadata gate that rejects builds on compileSdk 36 / AGP 8.x — it requires compileSdk 37 and AGP 9.1.0. Hold until the coordinated platform bump (Kotlin + AGP + compileSdk) lands.",
+      "matchPackageNames": [
+        "androidx.core:**"
+      ],
+      "allowedVersions": "<1.19.0"
+    },
+    {
+      "description": "Room 2.8+ relies on a newer kotlinx-serialization-core API (typeParametersSerializers default impl) that our pinned kotlinx-serialization-json 1.7.3 does not provide. Loading FieldBundle$$serializer throws AbstractMethodError at build time. Lift this cap alongside the kotlinx-serialization bump in the coordinated platform upgrade.",
+      "matchPackageNames": [
+        "androidx.room:**"
+      ],
+      "allowedVersions": "<2.8.0"
+    },
+    {
       "description": "Detekt and ktlint can move on their own — they're CI-only and breakage is loud.",
       "matchPackageNames": [
         "io.gitlab.arturbosch.detekt",
