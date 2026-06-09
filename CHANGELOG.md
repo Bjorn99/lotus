@@ -1,29 +1,18 @@
 # Changelog
 
-All notable changes to Lotus (community fork) are recorded here, newest
-first. For the full picture of how this fork differs from upstream
-`dn0ne/lotus`, see README.md.
+All notable changes to Lotus (community fork) are recorded here, newest first. For the full picture of how this fork differs from upstream `dn0ne/lotus`, see README.md.
 
-Each release page is built from the matching section below, so the
-wording is aimed at the end user.
+Each release page is built from the matching section below, so the wording is aimed at the end user.
 
 ## 1.7.0 — Per-track artwork and lyrics fixes
 
-Lotus can now display the cover art embedded inside each audio file
-instead of the album-level cover from Android's media database. The
-feature is off by default — turn it on in Settings → Theme.
+Lotus can now display the cover art embedded inside each audio file instead of the album-level cover from Android's media database. The feature is off by default — turn it on in Settings → Theme.
 
 ### How it works
 
-Most audio formats (MP3, FLAC, M4A, OPUS) let you store a cover image
-inside the file itself. Until now, Lotus ignored these and showed the
-same album cover for every track in an album. That's the conventional
-default and it's fine for most libraries.
+Most audio formats (MP3, FLAC, M4A, OPUS) let you store a cover image inside the file itself. Until now, Lotus ignored these and showed the same album cover for every track in an album. That's the conventional default and it's fine for most libraries.
 
-Turning on **Per-track artwork** changes that. The player reads the
-embedded image directly from each file. If a track has no embedded art
-(or the format doesn't support it), the album cover is shown instead —
-you never see a blank square.
+Turning on **Per-track artwork** changes that. The player reads the embedded image directly from each file. If a track has no embedded art (or the format doesn't support it), the album cover is shown instead — you never see a blank square.
 
 This matters for:
 - DJ mixes and compilations where individual tracks carry custom art
@@ -37,12 +26,7 @@ This matters for:
 
 ### Technical notes
 
-The per-track artwork feature uses Android's built-in
-`MediaMetadataRetriever` (no new dependencies) and Coil's Fetcher +
-Interceptor pipeline. Extraction takes ~5–30ms per track and results
-are memory-cached. The fallback path is identical to the pre-1.7 code
-path, so nothing changes for tracks without embedded art or when the
-toggle is off.
+The per-track artwork feature uses Android's built-in `MediaMetadataRetriever` (no new dependencies) and Coil's Fetcher + Interceptor pipeline. Extraction takes ~5–30ms per track and results are memory-cached. The fallback path is identical to the pre-1.7 code path, so nothing changes for tracks without embedded art or when the toggle is off.
 
 ## 1.6.1 — MusicBrainz search, OPUS editing, embedded lyrics, and more
 
