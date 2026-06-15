@@ -21,6 +21,11 @@ The animated seek bar got a handful of behind-the-scenes improvements that make 
 
 - **Fixed: tracks with missing artist metadata were treated as the same artist.** When the media database can't supply an artist name (common with untagged files or certain formats), smart shuffle used to see those unrelated tracks as being "by the same artist" and penalized them. They're now left alone, so the shuffle order isn't thrown off by missing data.
 
+### Sorting
+
+- **Album, artist, genre, and folder tabs now sort tracks properly within each group.** Albums are ordered by track number, artists by album then track number, genres by artist then album, and folders by title. Before, tracks inside a group inherited whatever global sort was active on the tracks tab — tap an album while browsing tracks by Title and you'd get alphabetical order instead of album order.
+- **Album tabs can now be sorted by Artist and Year** in addition to the existing Title and Track Count options.
+
 ## 1.7.0 — Per-track artwork and lyrics fixes
 
 Lotus can now display the cover art embedded inside each audio file instead of the album-level cover from Android's media database. The feature is off by default — turn it on in Settings → Theme.
