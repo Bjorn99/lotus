@@ -74,12 +74,14 @@ class ShuffleEngine(private val random: Random = Random) {
         for (i in 0 until n - 1) {
             val current = order[i]
             val next = order[i + 1]
-            val sameArtist = artistForIndex(current) == artistForIndex(next)
-            if (sameArtist) {
+            val artistA = artistForIndex(current)
+            val artistB = artistForIndex(next)
+            if (artistA.isNotBlank() && artistA == artistB) {
                 penalty += ARTIST_ADJACENCY_WEIGHT
             } else {
-                val sameAlbum = albumForIndex(current) == albumForIndex(next)
-                if (sameAlbum) {
+                val albumA = albumForIndex(current)
+                val albumB = albumForIndex(next)
+                if (albumA.isNotBlank() && albumA == albumB) {
                     penalty += ALBUM_ADJACENCY_WEIGHT
                 }
             }

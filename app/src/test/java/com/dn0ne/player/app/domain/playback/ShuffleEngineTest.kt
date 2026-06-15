@@ -260,6 +260,41 @@ class ShuffleEngineTest {
         assertEquals(2, penalty)
     }
 
+    @Test
+    fun `blank artists not treated as same-artist adjacency`() {
+        val artists = artistForIndex(mapOf(0 to "", 1 to "", 2 to "", 3 to ""))
+        val albums = albumForIndex(emptyMap())
+        val engine = ShuffleEngine()
+
+        // All artists blank — no false adjacency should be penalized
+        val penalty = engine.calculatePenalty(intArrayOf(0, 1, 2, 3), artists, albums, emptySet())
+        assertEquals(0, penalty)
+    }
+
+    @Test
+    fun `mixed blank and known artists only penalize known matches`() {
+        val artists = artistForIndex(mapOf(0 to "A", 1 to "", 2 to "A", 3 to ""))
+        val albums = albumForIndex(emptyMap())
+        val engine = ShuffleEngine()
+
+        // 0:A, 1:"", 2:A, 3:"" — only (0,2) similarity exists, but they're not adjacent
+        val penalty = engine.calculatePenalty(intArrayOf(0, 1, 2, 3), artists, albums, emptySet())
+        assertEquals(0, penalty)
+    }
+
+    @Test
+    fun `adjacent blank artists not penalized`() {
+        val artists = artistForIndex(mapOf(0 to "", 1 to "", 2 to "A", 3 to "B"))
+        val albums = albumForIndex(emptyMap())
+        val engine = ShuffleEngine()
+
+        // Positions (0,1): both blank → no penalty
+        // Positions (1,2): blank vs "A" → no match
+        // Positions (2,3): "A" vs "B" → no match
+        val penalty = engine.calculatePenalty(intArrayOf(0, 1, 2, 3), artists, albums, emptySet())
+        assertEquals(0, penalty)
+    }
+
     // ---- Edge cases ----
 
     @Test
