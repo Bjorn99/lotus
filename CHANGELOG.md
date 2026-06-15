@@ -4,6 +4,23 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.7.1 — Inter font, seek bar improvements, and shuffle fix
+
+Lotus now uses the Inter font family everywhere. Inter was designed for on-screen readability, so text stays sharp whether you're browsing your library or reading synced lyrics. Nothing to configure — the font applies automatically.
+
+### Seek bar
+
+The animated seek bar got a handful of behind-the-scenes improvements that make it feel more responsive.
+
+- **Drag is smoother and no longer jumps during fast scrubs.** Three separate touch handlers spread across the bar and the handle have been consolidated into one, so the handle position stays consistent no matter where your finger lands.
+- **Tapping or dragging now moves the handle with a subtle spring motion.** Instead of teleporting to the new position, the handle snaps with a barely perceptible bounce that makes the seek bar feel physical rather than digital.
+- **The waveform stays visible when music is paused.** Before, the wave flattened into a straight line on pause and the bar looked lifeless between songs. Now it drops to a gentle ripple so the bar stays interesting even when nothing is playing.
+- **The wave animation shuts off completely when it's not shown.** If you've turned waving off in Settings, or while you're dragging the handle, the wave no longer runs invisible — no wasted CPU cycles for nothing.
+
+### Smart shuffle
+
+- **Fixed: tracks with missing artist metadata were treated as the same artist.** When the media database can't supply an artist name (common with untagged files or certain formats), smart shuffle used to see those unrelated tracks as being "by the same artist" and penalized them. They're now left alone, so the shuffle order isn't thrown off by missing data.
+
 ## 1.7.0 — Per-track artwork and lyrics fixes
 
 Lotus can now display the cover art embedded inside each audio file instead of the album-level cover from Android's media database. The feature is off by default — turn it on in Settings → Theme.
