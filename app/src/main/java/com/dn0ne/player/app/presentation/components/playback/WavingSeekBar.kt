@@ -345,14 +345,15 @@ fun FilledSeekBarSegment(
         }
     ) {
 
+        val step = (waveWidth / 6f).coerceAtLeast(2f)
         val path = Path().apply {
             moveTo(x = 0f, y = canvasHeight / 2 + waveHeight * cos(-offset / waveWidth) / 2)
-            for (i in 0..size.width.toInt()) {
-                lineTo(
-                    x = i.toFloat(),
-                    y = canvasHeight / 2 + waveHeight * cos((i.toFloat() - offset) / waveWidth) / 2
-                )
+            var x = step
+            while (x < size.width) {
+                lineTo(x, canvasHeight / 2 + waveHeight * cos((x - offset) / waveWidth) / 2)
+                x += step
             }
+            lineTo(x = size.width, y = canvasHeight / 2 + waveHeight * cos((size.width - offset) / waveWidth) / 2)
         }
 
         drawPath(
