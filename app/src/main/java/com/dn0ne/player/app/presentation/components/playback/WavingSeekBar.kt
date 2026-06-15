@@ -309,8 +309,6 @@ fun FilledSeekBarSegment(
     strokeWidth: Float = 10f,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "infinite-transition")
-
     var canvasHeight by remember {
         mutableFloatStateOf(0f)
     }
@@ -324,20 +322,19 @@ fun FilledSeekBarSegment(
         label = "wave-height"
     )
 
-    val strokeWidth by remember {
-        derivedStateOf {
-            strokeWidth
-        }
+    val offset by if (enableWaving) {
+        val transition = rememberInfiniteTransition(label = "infinite-transition")
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = (if (waveBackwards) waveWidth else -waveWidth) * 2 * PI.toFloat(),
+            animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = LinearEasing)
+            ),
+            label = "wave-offset"
+        )
+    } else {
+        remember { mutableFloatStateOf(0f) }
     }
-
-    val offset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = (if (waveBackwards) waveWidth else -waveWidth) * 2 * PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing)
-        ),
-        label = "wave-offset"
-    )
 
     Canvas(modifier = modifier
         .onGloballyPositioned {
