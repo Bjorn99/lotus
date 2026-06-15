@@ -187,7 +187,9 @@ class PlayerViewModel(
         tracks.groupBy { it.album }.entries.map { (album, albumTracks) ->
             Playlist(
                 name = album,
-                trackList = albumTracks.sortedBy { it.trackNumber?.toIntOrNull() ?: 0 }
+                trackList = albumTracks.sortedWith(
+                    compareBy<Track> { it.trackNumber?.toIntOrNull() ?: 0 }.thenBy { it.title }
+                )
             )
         }
     }.stateIn(
@@ -201,7 +203,7 @@ class PlayerViewModel(
             Playlist(
                 name = artist,
                 trackList = artistTracks.sortedWith(
-                    compareBy<Track> { it.album }.thenBy { it.trackNumber?.toIntOrNull() ?: 0 }
+                    compareBy<Track> { it.album }.thenBy { it.trackNumber?.toIntOrNull() ?: 0 }.thenBy { it.title }
                 )
             )
         }
@@ -215,7 +217,7 @@ class PlayerViewModel(
             Playlist(
                 name = genre,
                 trackList = genreTracks.sortedWith(
-                    compareBy<Track> { it.artist }.thenBy { it.album }
+                    compareBy<Track> { it.artist }.thenBy { it.album }.thenBy { it.title }
                 )
             )
         }
