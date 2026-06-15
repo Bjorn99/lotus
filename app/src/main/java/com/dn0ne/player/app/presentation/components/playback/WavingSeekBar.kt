@@ -122,6 +122,28 @@ fun WavingSeekBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            handleOffset = (if (isLtr) offset.x else barWidth - offset.x).coerceIn(0f, barWidth)
+                            handleOffsetFraction = handleOffset / barWidth
+                            onPositionChange((handleOffsetFraction * currentDuration).toLong())
+                        }
+                    )
+                }
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { isHandleInDrag = true },
+                        onDragEnd = {
+                            isHandleInDrag = false
+                            onPositionChange((handleOffsetFraction * currentDuration).toLong())
+                        },
+                    ) { _, dragAmount ->
+                        handleOffset += if (isLtr) dragAmount.x else -dragAmount.x
+                        handleOffset = handleOffset.coerceIn(0f, barWidth)
+                        handleOffsetFraction = handleOffset / barWidth
+                    }
+                }
         ) {
             Row(
                 modifier = Modifier
@@ -129,36 +151,7 @@ fun WavingSeekBar(
                         barWidth = it.size.width.toFloat()
                         handleOffset = barWidth * handleOffsetFraction
                     }
-                    .matchParentSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                handleOffset = (if (isLtr) it.x else barWidth - it.x).coerceIn(0f, barWidth)
-                                handleOffsetFraction = handleOffset / barWidth
-                                onPositionChange(
-                                    (handleOffsetFraction * currentDuration).toLong()
-                                )
-                            }
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-                                isHandleInDrag = true
-                            },
-                            onDragEnd = {
-                                isHandleInDrag = false
-                                onPositionChange(
-                                    (handleOffsetFraction * currentDuration).toLong()
-                                )
-                            },
-                        ) { _, dragAmount ->
-                            handleOffset += if (isLtr) dragAmount.x else -dragAmount.x
-
-                            handleOffset = handleOffset.coerceIn(0f, barWidth)
-                            handleOffsetFraction = handleOffset / barWidth
-                        }
-                    },
+                    .matchParentSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilledSeekBarSegment(
@@ -226,24 +219,6 @@ fun WavingSeekBar(
                     .padding(handlePadding)
                     .offset {
                         IntOffset(x = animatedHandleOffset.roundToPx(), y = 0)
-                    }
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-                                isHandleInDrag = true
-                            },
-                            onDragEnd = {
-                                isHandleInDrag = false
-                                onPositionChange(
-                                    (handleOffsetFraction * currentDuration).toLong()
-                                )
-                            },
-                        ) { _, dragAmount ->
-                            handleOffset += if (isLtr) dragAmount.x else -dragAmount.x
-
-                            handleOffset = handleOffset.coerceIn(0f, barWidth)
-                            handleOffsetFraction = handleOffset / barWidth
-                        }
                     }
                     .align(Alignment.CenterStart)
                     .graphicsLayer {
