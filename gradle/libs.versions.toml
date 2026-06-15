@@ -24,7 +24,7 @@ splashScreen = "1.2.0"
 jaudiotagger = "3.0.1"
 scrollbars = "2.2.0"
 detekt = "1.23.8"
-ktlint = "12.3.0"
+ktlint = "14.2.0"
 room = "2.7.2"
 ksp = "2.0.20-1.0.25"
 
