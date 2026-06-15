@@ -482,6 +482,112 @@ fun BottomPlayer(
 }
 
 @Composable
+private fun ExpandedPlayerActions(
+    playbackState: PlaybackState,
+    lovedUris: Set<String>,
+    playbackMode: PlaybackMode,
+    onHideClick: () -> Unit,
+    onShowSleepTimer: () -> Unit,
+    onShowQueue: () -> Unit,
+    onLyricsClick: () -> Unit,
+    onLyricsSheetExpandedChange: (Boolean) -> Unit,
+    onPlaybackModeClick: () -> Unit,
+    onToggleLovedClick: () -> Unit,
+    onPlayNextClick: () -> Unit,
+    onAddToQueueClick: () -> Unit,
+    onAddToPlaylistClick: () -> Unit,
+    onViewTrackInfoClick: () -> Unit,
+    onGoToAlbumClick: () -> Unit,
+    onGoToArtistClick: () -> Unit,
+    onShareClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = onHideClick) {
+            Icon(
+                imageVector = Icons.Rounded.ExpandMore,
+                contentDescription = context.resources.getString(R.string.close_player_sheet),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row {
+            IconButton(onClick = onShowSleepTimer) {
+                Icon(
+                    imageVector = Icons.Rounded.Timer,
+                    contentDescription = context.resources.getString(R.string.set_sleep_timer),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            AnimatedVisibility(
+                visible = playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle,
+                enter = expandHorizontally(),
+                exit = shrinkHorizontally()
+            ) {
+                IconButton(onClick = onShowQueue) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
+                        contentDescription = context.resources.getString(R.string.show_queue),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = {
+                    onLyricsSheetExpandedChange(true)
+                    onLyricsClick()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Lyrics,
+                    contentDescription = context.resources.getString(R.string.show_lyrics),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = onPlaybackModeClick) {
+                Icon(
+                    imageVector = when (playbackMode) {
+                        PlaybackMode.Repeat -> Icons.Rounded.Repeat
+                        PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
+                        PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
+                        PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
+                    },
+                    contentDescription = when (playbackMode) {
+                        PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
+                        PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
+                        PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
+                        PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
+                    },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            TrackMenuButton(
+                isLoved = playbackState.currentTrack?.let {
+                    it.uri.toString() in lovedUris
+                } ?: false,
+                onToggleLovedClick = onToggleLovedClick,
+                onPlayNextClick = onPlayNextClick,
+                onAddToQueueClick = onAddToQueueClick,
+                onAddToPlaylistClick = onAddToPlaylistClick,
+                onViewTrackInfoClick = onViewTrackInfoClick,
+                onGoToAlbumClick = onGoToAlbumClick,
+                onGoToArtistClick = onGoToArtistClick,
+                onShareClick = onShareClick,
+            )
+        }
+    }
+}
+
+@Composable
 fun ExpandedPlayer(
     playbackStateFlow: StateFlow<PlaybackState>,
     onPlayClick: () -> Unit,
@@ -544,110 +650,33 @@ fun ExpandedPlayer(
 
             val context = LocalContext.current
             if (!isSystemInLandscapeOrientation()) {
-                Row(
+                ExpandedPlayerActions(
+                    playbackState = playbackState,
+                    lovedUris = lovedUris,
+                    playbackMode = playbackMode,
+                    onHideClick = onHideClick,
+                    onShowSleepTimer = { showSleepTimerSheet = true },
+                    onShowQueue = {
+                        if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
+                            showQueue = true
+                        }
+                    },
+                    onLyricsClick = onLyricsClick,
+                    onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
+                    onPlaybackModeClick = onPlaybackModeClick,
+                    onToggleLovedClick = { playbackState.currentTrack?.let(onToggleLovedClick) },
+                    onPlayNextClick = onPlayNextClick,
+                    onAddToQueueClick = onAddToQueueClick,
+                    onAddToPlaylistClick = onAddToPlaylistClick,
+                    onViewTrackInfoClick = onViewTrackInfoClick,
+                    onGoToAlbumClick = onGoToAlbumClick,
+                    onGoToArtistClick = onGoToArtistClick,
+                    onShareClick = { playbackState.currentTrack?.let { shareTrack(context, it) } },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                         .align(Alignment.TopCenter),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    IconButton(
-                        onClick = onHideClick
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ExpandMore,
-                            contentDescription = context.resources.getString(R.string.close_player_sheet),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-
-                    Row {
-                        IconButton(
-                            onClick = {
-                                showSleepTimerSheet = true
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Timer,
-                                contentDescription = context.resources.getString(R.string.set_sleep_timer),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle,
-                            enter = expandHorizontally(),
-                            exit = shrinkHorizontally()
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
-                                        showQueue = true
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
-                                    contentDescription = context.resources.getString(R.string.show_queue),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        IconButton(
-                            onClick = {
-                                onLyricsSheetExpandedChange(true)
-                                onLyricsClick()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Lyrics,
-                                contentDescription = context.resources.getString(R.string.show_lyrics),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        IconButton(
-                            onClick = onPlaybackModeClick
-                        ) {
-                            Icon(
-                                imageVector = when (playbackMode) {
-                                    PlaybackMode.Repeat -> Icons.Rounded.Repeat
-                                    PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
-                                    PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
-                                    PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
-                                },
-                                contentDescription = when (playbackMode) {
-                                    PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
-                                    PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
-                                    PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
-                                    PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
-                                },
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        TrackMenuButton(
-                            isLoved = playbackState.currentTrack?.let {
-                                it.uri.toString() in lovedUris
-                            } ?: false,
-                            onToggleLovedClick = {
-                                playbackState.currentTrack?.let(onToggleLovedClick)
-                            },
-                            onPlayNextClick = onPlayNextClick,
-                            onAddToQueueClick = onAddToQueueClick,
-                            onAddToPlaylistClick = onAddToPlaylistClick,
-                            onViewTrackInfoClick = onViewTrackInfoClick,
-                            onGoToAlbumClick = onGoToAlbumClick,
-                            onGoToArtistClick = onGoToArtistClick,
-                            onShareClick = {
-                                playbackState.currentTrack?.let { shareTrack(context, it) }
-                            }
-                        )
-                    }
-                }
+                )
 
                 Column(
                     modifier = Modifier
@@ -754,111 +783,34 @@ fun ExpandedPlayer(
                             .fillMaxHeight(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Row(
+                        ExpandedPlayerActions(
+                            playbackState = playbackState,
+                            lovedUris = lovedUris,
+                            playbackMode = playbackMode,
+                            onHideClick = onHideClick,
+                            onShowSleepTimer = { showSleepTimerSheet = true },
+                            onShowQueue = {
+                                if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
+                                    showQueue = true
+                                }
+                            },
+                            onLyricsClick = onLyricsClick,
+                            onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
+                            onPlaybackModeClick = onPlaybackModeClick,
+                            onToggleLovedClick = { playbackState.currentTrack?.let(onToggleLovedClick) },
+                            onPlayNextClick = onPlayNextClick,
+                            onAddToQueueClick = onAddToQueueClick,
+                            onAddToPlaylistClick = onAddToPlaylistClick,
+                            onViewTrackInfoClick = onViewTrackInfoClick,
+                            onGoToAlbumClick = onGoToAlbumClick,
+                            onGoToArtistClick = onGoToArtistClick,
+                            onShareClick = { playbackState.currentTrack?.let { shareTrack(context, it) } },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp)
                                 .padding(horizontal = 16.dp)
                                 .align(Alignment.TopCenter),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            IconButton(
-                                onClick = onHideClick
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.ExpandMore,
-                                    contentDescription = context.resources.getString(R.string.close_player_sheet),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-
-                            Row {
-                                IconButton(
-                                    onClick = {
-                                        showSleepTimerSheet = true
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Timer,
-                                        contentDescription = context.resources.getString(R.string.set_sleep_timer),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                AnimatedVisibility(
-                                    visible = playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle,
-                                    enter = expandHorizontally(),
-                                    exit = shrinkHorizontally()
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
-                                                showQueue = true
-                                            }
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
-                                            contentDescription = context.resources.getString(R.string.show_queue),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        onLyricsSheetExpandedChange(true)
-                                        onLyricsClick()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Lyrics,
-                                        contentDescription = context.resources.getString(R.string.show_lyrics),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                IconButton(
-                                    onClick = onPlaybackModeClick
-                                ) {
-                                    Icon(
-                                        imageVector = when (playbackMode) {
-                                            PlaybackMode.Repeat -> Icons.Rounded.Repeat
-                                            PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
-                                            PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
-                                            PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
-                                        },
-                                        contentDescription = when (playbackMode) {
-                                            PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
-                                            PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
-                                            PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
-                                            PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
-                                        },
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                TrackMenuButton(
-                                    isLoved = playbackState.currentTrack?.let {
-                                        it.uri.toString() in lovedUris
-                                    } ?: false,
-                                    onToggleLovedClick = {
-                                        playbackState.currentTrack?.let(onToggleLovedClick)
-                                    },
-                                    onPlayNextClick = onPlayNextClick,
-                                    onAddToQueueClick = onAddToQueueClick,
-                                    onAddToPlaylistClick = onAddToPlaylistClick,
-                                    onViewTrackInfoClick = onViewTrackInfoClick,
-                                    onGoToAlbumClick = onGoToAlbumClick,
-                                    onGoToArtistClick = onGoToArtistClick,
-                                    onShareClick = {
-                                        playbackState.currentTrack?.let { shareTrack(context, it) }
-                                    }
-                                )
-                            }
-                        }
+                        )
 
                         Column(
                             modifier = Modifier
