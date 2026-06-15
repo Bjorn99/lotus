@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -186,20 +187,13 @@ fun WavingSeekBar(
                 )
             }
 
-            var lastAngle by remember {
-                mutableFloatStateOf(0f)
-            }
             val handleRotation = rememberAnimatable(initialValue = 0f)
             LaunchedEffect(isPlaying) {
-                val startAngle = (lastAngle.toInt() % 90).toFloat()
-                while (isPlaying) {
+                if (isPlaying) {
                     handleRotation.animateTo(
-                        targetValue = startAngle + if (isLtr) 90f else -90f,
-                        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-                    ) {
-                        lastAngle = value
-                    }
-                    handleRotation.snapTo(startAngle)
+                        targetValue = handleRotation.value + if (isLtr) 360f else -360f,
+                        animationSpec = tween(durationMillis = 4000, easing = LinearEasing)
+                    )
                 }
             }
 
@@ -210,6 +204,10 @@ fun WavingSeekBar(
                 targetValue = with(density) {
                     handleOffset.toDp() - (handleSize + handlePadding * 2) / 2
                 },
+                animationSpec = spring(
+                    dampingRatio = 0.6f,
+                    stiffness = 400f,
+                ),
                 label = "seek-bar-handle-position-animation"
             )
 
@@ -222,7 +220,7 @@ fun WavingSeekBar(
                     }
                     .align(Alignment.CenterStart)
                     .graphicsLayer {
-                        rotationZ = if (isPlaying) handleRotation.value else lastAngle
+                        rotationZ = handleRotation.value
                     }
                     .clip(RoundedCornerShape(handleSize / 3))
                     .background(color = MaterialTheme.colorScheme.primary)
