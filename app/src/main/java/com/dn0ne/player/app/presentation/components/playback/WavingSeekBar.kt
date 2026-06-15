@@ -164,6 +164,7 @@ fun WavingSeekBar(
                 FilledSeekBarSegment(
                     color = MaterialTheme.colorScheme.primary,
                     enableWaving = enableWaving && isPlaying && !isHandleInDrag,
+                    isHandleInDrag = isHandleInDrag,
                     waveBackwards = !isLtr,
                     waveWidth = with(density) {
                         waveWidth.toPx()
@@ -304,6 +305,7 @@ fun WavingSeekBar(
 fun FilledSeekBarSegment(
     color: Color,
     enableWaving: Boolean = true,
+    isHandleInDrag: Boolean = false,
     waveBackwards: Boolean = false,
     waveWidth: Float? = null,
     strokeWidth: Float = 10f,
@@ -318,7 +320,11 @@ fun FilledSeekBarSegment(
         }
     }
     val waveHeight by animateFloatAsState(
-        targetValue = if (enableWaving) canvasHeight else 0f,
+        targetValue = when {
+            enableWaving -> canvasHeight
+            isHandleInDrag -> 0f
+            else -> canvasHeight / 6f
+        },
         label = "wave-height"
     )
 
