@@ -77,7 +77,7 @@ Three alternative bioinformatics approaches were evaluated and deliberately reje
 
 1. Altschul & Erickson, "Significance of nucleotide sequence alignments" (1985), *Mol Biol Evol* 2(6):526–538. Jiang et al., "uShuffle: A useful tool for shuffling biological sequences while preserving the k-let counts" (2008), *BMC Bioinformatics* 9:192.
 2. Pauws, Verhaegh & Vossen, "Music playlist generation by adapted simulated annealing" (2008), *Information Sciences* 178(3):647–662.
-3. Bountouridis et al., "Melodic Similarity and Applications Using Biologically-Inspired Techniques" (2017), *Applied Sciences* 7(12):1242. Full evaluation in `docs/research/shuffle-algorithm-analysis.md`.
+3. Bountouridis et al., "Melodic Similarity and Applications Using Biologically-Inspired Techniques" (2017), *Applied Sciences* 7(12):1242.
 4. Spotify Engineering, "Shuffle: Making Random Feel More Human" (November 2025). https://engineering.atspotify.com/2025/11/shuffle-making-random-feel-more-human
 
 Full version history in [CHANGELOG.md](CHANGELOG.md).
