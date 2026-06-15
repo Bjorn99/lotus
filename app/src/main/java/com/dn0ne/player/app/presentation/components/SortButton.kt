@@ -183,6 +183,22 @@ fun PlaylistSortButton(
             )
 
             SortButton(
+                isSelected = sort == PlaylistSort.Artist,
+                text = context.resources.getString(R.string.artist),
+                onClick = {
+                    onSortChange(PlaylistSort.Artist)
+                }
+            )
+
+            SortButton(
+                isSelected = sort == PlaylistSort.Year,
+                text = context.resources.getString(R.string.year),
+                onClick = {
+                    onSortChange(PlaylistSort.Year)
+                }
+            )
+
+            SortButton(
                 isSelected = sort == PlaylistSort.TrackCount,
                 text = context.resources.getString(R.string.track_count),
                 onClick = {

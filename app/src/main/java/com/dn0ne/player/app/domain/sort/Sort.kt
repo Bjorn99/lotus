@@ -48,23 +48,33 @@ fun List<Track>.sortedBy(sort: TrackSort, order: SortOrder): List<Track> {
 }
 
 enum class PlaylistSort {
-    Title, TrackCount
+    Title, TrackCount, Artist, Year
 }
 
 fun List<Playlist>.sortedBy(
     sort: PlaylistSort,
     order: SortOrder
 ): List<Playlist> {
+    val artistOf: (Playlist) -> String = { p ->
+        p.trackList.firstOrNull()?.albumArtist?.takeIf { it.isNotBlank() }
+            ?: (p.trackList.firstOrNull()?.artist ?: "")
+    }
+    val yearOf: (Playlist) -> String? = { p -> p.trackList.firstOrNull()?.year }
+
     return when(order) {
         SortOrder.Ascending -> {
             when(sort) {
                 PlaylistSort.Title -> sortedBy { it.name }
+                PlaylistSort.Artist -> sortedBy(artistOf)
+                PlaylistSort.Year -> sortedBy(yearOf)
                 PlaylistSort.TrackCount -> sortedBy { it.trackList.size }
             }
         }
         SortOrder.Descending -> {
             when(sort) {
                 PlaylistSort.Title -> sortedByDescending { it.name }
+                PlaylistSort.Artist -> sortedByDescending(artistOf)
+                PlaylistSort.Year -> sortedByDescending(yearOf)
                 PlaylistSort.TrackCount -> sortedByDescending { it.trackList.size }
             }
         }

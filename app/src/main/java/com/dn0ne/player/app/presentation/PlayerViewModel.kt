@@ -183,11 +183,11 @@ class PlayerViewModel(
         initialValue = emptyList()
     )
 
-    val albumPlaylists = _trackList.map {
-        it.groupBy { it.album }.entries.map {
+    val albumPlaylists = _trackList.map { tracks ->
+        tracks.groupBy { it.album }.entries.map { (album, albumTracks) ->
             Playlist(
-                name = it.key,
-                trackList = it.value
+                name = album,
+                trackList = albumTracks.sortedBy { it.trackNumber?.toIntOrNull() ?: 0 }
             )
         }
     }.stateIn(
@@ -195,11 +195,14 @@ class PlayerViewModel(
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = emptyList()
     )
-    val artistPlaylists = _trackList.map {
-        it.groupBy { it.albumArtist?.takeIf { it.isNotBlank() } ?: it.artist }.entries.map {
+    val artistPlaylists = _trackList.map { tracks ->
+        tracks.groupBy { it.albumArtist?.takeIf { it.isNotBlank() } ?: it.artist }.entries.map {
+                (artist, artistTracks) ->
             Playlist(
-                name = it.key,
-                trackList = it.value
+                name = artist,
+                trackList = artistTracks.sortedWith(
+                    compareBy<Track> { it.album }.thenBy { it.trackNumber?.toIntOrNull() ?: 0 }
+                )
             )
         }
     }.stateIn(
@@ -207,11 +210,13 @@ class PlayerViewModel(
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = emptyList()
     )
-    val genrePlaylists = _trackList.map {
-        it.groupBy { it.genre }.entries.map {
+    val genrePlaylists = _trackList.map { tracks ->
+        tracks.groupBy { it.genre }.entries.map { (genre, genreTracks) ->
             Playlist(
-                name = it.key,
-                trackList = it.value
+                name = genre,
+                trackList = genreTracks.sortedWith(
+                    compareBy<Track> { it.artist }.thenBy { it.album }
+                )
             )
         }
     }.stateIn(
@@ -219,11 +224,11 @@ class PlayerViewModel(
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = emptyList()
     )
-    val folderPlaylists = _trackList.map {
-        it.groupBy { it.data.substringBeforeLast('/') }.entries.map {
+    val folderPlaylists = _trackList.map { tracks ->
+        tracks.groupBy { it.data.substringBeforeLast('/') }.entries.map { (path, folderTracks) ->
             Playlist(
-                name = it.key.substringAfterLast('/'),
-                trackList = it.value
+                name = path.substringAfterLast('/'),
+                trackList = folderTracks.sortedBy { it.title }
             )
         }
     }.stateIn(
