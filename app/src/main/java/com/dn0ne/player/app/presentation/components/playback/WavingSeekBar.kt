@@ -190,10 +190,12 @@ fun WavingSeekBar(
             val handleRotation = rememberAnimatable(initialValue = 0f)
             LaunchedEffect(isPlaying) {
                 if (isPlaying) {
-                    handleRotation.animateTo(
-                        targetValue = handleRotation.value + if (isLtr) 360f else -360f,
-                        animationSpec = tween(durationMillis = 4000, easing = LinearEasing)
-                    )
+                    while (isPlaying) {
+                        handleRotation.animateTo(
+                            targetValue = handleRotation.value + if (isLtr) 360f else -360f,
+                            animationSpec = tween(durationMillis = 4000, easing = LinearEasing)
+                        )
+                    }
                 }
             }
 
