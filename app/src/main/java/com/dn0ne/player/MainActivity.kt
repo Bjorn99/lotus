@@ -54,6 +54,7 @@ import com.dn0ne.player.setup.presentation.SetupScreen
 import com.dn0ne.player.setup.presentation.SetupViewModel
 import com.dn0ne.player.ui.theme.MusicPlayerTheme
 import com.google.common.util.concurrent.MoreExecutors
+import java.io.File
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -164,19 +165,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-        val pickedPlaylistChannel = Channel<Pair<String, String>>()
+        val pickedPlaylistChannel = Channel<Triple<String, String, String?>>()
         val playlistPicker =
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 uri?.let {
                     val name = Uri.decode(it.toString()).substringAfterLast('/').substringBeforeLast('.')
+                    val m3uDirectory = getDirectoryFromDocumentUri(it)
                     var content: String? = null
                     contentResolver.openInputStream(it)?.use { input ->
                         content = input.readBytes().toString(Charsets.UTF_8)
                     }
 
-                    content?.let {
+                    content?.let { c ->
                         lifecycleScope.launch {
-                            pickedPlaylistChannel.send(name to content)
+                            pickedPlaylistChannel.send(Triple(name, c, m3uDirectory))
                         }
                     }
                 }
@@ -365,8 +367,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel.onLyricsPicked(lyrics)
                             }
 
-                            ObserveAsEvents(pickedPlaylistChannel.receiveAsFlow()) { (name, content) ->
-                                viewModel.parseM3U(name, content)
+                            ObserveAsEvents(pickedPlaylistChannel.receiveAsFlow()) { (name, content, directory) ->
+                                viewModel.parseM3U(name, content, directory)
                             }
 
                             if (viewModel.settings.scanOnAppLaunch.value) {
@@ -512,5 +514,15 @@ class MainActivity : ComponentActivity() {
             ?: "emulated/0"
         val path = decoded.substringAfterLast(':')
         return "/storage/$sd/$path"
+    }
+
+    private fun getDirectoryFromDocumentUri(uri: Uri): String? {
+        val decoded = Uri.decode(uri.toString())
+        // Replace URI label 'primary' by the actual path 'emulated/0'
+        val sd = decoded.substringAfter("document/").substringBefore(':')
+            .takeIf { it != "primary" } ?: "emulated/0"
+        val path = decoded.substringAfterLast(':')
+        val fullPath = "/storage/$sd/$path"
+        return File(fullPath).parent
     }
 }

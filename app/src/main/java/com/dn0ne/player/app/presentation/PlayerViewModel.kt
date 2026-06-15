@@ -51,6 +51,7 @@ import com.dn0ne.player.app.presentation.components.trackinfo.ManualInfoEditShee
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheetState
 import com.dn0ne.player.core.data.MusicScanner
 import com.dn0ne.player.core.data.Settings
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -1580,12 +1581,26 @@ class PlayerViewModel(
         }
     }
 
-    fun parseM3U(playlistName: String, fileContent: String) {
+    fun parseM3U(playlistName: String, fileContent: String, m3uDirectoryPath: String?) {
         viewModelScope.launch {
-            val paths = fileContent.lines().fastFilter { it.startsWith("/") }
-            val tracks = paths.map { path ->
-                _trackList.value.fastFirstOrNull { path == it.data }
+            val lines = fileContent.lines().fastFilter { line ->
+                line.isNotBlank() && !line.startsWith("#")
+            }
+
+            val resolvedPaths = lines.map { line ->
+                if (line.startsWith("/")) {
+                    line
+                } else if (m3uDirectoryPath != null) {
+                    File(m3uDirectoryPath, line).canonicalPath
+                } else {
+                    null
+                }
             }.filterNotNull()
+
+            val tracks = resolvedPaths.mapNotNull { path ->
+                _trackList.value.fastFirstOrNull { path == it.data }
+            }
+
             val name = playlistName.filter { it.isDigit() || it.isLetter() || it.isWhitespace() }
 
             playlistRepository.insertPlaylist(
