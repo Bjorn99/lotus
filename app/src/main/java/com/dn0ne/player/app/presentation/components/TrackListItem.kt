@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dn0ne.player.R
@@ -53,7 +52,7 @@ fun TrackListItem(
                 onClick()
             }
             .background(
-                color = if (isCurrent) MaterialTheme.colorScheme.surfaceContainerLow else Color.Transparent
+                color = if (isCurrent) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface
             )
             .padding(vertical = 8.dp)
             .padding(start = 8.dp, end = if (dragHandle != null) 8.dp else 0.dp),

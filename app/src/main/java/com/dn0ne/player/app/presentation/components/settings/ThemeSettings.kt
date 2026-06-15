@@ -112,7 +112,9 @@ fun ThemeSettings(
     ) {
         val isDarkTheme = isSystemInDarkTheme()
         val selectedAppearance by settings.appearance.collectAsState()
-        val appearanceOptions = remember {
+        val surfaceColor = MaterialTheme.colorScheme.surface
+        val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+        val appearanceOptions = remember(surfaceColor, onSurfaceColor) {
             listOf(
                 AppearanceOption(
                     title = context.resources.getString(R.string.appearance_system),
@@ -121,8 +123,8 @@ fun ThemeSettings(
                     },
                     appearance = Appearance.System,
                     icon = Icons.Rounded.PhonelinkSetup,
-                    containerColor = if (isDarkTheme) Color.Black else Color.White,
-                    contentColor = if (isDarkTheme) Color.White else Color.Black
+                    containerColor = surfaceColor,
+                    contentColor = onSurfaceColor
                 ),
                 AppearanceOption(
                     title = context.resources.getString(R.string.appearance_light),
