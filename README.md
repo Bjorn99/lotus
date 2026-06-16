@@ -111,6 +111,10 @@ Lotus has been useful to you, consider thanking them on
 Release builds are automated via CI — see [docs/RELEASING.md](docs/RELEASING.md)
 for the full process.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on bug reports, feature proposals, and pull requests.
+
 ## Credits
 
 Some UI elements inspired by [Vanilla](https://github.com/vanilla-music/vanilla).
