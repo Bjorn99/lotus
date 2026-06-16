@@ -107,6 +107,13 @@
       "allowedVersions": "<3.1.0"
     },
     {
+      "description": "materialkolor 3.0.0+ is compiled with Kotlin 2.2.0+ binary metadata, incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
+      "matchDepNames": [
+        "com.materialkolor:material-kolor"
+      ],
+      "allowedVersions": "<3.0.0"
+    },
+    {
       "description": "androidx.core 1.19+ ships an AAR metadata gate that rejects builds on compileSdk 36 / AGP 8.x — it requires compileSdk 37 and AGP 9.1.0. Hold until the coordinated platform bump (Kotlin + AGP + compileSdk) lands.",
       "matchPackageNames": [
         "androidx.core:**"
