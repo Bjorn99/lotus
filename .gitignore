@@ -23,3 +23,5 @@ keystore.properties
 docs/research/
 docs/superpowers/
 .worktrees/
+.codegraph/
+CLAUDE.md
