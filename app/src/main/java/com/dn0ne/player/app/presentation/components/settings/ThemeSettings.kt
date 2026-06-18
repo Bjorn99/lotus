@@ -322,7 +322,7 @@ fun ThemeSettings(
                             PaletteStyle.Fidelity -> com.materialkolor.PaletteStyle.Fidelity
                             PaletteStyle.Content -> com.materialkolor.PaletteStyle.Content
                         },
-                        animate = true
+                        animate = false
                     ) {
                         listOf(
                             MaterialTheme.colorScheme.primary,
