@@ -99,23 +99,23 @@ fun AboutPage(
                     title = context.resources.getString(R.string.repo),
                     supportingText = context.resources.getString(R.string.repo_explain),
                     icon = repoIcon,
-                    onClick = {
-                        uriHandler.openUri(context.resources.getString(R.string.repo_url))
-                    }
                 ),
                 SettingsItem(
                     title = context.resources.getString(R.string.feedback),
                     supportingText = context.resources.getString(R.string.feedback_explain),
                     icon = Icons.Rounded.QuestionAnswer,
-                    onClick = {
-                        uriHandler.openUri(context.resources.getString(R.string.feedback_url))
-                    }
                 ),
                 SettingsItem(
                     title = context.resources.getString(R.string.share_crash_log),
                     supportingText = context.resources.getString(R.string.share_crash_log_explain),
                     icon = Icons.Rounded.BugReport,
-                    onClick = {
+                )
+            ),
+            onItemClick = { index ->
+                when (index) {
+                    0 -> uriHandler.openUri(context.resources.getString(R.string.repo_url))
+                    1 -> uriHandler.openUri(context.resources.getString(R.string.feedback_url))
+                    2 -> {
                         val log = CrashReporter.latestLog(context)
                         if (log == null) {
                             Toast.makeText(
@@ -143,8 +143,8 @@ fun AboutPage(
                             )
                         }
                     }
-                )
-            )
+                }
+            }
         )
     }
 }

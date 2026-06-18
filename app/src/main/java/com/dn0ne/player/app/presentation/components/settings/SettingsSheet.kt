@@ -160,79 +160,69 @@ fun SettingsSheet(
                                     title = context.resources.getString(R.string.playback),
                                     supportingText = context.resources.getString(R.string.playback_supporting_text),
                                     icon = Icons.Rounded.MusicNote,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Playback)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.music_scan),
                                     supportingText = context.resources.getString(R.string.music_scan_supporting_text),
                                     icon = Icons.Rounded.Radar,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.MusicScan)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.tabs),
                                     supportingText = context.resources.getString(R.string.tabs_supporting_text),
                                     icon = Icons.Rounded.TableChart,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Tabs)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.playlists),
                                     supportingText = context.resources.getString(R.string.playlists_supporting_text),
                                     icon = Icons.AutoMirrored.Rounded.PlaylistPlay,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Playlists)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.theme),
                                     supportingText = context.resources.getString(R.string.theme_supporting_text),
                                     icon = Icons.Rounded.ColorLens,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Theme)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.lyrics),
                                     supportingText = context.resources.getString(R.string.lyrics_supporting_text),
                                     icon = Icons.Rounded.Lyrics,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Lyrics)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.privacy),
                                     supportingText = context.resources.getString(R.string.privacy_supporting_text),
                                     icon = Icons.Rounded.Lock,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Privacy)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.backup),
                                     supportingText = context.resources.getString(R.string.backup_supporting_text),
                                     icon = Icons.Rounded.Backup,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Backup)
-                                    }
                                 ),
                                 SettingsItem(
                                     title = context.resources.getString(R.string.stats_title),
                                     supportingText = context.resources.getString(R.string.stats_supporting_text),
                                     icon = Icons.Rounded.Insights,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.Stats)
-                                    }
                                 )
                             )
                         }
 
+                        val settingsRoutes = remember {
+                            listOf(
+                                SettingsRoutes.Playback,
+                                SettingsRoutes.MusicScan,
+                                SettingsRoutes.Tabs,
+                                SettingsRoutes.Playlists,
+                                SettingsRoutes.Theme,
+                                SettingsRoutes.Lyrics,
+                                SettingsRoutes.Privacy,
+                                SettingsRoutes.Backup,
+                                SettingsRoutes.Stats,
+                            )
+                        }
+
                         SettingsGroup(
-                            items = settings
+                            items = settings,
+                            onItemClick = { index ->
+                                navController.navigate(settingsRoutes[index])
+                            }
                         )
 
                         SettingsGroup(
@@ -241,11 +231,11 @@ fun SettingsSheet(
                                     title = context.resources.getString(R.string.about_app),
                                     supportingText = context.resources.getString(R.string.about_explain),
                                     icon = Icons.Rounded.Info,
-                                    onClick = {
-                                        navController.navigate(SettingsRoutes.About)
-                                    }
                                 )
-                            )
+                            ),
+                            onItemClick = {
+                                navController.navigate(SettingsRoutes.About)
+                            }
                         )
                     }
                 }

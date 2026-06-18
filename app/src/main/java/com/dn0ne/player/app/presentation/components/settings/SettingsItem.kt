@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,24 +22,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 
+@Immutable
 data class SettingsItem(
     val title: String,
     val supportingText: String,
     val icon: ImageVector,
-    val onClick: () -> Unit,
 )
 
 @Composable
 fun SettingsItem(
     item: SettingsItem,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.surfaceContainer)
-            .clickable {
-                item.onClick()
-            }
+            .clickable { onClick() }
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -70,6 +70,7 @@ fun SettingsItem(
 @Composable
 fun SettingsGroup(
     items: List<SettingsItem>,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -79,6 +80,7 @@ fun SettingsGroup(
         items.fastForEachIndexed { index, item ->
             SettingsItem(
                 item = item,
+                onClick = { onItemClick(index) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(
