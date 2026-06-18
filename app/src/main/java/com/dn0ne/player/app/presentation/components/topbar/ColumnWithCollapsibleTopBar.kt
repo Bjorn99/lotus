@@ -43,6 +43,15 @@ import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 
+internal fun calculateTopBarHeight(
+    previousHeight: Float,
+    scrollDelta: Float,
+    minHeight: Float,
+    maxHeight: Float
+): Float {
+    return (previousHeight + scrollDelta).coerceIn(minHeight, maxHeight)
+}
+
 @Composable
 fun ColumnWithCollapsibleTopBar(
     topBarContent: @Composable BoxScope.() -> Unit,
@@ -95,13 +104,20 @@ fun ColumnWithCollapsibleTopBar(
                 source: NestedScrollSource
             ): Offset {
                 val previousHeight = topBarHeight.value
-                val newHeight =
-                    (previousHeight + available.y - contentScrollState.value).coerceIn(
-                        minTopBarHeight,
-                        maxTopBarHeight
+                val shouldAdjust = available.y < 0 || contentScrollState.value == 0
+                val newHeight = if (shouldAdjust) {
+                    calculateTopBarHeight(
+                        previousHeight = previousHeight,
+                        scrollDelta = available.y,
+                        minHeight = minTopBarHeight,
+                        maxHeight = maxTopBarHeight
                     )
-                coroutineScope.launch {
-                    topBarHeight.snapTo(newHeight)
+                } else previousHeight
+
+                if (newHeight != previousHeight) {
+                    coroutineScope.launch {
+                        topBarHeight.snapTo(newHeight)
+                    }
                 }
                 return Offset(0f, newHeight - previousHeight)
             }
@@ -209,23 +225,22 @@ fun LazyColumnWithCollapsibleTopBar(
                 source: NestedScrollSource
             ): Offset {
                 val previousHeight = topBarHeight.value
-                val newHeight = if (listState.firstVisibleItemIndex >= 0 && available.y < 0) {
-                    (previousHeight + available.y).coerceIn(
-                        minTopBarHeight,
-                        maxTopBarHeight
-                    )
-                } else if (
-                    listState.firstVisibleItemIndex == 0 &&
+                val isAtTop = listState.firstVisibleItemIndex == 0 &&
                     listState.layoutInfo.visibleItemsInfo.firstOrNull()?.offset == 0
-                ) {
-                    (previousHeight + available.y).coerceIn(
-                        minTopBarHeight,
-                        maxTopBarHeight
+                val shouldAdjust = available.y < 0 || isAtTop
+                val newHeight = if (shouldAdjust) {
+                    calculateTopBarHeight(
+                        previousHeight = previousHeight,
+                        scrollDelta = available.y,
+                        minHeight = minTopBarHeight,
+                        maxHeight = maxTopBarHeight
                     )
                 } else previousHeight
 
-                coroutineScope.launch {
-                    topBarHeight.snapTo(newHeight)
+                if (newHeight != previousHeight) {
+                    coroutineScope.launch {
+                        topBarHeight.snapTo(newHeight)
+                    }
                 }
                 return Offset(0f, newHeight - previousHeight)
             }
