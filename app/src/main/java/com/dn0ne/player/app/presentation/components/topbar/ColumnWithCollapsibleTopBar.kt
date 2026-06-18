@@ -27,6 +27,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -91,10 +92,12 @@ fun ColumnWithCollapsibleTopBar(
         }
     }
 
-    LaunchedEffect(topBarHeight.value) {
-        collapseFraction(
+    LaunchedEffect(Unit) {
+        snapshotFlow {
             (topBarHeight.value - minTopBarHeight) / (maxTopBarHeight - minTopBarHeight)
-        )
+        }.collect { fraction ->
+            collapseFraction(fraction)
+        }
     }
 
     val topBarScrollConnection = remember {
@@ -212,10 +215,12 @@ fun LazyColumnWithCollapsibleTopBar(
         topBarHeight.snapTo(maxTopBarHeight)
     }
 
-    LaunchedEffect(topBarHeight.value) {
-        collapseFraction(
+    LaunchedEffect(Unit) {
+        snapshotFlow {
             (topBarHeight.value - minTopBarHeight) / (maxTopBarHeight - minTopBarHeight)
-        )
+        }.collect { fraction ->
+            collapseFraction(fraction)
+        }
     }
 
     val topBarScrollConnection = remember {
