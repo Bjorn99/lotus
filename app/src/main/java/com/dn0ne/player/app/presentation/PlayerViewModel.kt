@@ -147,6 +147,62 @@ class PlayerViewModel(
         initialValue = _playlistSortOrder.value
     )
 
+    private val _albumSort = MutableStateFlow(settings.albumSort)
+    val albumSort = _albumSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _albumSort.value
+    )
+
+    private val _albumSortOrder = MutableStateFlow(settings.albumSortOrder)
+    val albumSortOrder = _albumSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _albumSortOrder.value
+    )
+
+    private val _artistSort = MutableStateFlow(settings.artistSort)
+    val artistSort = _artistSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _artistSort.value
+    )
+
+    private val _artistSortOrder = MutableStateFlow(settings.artistSortOrder)
+    val artistSortOrder = _artistSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _artistSortOrder.value
+    )
+
+    private val _genreSort = MutableStateFlow(settings.genreSort)
+    val genreSort = _genreSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _genreSort.value
+    )
+
+    private val _genreSortOrder = MutableStateFlow(settings.genreSortOrder)
+    val genreSortOrder = _genreSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _genreSortOrder.value
+    )
+
+    private val _folderSort = MutableStateFlow(settings.folderSort)
+    val folderSort = _folderSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _folderSort.value
+    )
+
+    private val _folderSortOrder = MutableStateFlow(settings.folderSortOrder)
+    val folderSortOrder = _folderSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _folderSortOrder.value
+    )
+
     // Loved-track URIs as a Set for O(1) "is this loved?" lookups in track
     // rows. The DAO already orders by added_at DESC; we lose order here, but
     // the smart-playlist builder reads the ordered Flow directly.
@@ -472,6 +528,8 @@ class PlayerViewModel(
             is OnRestoreCoverArtClick, is OnConfirmMetadataEditClick -> handleTrackInfoEvent(event)
 
             is OnPlaylistSelection, is OnTrackSortChange, is OnPlaylistSortChange,
+            is OnAlbumSortChange, is OnArtistSortChange, is OnGenreSortChange,
+            is OnFolderSortChange,
             is OnCreatePlaylistClick, is OnRenamePlaylistClick, is OnDeletePlaylistClick,
             is OnAddToPlaylist, is OnRemoveFromPlaylist, is OnPlaylistReorder -> handlePlaylistEvent(event)
 
@@ -1150,6 +1208,54 @@ class PlayerViewModel(
                     _playlistSortOrder.update {
                         order
                     }
+                }
+            }
+
+            is OnAlbumSortChange -> {
+                event.sort?.let { sort ->
+                    settings.albumSort = sort
+                    _albumSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.albumSortOrder = order
+                    _albumSortOrder.update { order }
+                }
+            }
+
+            is OnArtistSortChange -> {
+                event.sort?.let { sort ->
+                    settings.artistSort = sort
+                    _artistSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.artistSortOrder = order
+                    _artistSortOrder.update { order }
+                }
+            }
+
+            is OnGenreSortChange -> {
+                event.sort?.let { sort ->
+                    settings.genreSort = sort
+                    _genreSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.genreSortOrder = order
+                    _genreSortOrder.update { order }
+                }
+            }
+
+            is OnFolderSortChange -> {
+                event.sort?.let { sort ->
+                    settings.folderSort = sort
+                    _folderSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.folderSortOrder = order
+                    _folderSortOrder.update { order }
                 }
             }
 

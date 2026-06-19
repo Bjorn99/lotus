@@ -244,6 +244,14 @@ fun PlayerScreen(
                 val trackSortOrder by viewModel.trackSortOrder.collectAsState()
                 val playlistSort by viewModel.playlistSort.collectAsState()
                 val playlistSortOrder by viewModel.playlistSortOrder.collectAsState()
+                val albumSort by viewModel.albumSort.collectAsState()
+                val albumSortOrder by viewModel.albumSortOrder.collectAsState()
+                val artistSort by viewModel.artistSort.collectAsState()
+                val artistSortOrder by viewModel.artistSortOrder.collectAsState()
+                val genreSort by viewModel.genreSort.collectAsState()
+                val genreSortOrder by viewModel.genreSortOrder.collectAsState()
+                val folderSort by viewModel.folderSort.collectAsState()
+                val folderSortOrder by viewModel.folderSortOrder.collectAsState()
 
                 // Hoisted to PlayerScreen scope so the NavHost composables and
                 // PlayerSheet (rendered outside the NavHost) can all read the
@@ -432,6 +440,14 @@ fun PlayerScreen(
                             trackSortOrder = trackSortOrder,
                             playlistSort = playlistSort,
                             playlistSortOrder = playlistSortOrder,
+                            albumSort = albumSort,
+                            albumSortOrder = albumSortOrder,
+                            artistSort = artistSort,
+                            artistSortOrder = artistSortOrder,
+                            genreSort = genreSort,
+                            genreSortOrder = genreSortOrder,
+                            folderSort = folderSort,
+                            folderSortOrder = folderSortOrder,
                             onTrackSortChange = { sort, order ->
                                 viewModel.onEvent(PlayerScreenEvent.OnTrackSortChange(sort, order))
                             },
@@ -441,6 +457,26 @@ fun PlayerScreen(
                                         sort,
                                         order
                                     )
+                                )
+                            },
+                            onAlbumSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnAlbumSortChange(sort, order)
+                                )
+                            },
+                            onArtistSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnArtistSortChange(sort, order)
+                                )
+                            },
+                            onGenreSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnGenreSortChange(sort, order)
+                                )
+                            },
+                            onFolderSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnFolderSortChange(sort, order)
                                 )
                             },
                             onPlaylistSelection = { playlist ->
@@ -1099,8 +1135,20 @@ fun MainPlayerScreen(
     trackSortOrder: SortOrder,
     playlistSort: PlaylistSort,
     playlistSortOrder: SortOrder,
+    albumSort: PlaylistSort,
+    albumSortOrder: SortOrder,
+    artistSort: PlaylistSort,
+    artistSortOrder: SortOrder,
+    genreSort: PlaylistSort,
+    genreSortOrder: SortOrder,
+    folderSort: PlaylistSort,
+    folderSortOrder: SortOrder,
     onTrackSortChange: (TrackSort?, SortOrder?) -> Unit,
     onPlaylistSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onAlbumSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onArtistSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onGenreSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onFolderSortChange: (PlaylistSort?, SortOrder?) -> Unit,
     onPlaylistSelection: (Playlist) -> Unit,
     onAlbumPlaylistSelection: (Playlist) -> Unit,
     onArtistPlaylistSelection: (Playlist) -> Unit,
@@ -1210,6 +1258,50 @@ fun MainPlayerScreen(
                                         },
                                         onSortOrderChange = {
                                             onTrackSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Albums) {
+                                    PlaylistSortButton(
+                                        sort = albumSort,
+                                        order = albumSortOrder,
+                                        onSortChange = {
+                                            onAlbumSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onAlbumSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Artists) {
+                                    PlaylistSortButton(
+                                        sort = artistSort,
+                                        order = artistSortOrder,
+                                        onSortChange = {
+                                            onArtistSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onArtistSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Genres) {
+                                    PlaylistSortButton(
+                                        sort = genreSort,
+                                        order = genreSortOrder,
+                                        onSortChange = {
+                                            onGenreSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onGenreSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Folders) {
+                                    PlaylistSortButton(
+                                        sort = folderSort,
+                                        order = folderSortOrder,
+                                        onSortChange = {
+                                            onFolderSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onFolderSortChange(null, it)
                                         }
                                     )
                                 } else {
@@ -1615,8 +1707,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = albumPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = albumSort,
+                    playlistSortOrder = albumSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_album),
                     showSinglePreview = true,
                     onPlaylistClick = onAlbumPlaylistSelection,
@@ -1640,8 +1732,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = artistPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = artistSort,
+                    playlistSortOrder = artistSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_artist),
                     onPlaylistClick = onArtistPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
@@ -1665,8 +1757,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = genrePlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = genreSort,
+                    playlistSortOrder = genreSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_genre),
                     onPlaylistClick = onGenrePlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
@@ -1690,8 +1782,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = folderPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = folderSort,
+                    playlistSortOrder = folderSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_folder),
                     onPlaylistClick = onFolderPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,

@@ -46,6 +46,14 @@ class Settings(context: Context) {
     private val trackSortOrderKey = "track-sort-order-key"
     private val playlistSortKey = "playlist-sort-key"
     private val playlistSortOrderKey = "playlist-sort-order-key"
+    private val albumSortKey = "album-sort-key"
+    private val albumSortOrderKey = "album-sort-order-key"
+    private val artistSortKey = "artist-sort-key"
+    private val artistSortOrderKey = "artist-sort-order-key"
+    private val genreSortKey = "genre-sort-key"
+    private val genreSortOrderKey = "genre-sort-order-key"
+    private val folderSortKey = "folder-sort-key"
+    private val folderSortOrderKey = "folder-sort-order-key"
 
     private val isScanModeInclusiveKey = "is-scan-mode-inclusive"
     private val ignoreShortTracksKey = "exclude-short-tracks"
@@ -320,6 +328,78 @@ class Settings(context: Context) {
         set(value) {
             with(sharedPreferences.edit()) {
                 putInt(playlistSortOrderKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var albumSort: PlaylistSort
+        get() = PlaylistSort.entries[sharedPreferences.getInt(albumSortKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(albumSortKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var albumSortOrder: SortOrder
+        get() = SortOrder.entries[sharedPreferences.getInt(albumSortOrderKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(albumSortOrderKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var artistSort: PlaylistSort
+        get() = PlaylistSort.entries[sharedPreferences.getInt(artistSortKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(artistSortKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var artistSortOrder: SortOrder
+        get() = SortOrder.entries[sharedPreferences.getInt(artistSortOrderKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(artistSortOrderKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var genreSort: PlaylistSort
+        get() = PlaylistSort.entries[sharedPreferences.getInt(genreSortKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(genreSortKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var genreSortOrder: SortOrder
+        get() = SortOrder.entries[sharedPreferences.getInt(genreSortOrderKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(genreSortOrderKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var folderSort: PlaylistSort
+        get() = PlaylistSort.entries[sharedPreferences.getInt(folderSortKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(folderSortKey, value.ordinal)
+                apply()
+            }
+        }
+
+    var folderSortOrder: SortOrder
+        get() = SortOrder.entries[sharedPreferences.getInt(folderSortOrderKey, 0)]
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putInt(folderSortOrderKey, value.ordinal)
                 apply()
             }
         }
