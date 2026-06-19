@@ -43,6 +43,11 @@ internal fun escapeLuceneQuery(query: String): String {
     return query.replace(LUCENE_SPECIAL, "\\\\$1")
 }
 
+private fun buildBroadenedQuery(query: String): String {
+    val term = escapeLuceneQuery(query)
+    return "recording:\"$term\" OR alias:\"$term\" OR artist:\"$term\""
+}
+
 class MusicBrainzMetadataProvider(
     context: Context,
     private val client: HttpClient,
@@ -73,19 +78,71 @@ class MusicBrainzMetadataProvider(
             escapeLuceneQuery(query)
         }
 
-        val finalQuery = buildString {
+        val narrowQuery = buildString {
             append(escapedQuery)
             if (matchDuration && trackDuration > 0) {
                 append(" AND dur:[${trackDuration - 15000} TO ${trackDuration + 15000}]")
             }
         }
 
+        // Stage 1: Narrow recording search
+        val recordingResult = searchRecordings(narrowQuery)
+        when (recordingResult) {
+            is Result.Error -> return recordingResult
+            is Result.Success -> {
+                if (recordingResult.data.size >= 3) {
+                    return recordingResult
+                }
+            }
+        }
+
+        // Stage 2: Broadened recording search
+        // Conditions: single word, no Lucene syntax, not a UUID
+        val shouldBroaden = !query.contains(' ') &&
+            !HAS_LUCENE_SYNTAX.containsMatchIn(query) &&
+            !MBID_REGEX.matches(query)
+
+        if (shouldBroaden) {
+            delay(1100)
+            val broadenedQuery = buildString {
+                append("(")
+                append(buildBroadenedQuery(query))
+                append(")")
+                if (matchDuration && trackDuration > 0) {
+                    append(" AND dur:[${trackDuration - 15000} TO ${trackDuration + 15000}]")
+                }
+            }
+            val broadenedResult = searchRecordings(broadenedQuery)
+            when (broadenedResult) {
+                is Result.Success -> {
+                    if (broadenedResult.data.size >= 3) {
+                        return broadenedResult
+                    }
+                }
+                is Result.Error -> { /* fall through to stage 3 */ }
+            }
+        }
+
+        // Stage 3: Release search and merge
+        val releaseResult = searchReleases(query, trackDuration, matchDuration)
+        val recordingResults = (recordingResult as? Result.Success)?.data ?: emptyList()
+        val releaseResults = when (releaseResult) {
+            is Result.Success -> releaseResult.data
+            is Result.Error -> emptyList()
+        }
+        val merged = (recordingResults + releaseResults).distinctBy { it.id }
+        return Result.Success(merged)
+    }
+
+    private suspend fun searchRecordings(
+        query: String,
+    ): Result<List<MetadataSearchResult>, DataError> {
         val response = try {
             client.get(musicBrainzEndpoint) {
                 url {
                     appendPathSegments("recording")
                     parameters.append("fmt", "json")
-                    parameters.append("query", finalQuery)
+                    parameters.append("query", query)
                     parameters.append("limit", "50")
                 }
                 headers {
@@ -94,7 +151,6 @@ class MusicBrainzMetadataProvider(
                 }
             }
         } catch (e: CancellationException) {
-            // Coroutine cancellation must propagate; never swallow.
             throw e
         } catch (e: Throwable) {
             return Result.Error(e.toNetworkError())
@@ -113,9 +169,98 @@ class MusicBrainzMetadataProvider(
                     Log.d(logTag, e.message, e)
                     return Result.Error(DataError.Network.ParseError)
                 } catch (e: Throwable) {
-                    // Defensive — body parsing can throw a wide range of
-                    // wrapped Ktor / kotlinx.serialization exceptions.
                     Log.w(logTag, "Failed to parse MusicBrainz search response", e)
+                    return Result.Error(DataError.Network.ParseError)
+                }
+            }
+
+            HttpStatusCode.BadRequest -> {
+                return Result.Error(DataError.Network.BadRequest)
+            }
+
+            HttpStatusCode.Unauthorized -> {
+                return Result.Error(DataError.Network.Unauthorized)
+            }
+
+            HttpStatusCode.Forbidden -> {
+                return Result.Error(DataError.Network.Forbidden)
+            }
+
+            HttpStatusCode.NotFound -> {
+                return Result.Error(DataError.Network.NotFound)
+            }
+
+            HttpStatusCode.RequestTimeout -> {
+                return Result.Error(DataError.Network.RequestTimeout)
+            }
+
+            HttpStatusCode.InternalServerError -> {
+                return Result.Error(DataError.Network.InternalServerError)
+            }
+
+            HttpStatusCode.ServiceUnavailable -> {
+                return Result.Error(DataError.Network.ServiceUnavailable)
+            }
+
+            else -> {
+                return Result.Error(DataError.Network.Unknown)
+            }
+        }
+    }
+
+    override suspend fun searchReleases(
+        query: String,
+        trackDuration: Long,
+        matchDuration: Boolean,
+    ): Result<List<MetadataSearchResult>, DataError> {
+        delay(1100)
+
+        val escapedQuery = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
+            query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
+        } else {
+            escapeLuceneQuery(query)
+        }
+
+        val finalQuery = buildString {
+            append(escapedQuery)
+            if (matchDuration && trackDuration > 0) {
+                append(" AND dur:[${trackDuration - 15000} TO ${trackDuration + 15000}]")
+            }
+        }
+
+        val response = try {
+            client.get(musicBrainzEndpoint) {
+                url {
+                    appendPathSegments("release")
+                    parameters.append("fmt", "json")
+                    parameters.append("query", finalQuery)
+                    parameters.append("limit", "50")
+                }
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    append(HttpHeaders.UserAgent, userAgent)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
+        }
+
+        when (response.status) {
+            HttpStatusCode.OK -> {
+                try {
+                    val searchResult: ReleaseSearchResultDto = response.body()
+                    return Result.Success(
+                        data = searchResult.toMetadataSearchResultList()
+                    )
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: JsonConvertException) {
+                    Log.d(logTag, e.message, e)
+                    return Result.Error(DataError.Network.ParseError)
+                } catch (e: Throwable) {
+                    Log.w(logTag, "Failed to parse MusicBrainz release search response", e)
                     return Result.Error(DataError.Network.ParseError)
                 }
             }
@@ -440,4 +585,68 @@ internal data class MediaTrack(
 @Serializable
 internal data class Tag(
     val name: String
+)
+
+// --- Release search DTOs ---
+
+@Serializable
+internal data class ReleaseSearchResultDto(
+    val releases: List<ReleaseSearchItem>
+)
+
+internal fun ReleaseSearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
+    val results = mutableListOf<MetadataSearchResult>()
+    releases.forEach { release ->
+        val artist = release.artistCredit?.map {
+            it.name + (it.joinphrase ?: "")
+        }?.joinToString(separator = "") ?: ""
+
+        val firstTrack = release.media?.firstOrNull()?.tracks?.firstOrNull()
+        val recording = firstTrack?.recording
+
+        if (recording != null) {
+            results += MetadataSearchResult(
+                id = recording.id,
+                title = recording.title,
+                artist = artist,
+                albumId = release.id,
+                album = release.title,
+                albumArtist = artist,
+                trackNumber = firstTrack.number,
+                year = release.date,
+                genres = null,
+                description = null,
+                albumDescription = release.disambiguation
+            )
+        }
+    }
+    return results
+}
+
+@Serializable
+internal data class ReleaseSearchItem(
+    val id: String,
+    val title: String,
+    @SerialName("artist-credit")
+    val artistCredit: List<Artist>? = null,
+    val media: List<ReleaseMedium>? = null,
+    val disambiguation: String? = null,
+    val date: String? = null
+)
+
+@Serializable
+internal data class ReleaseMedium(
+    val tracks: List<ReleaseTrack>? = null
+)
+
+@Serializable
+internal data class ReleaseTrack(
+    val number: String? = null,
+    val recording: ReleaseTrackRecording? = null
+)
+
+@Serializable
+internal data class ReleaseTrackRecording(
+    val id: String,
+    val title: String
 )

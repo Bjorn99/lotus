@@ -6,5 +6,6 @@ import com.dn0ne.player.app.domain.result.Result
 
 interface MetadataProvider {
     suspend fun searchMetadata(query: String, trackDuration: Long, matchDuration: Boolean = true): Result<List<MetadataSearchResult>, DataError>
+    suspend fun searchReleases(query: String, trackDuration: Long, matchDuration: Boolean): Result<List<MetadataSearchResult>, DataError>
     suspend fun getCoverArtBytes(searchResult: MetadataSearchResult): Result<ByteArray, DataError>
 }
