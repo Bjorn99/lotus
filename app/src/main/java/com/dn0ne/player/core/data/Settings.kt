@@ -31,6 +31,7 @@ class Settings(context: Context) {
     private val lyricsLineHeightKey = "lyrics-line-height"
     private val lyricsLetterSpacingKey = "lyrics-letter-spacing"
     private val lyricsAlignmentKey = "lyrics-alignment"
+    private val sidecarFolderUriKey = "sidecar-folder-uri"
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
     private val networkLookupsEnabledKey = "network-lookups-enabled"
     private val trackPlayStatsKey = "track-play-stats"
@@ -213,6 +214,15 @@ class Settings(context: Context) {
             apply()
         }
     }
+
+    var sidecarFolderUri: String?
+        get() = sharedPreferences.getString(sidecarFolderUriKey, null)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putString(sidecarFolderUriKey, value)
+                apply()
+            }
+        }
 
     var useDarkPaletteOnLyricsSheet: Boolean
         get() = sharedPreferences.getBoolean(useDarkPaletteOnLyricsSheetKey, true)

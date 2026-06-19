@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ import com.dn0ne.player.core.data.Settings
 fun LyricsSettings(
     settings: Settings,
     onBackClick: () -> Unit,
+    onLyricsFolderPick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -108,6 +110,16 @@ fun LyricsSettings(
                 settings.useDarkPaletteOnLyricsSheet = it
                 useDarkPaletteOnLyricsSheet = it
             },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        SettingIconButton(
+            title = context.resources.getString(R.string.lyrics_folder),
+            supportingText = context.resources.getString(R.string.lyrics_folder_supporting_text),
+            icon = Icons.Rounded.Folder,
+            buttonIcon = Icons.Rounded.Folder,
+            buttonContentDescription = context.resources.getString(R.string.pick_lyrics_folder),
+            onButtonClick = onLyricsFolderPick,
             modifier = Modifier.fillMaxWidth()
         )
 
