@@ -22,6 +22,17 @@ class GatedMetadataProvider(
             Result.Error(DataError.Network.NoInternet)
         }
 
+    override suspend fun searchReleases(
+        query: String,
+        trackDuration: Long,
+        matchDuration: Boolean,
+    ): Result<List<MetadataSearchResult>, DataError> =
+        if (isEnabled()) {
+            delegate.searchReleases(query, trackDuration, matchDuration)
+        } else {
+            Result.Error(DataError.Network.NoInternet)
+        }
+
     override suspend fun getCoverArtBytes(
         searchResult: MetadataSearchResult,
     ): Result<ByteArray, DataError> =
