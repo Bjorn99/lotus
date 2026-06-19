@@ -8,6 +8,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.io.File
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -1910,12 +1911,23 @@ class PlayerViewModel(
         }
     }
 
-    fun parseM3U(playlistName: String, fileContent: String) {
+    fun parseM3U(playlistName: String, fileContent: String, m3uDirectory: String?) {
         viewModelScope.launch {
-            val paths = fileContent.lines().fastFilter { it.startsWith("/") }
-            val tracks = paths.map { path ->
-                _trackList.value.fastFirstOrNull { path == it.data }
-            }.filterNotNull()
+            val tracks = withContext(Dispatchers.IO) {
+                fileContent.lines()
+                    .filter { it.isNotBlank() && !it.startsWith("#") }
+                    .map { line ->
+                        when {
+                            line.startsWith("/") -> line
+                            m3uDirectory != null -> runCatching {
+                                File(m3uDirectory, line).canonicalPath
+                            }.getOrNull()
+                            else -> null
+                        }
+                    }
+                    .filterNotNull()
+                    .mapNotNull { path -> _trackList.value.fastFirstOrNull { path == it.data } }
+            }
             val name = playlistName.filter { it.isDigit() || it.isLetter() || it.isWhitespace() }
 
             playlistRepository.insertPlaylist(
