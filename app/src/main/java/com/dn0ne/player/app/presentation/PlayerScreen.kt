@@ -1957,7 +1957,7 @@ private fun AlbumInfoDialog(
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(state.searchResults, key = { "${"$"}{it.id}-${"$"}{it.albumId}" }) { result ->
+                        items(state.searchResults, key = { "${it.id}-${it.albumId}" }) { result ->
                             SearchResultItem(
                                 searchResult = result,
                                 onClick = {
