@@ -52,6 +52,7 @@ import com.dn0ne.player.app.presentation.components.snackbar.ScaffoldWithSnackba
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarController
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
 import com.dn0ne.player.core.data.MusicScanner
+import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.core.presentation.Routes
 import com.dn0ne.player.setup.data.SetupState
 import com.dn0ne.player.setup.presentation.SetupScreen
@@ -151,6 +152,17 @@ class MainActivity : ComponentActivity() {
                             getPathFromFolderUri(it)
                         )
                     }
+                }
+            }
+
+        val sidecarFolderPicker =
+            registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+                if (uri != null) {
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    get<Settings>().sidecarFolderUri = uri.toString()
                 }
             }
 
@@ -297,6 +309,9 @@ class MainActivity : ComponentActivity() {
                                     onFolderPick = { shouldScan ->
                                         shouldScanPickedFolder = shouldScan
                                         pickFolder.launch(null)
+                                    },
+                                    onSidecarFolderPick = {
+                                        sidecarFolderPicker.launch(null)
                                     },
                                     onLyricsPick = {
                                         pickLyricsFile.launch(arrayOf("text/plain", "application/lrc"))

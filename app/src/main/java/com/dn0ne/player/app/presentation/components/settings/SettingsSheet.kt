@@ -63,6 +63,7 @@ import kotlinx.serialization.Serializable
 fun SettingsSheet(
     state: SettingsSheetState,
     onFolderPick: (scan: Boolean) -> Unit,
+    onSidecarFolderPick: () -> Unit,
     onPlaylistPick: () -> Unit,
     onScanFoldersClick: () -> Unit,
     onCloseClick: () -> Unit,
@@ -303,6 +304,7 @@ fun SettingsSheet(
                         onBackClick = {
                             navController.navigateUp()
                         },
+                        onLyricsFolderPick = onSidecarFolderPick,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
