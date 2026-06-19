@@ -643,32 +643,25 @@ internal data class ReleaseSearchResultDto(
 )
 
 internal fun ReleaseSearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
-    val results = mutableListOf<MetadataSearchResult>()
-    releases.forEach { release ->
+    return releases.map { release ->
         val artist = release.artistCredit?.map {
             it.name + (it.joinphrase ?: "")
         }?.joinToString(separator = "") ?: ""
 
-        val firstTrack = release.media?.firstOrNull()?.tracks?.firstOrNull()
-        val recording = firstTrack?.recording
-
-        if (recording != null) {
-            results += MetadataSearchResult(
-                id = recording.id,
-                title = recording.title,
-                artist = artist,
-                albumId = release.id,
-                album = release.title,
-                albumArtist = artist,
-                trackNumber = firstTrack.number,
-                year = release.date,
-                genres = null,
-                description = null,
-                albumDescription = release.disambiguation
-            )
-        }
+        MetadataSearchResult(
+            id = release.id,
+            title = release.title,
+            artist = artist,
+            albumId = release.id,
+            album = release.title,
+            albumArtist = artist,
+            trackNumber = null,
+            year = release.date,
+            genres = null,
+            description = null,
+            albumDescription = release.disambiguation
+        )
     }
-    return results
 }
 
 @Serializable

@@ -298,7 +298,7 @@ fun FilledSeekBarSegment(
         targetValue = when {
             enableWaving -> canvasHeight
             isHandleInDrag -> 0f
-            else -> canvasHeight / 3f
+            else -> canvasHeight / 2.5f
         },
         label = "wave-height"
     )
