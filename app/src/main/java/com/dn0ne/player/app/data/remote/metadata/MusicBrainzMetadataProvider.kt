@@ -19,8 +19,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.appendPathSegments
 import io.ktor.http.headers
 import io.ktor.serialization.JsonConvertException
+import com.dn0ne.player.core.util.RateLimiter
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.io.IOException
@@ -45,7 +45,8 @@ internal fun escapeLuceneQuery(query: String): String {
 
 class MusicBrainzMetadataProvider(
     context: Context,
-    private val client: HttpClient
+    private val client: HttpClient,
+    private val rateLimiter: RateLimiter,
 ) : MetadataProvider {
     private val logTag = "MBMetadataProvider"
     private val musicBrainzEndpoint = "https://musicbrainz.org/ws/2"
@@ -60,7 +61,7 @@ class MusicBrainzMetadataProvider(
         trackDuration: Long,
         matchDuration: Boolean,
     ): Result<List<MetadataSearchResult>, DataError> {
-        delay(1100)
+        rateLimiter.acquire()
 
         if (MBID_REGEX.matches(query)) {
             return lookupByMbid(query)
@@ -199,7 +200,7 @@ class MusicBrainzMetadataProvider(
     }
 
     override suspend fun getCoverArtBytes(searchResult: MetadataSearchResult): Result<ByteArray, DataError> {
-        delay(1100)
+        rateLimiter.acquire()
         val response = try {
             client.get(coverArtArchiveEndpoint) {
                 url {
