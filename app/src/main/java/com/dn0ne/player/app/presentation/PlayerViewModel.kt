@@ -54,6 +54,7 @@ import com.dn0ne.player.app.presentation.components.trackinfo.ManualInfoEditShee
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheetState
 import com.dn0ne.player.core.data.MusicScanner
 import com.dn0ne.player.core.data.Settings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -1548,21 +1549,17 @@ class PlayerViewModel(
                 }
 
                 viewModelScope.launch {
-                    val result = metadataProvider.searchMetadata(
-                        query = "\"$albumName\" AND artist:\"$artistName\"",
+                    val result = metadataProvider.searchReleases(
+                        query = "release:\"$albumName\" AND artist:\"$artistName\"",
                         trackDuration = 0L,
                         matchDuration = false,
                     )
                     when (result) {
                         is Result.Success -> {
-                            val seenAlbumIds = mutableSetOf<String>()
-                            val uniqueByAlbum = result.data.filter { item ->
-                                seenAlbumIds.add(item.albumId)
-                            }
                             _albumInfoSheetState.update {
                                 it.copy(
                                     isLoading = false,
-                                    searchResults = uniqueByAlbum,
+                                    searchResults = result.data,
                                 )
                             }
                         }
@@ -1921,7 +1918,8 @@ class PlayerViewModel(
                             line.startsWith("/") -> line
                             m3uDirectory != null -> runCatching {
                                 File(m3uDirectory, line).canonicalPath
-                            }.getOrNull()
+                            }.onFailure { if (it is CancellationException) throw it }
+                                .getOrNull()
                             else -> null
                         }
                     }

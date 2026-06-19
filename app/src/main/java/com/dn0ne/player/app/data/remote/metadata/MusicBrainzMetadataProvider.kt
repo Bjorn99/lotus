@@ -383,6 +383,8 @@ class MusicBrainzMetadataProvider(
                 }
             }
             HttpStatusCode.BadRequest -> Result.Error(DataError.Network.BadRequest)
+            HttpStatusCode.Unauthorized -> Result.Error(DataError.Network.Unauthorized)
+            HttpStatusCode.Forbidden -> Result.Error(DataError.Network.Forbidden)
             HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
             HttpStatusCode.RequestTimeout -> Result.Error(DataError.Network.RequestTimeout)
             HttpStatusCode.InternalServerError -> Result.Error(DataError.Network.InternalServerError)
