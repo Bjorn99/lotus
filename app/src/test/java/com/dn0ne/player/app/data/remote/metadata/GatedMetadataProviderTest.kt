@@ -1,6 +1,7 @@
 package com.dn0ne.player.app.data.remote.metadata
 
 import com.dn0ne.player.app.domain.metadata.MetadataSearchResult
+import com.dn0ne.player.app.domain.metadata.ReleaseMetadata
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import kotlinx.coroutines.runBlocking
@@ -15,11 +16,14 @@ class GatedMetadataProviderTest {
         var searchCallCount: Int = 0,
         var searchReleasesCallCount: Int = 0,
         var coverArtCallCount: Int = 0,
+        var releaseMetadataCallCount: Int = 0,
         private val searchResult: Result<List<MetadataSearchResult>, DataError> =
             Result.Error(DataError.Network.NotFound),
         private val searchReleasesResult: Result<List<MetadataSearchResult>, DataError> =
             Result.Error(DataError.Network.NotFound),
         private val coverArtResult: Result<ByteArray, DataError> =
+            Result.Error(DataError.Network.NotFound),
+        private val releaseMetadataResult: Result<ReleaseMetadata, DataError> =
             Result.Error(DataError.Network.NotFound),
     ) : MetadataProvider {
         override suspend fun searchMetadata(
@@ -45,6 +49,13 @@ class GatedMetadataProviderTest {
         ): Result<ByteArray, DataError> {
             coverArtCallCount++
             return coverArtResult
+        }
+
+        override suspend fun getReleaseMetadata(
+            releaseId: String,
+        ): Result<ReleaseMetadata, DataError> {
+            releaseMetadataCallCount++
+            return releaseMetadataResult
         }
     }
 

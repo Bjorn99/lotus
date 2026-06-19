@@ -215,6 +215,12 @@
     <string name="no_lyrics_found">No lyrics found for this track</string>
     <string name="failed_to_write">Failed to write file. Please try again.</string>
 
+    <!-- Album info fetch -->
+    <string name="fetch_album_info">Fetch album info</string>
+    <string name="album_info">Album info</string>
+    <string name="select_items">Select</string>
+    <string name="album_info_search_hint">Album name and artist</string>
+
     <!-- Manual editing screen -->
     <string name="edit">Edit</string>
     <string name="pick_art">Pick art</string>
@@ -284,7 +290,10 @@
     <string name="close_settings_sheet">Close settings sheet</string>
     <string name="theme">Theme</string>
     <string name="theme_supporting_text">Appearance, palette</string>
-    <string name="lyrics_supporting_text">Font settings, alignment</string>
+    <string name="lyrics_supporting_text">Font settings, alignment, sidecar folder</string>
+    <string name="lyrics_folder">Lyrics folder</string>
+    <string name="lyrics_folder_supporting_text">Pick a folder that contains .lrc files matching your audio files. The app looks for &lt;basename>.lrc when lyrics are needed.</string>
+    <string name="pick_lyrics_folder">Pick lyrics folder</string>
     <string name="playback">Playback</string>
     <string name="playback_supporting_text">Audio focus, equalizer</string>
     <string name="about_app">About app</string>

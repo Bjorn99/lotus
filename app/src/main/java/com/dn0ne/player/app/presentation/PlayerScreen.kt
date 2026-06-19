@@ -25,7 +25,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -45,16 +49,20 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -77,6 +85,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.fastFirstOrNull
@@ -87,6 +96,7 @@ import com.dn0ne.player.R
 import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.TrackSort
+import com.dn0ne.player.app.domain.metadata.MetadataSearchResult
 import com.dn0ne.player.app.domain.playlist.SmartPlaylists
 import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
@@ -112,8 +122,11 @@ import com.dn0ne.player.app.presentation.components.settings.Theme
 import com.dn0ne.player.app.presentation.components.topbar.LazyGridWithCollapsibleTabsTopBar
 import com.dn0ne.player.app.presentation.components.topbar.Tab
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
+import com.dn0ne.player.app.presentation.components.ProviderText
 import com.dn0ne.player.app.presentation.components.trackList
+import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
+import com.dn0ne.player.app.presentation.components.trackinfo.SearchResultItem
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheet
 import com.kmpalette.color
 import com.kmpalette.rememberDominantColorState
@@ -129,6 +142,7 @@ fun PlayerScreen(
     viewModel: PlayerViewModel,
     onCoverArtPick: () -> Unit,
     onFolderPick: (scan: Boolean) -> Unit,
+    onSidecarFolderPick: () -> Unit,
     onLyricsPick: () -> Unit,
     onPlaylistPick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -490,6 +504,9 @@ fun PlayerScreen(
                                 viewModel.settings.updateGridPlaylists(
                                     !gridPlaylists
                                 )
+                            },
+                            onFetchAlbumInfoClick = { playlist ->
+                                viewModel.onEvent(PlayerScreenEvent.OnFetchAlbumInfoClick(playlist))
                             }
                         )
                     }
@@ -935,6 +952,20 @@ fun PlayerScreen(
                         .fillMaxSize()
                 )
 
+
+                val albumInfoSheetState by viewModel.albumInfoSheetState.collectAsState()
+                if (albumInfoSheetState.isShown) {
+                    AlbumInfoDialog(
+                        state = albumInfoSheetState,
+                        onSearchResultClick = {
+                            viewModel.onEvent(PlayerScreenEvent.OnAlbumSearchResultPick(it))
+                        },
+                        onDismiss = {
+                            viewModel.onEvent(PlayerScreenEvent.OnCloseAlbumInfoSheet)
+                        },
+                    )
+                }
+
                 if (showAddToOrCreatePlaylistSheet) {
                     val playlists by viewModel.playlists.collectAsState()
                     AddToOrCreatePlaylistBottomSheet(
@@ -963,6 +994,7 @@ fun PlayerScreen(
                 SettingsSheet(
                     state = settingsSheetState,
                     onFolderPick = onFolderPick,
+                    onSidecarFolderPick = onSidecarFolderPick,
                     onPlaylistPick = onPlaylistPick,
                     onScanFoldersClick = {
                         viewModel.onEvent(PlayerScreenEvent.OnScanFoldersClick)
@@ -1077,7 +1109,8 @@ fun MainPlayerScreen(
     replaceSearchWithFilter: Boolean,
     gridPlaylists: Boolean,
     onGridPlaylistsClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onFetchAlbumInfoClick: (Playlist) -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -1103,6 +1136,10 @@ fun MainPlayerScreen(
     }
     val selectedPlaylists = remember {
         mutableStateListOf<Playlist>()
+    }
+
+    var albumContextMenuPlaylist by remember {
+        mutableStateOf<Playlist?>(null)
     }
 
     val topBarContent by remember {
@@ -1586,8 +1623,7 @@ fun MainPlayerScreen(
                     isInSelectionMode = isInSelectionMode,
                     selectedPlaylists = selectedPlaylists,
                     onEnterSelectionMode = { playlist ->
-                        isInSelectionMode = true
-                        selectedPlaylists.add(playlist)
+                        albumContextMenuPlaylist = playlist
                     },
                     onToggleSelection = { playlist ->
                         if (playlist in selectedPlaylists) {
@@ -1691,6 +1727,49 @@ fun MainPlayerScreen(
         onArtistPlaylistClick = onArtistPlaylistSelection,
         onGenrePlaylistClick = onGenrePlaylistSelection,
     )
+
+    if (albumContextMenuPlaylist != null) {
+        AlertDialog(
+            onDismissRequest = { albumContextMenuPlaylist = null },
+            title = {
+                Text(text = albumContextMenuPlaylist?.name
+                    ?: context.resources.getString(R.string.unknown_album))
+            },
+            text = {
+                Column {
+                    TextButton(
+                        onClick = {
+                            val playlist = albumContextMenuPlaylist
+                            albumContextMenuPlaylist = null
+                            playlist?.let { onFetchAlbumInfoClick(it) }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = context.resources.getString(R.string.fetch_album_info))
+                    }
+                    TextButton(
+                        onClick = {
+                            val playlist = albumContextMenuPlaylist
+                            albumContextMenuPlaylist = null
+                            playlist?.let {
+                                isInSelectionMode = true
+                                selectedPlaylists.add(it)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = context.resources.getString(R.string.select_items))
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { albumContextMenuPlaylist = null }) {
+                    Text(text = context.resources.getString(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -1757,6 +1836,72 @@ fun ScrollToTopAndLocateButtons(
             }
         }
     }
+}
+
+
+@Composable
+private fun AlbumInfoDialog(
+    state: AlbumInfoSheetState,
+    onSearchResultClick: (MetadataSearchResult) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = context.resources.getString(R.string.album_info))
+        },
+        text = {
+            Column {
+                if (state.isLoading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+
+                if (state.isFetchingRelease) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+
+                if (state.searchResults.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(state.searchResults, key = { "${"$"}{it.id}-${"$"}{it.albumId}" }) { result ->
+                            SearchResultItem(
+                                searchResult = result,
+                                onClick = {
+                                    onSearchResultClick(result)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        item {
+                            ProviderText(
+                                providerText = context.resources.getString(R.string.search_results_provided_by),
+                                uri = context.resources.getString(R.string.musicbrainz_uri),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+
+                if (!state.isLoading && state.searchResults.isEmpty() && !state.isFetchingRelease) {
+                    Text(
+                        text = context.resources.getString(R.string.search_no_results),
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = context.resources.getString(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Serializable

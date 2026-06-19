@@ -11,3 +11,18 @@ data class Metadata(
     val coverArtBytes: ByteArray? = null,
     val lyrics: String? = null
 )
+
+data class ReleaseMetadata(
+    val title: String,
+    val artist: String,
+    val date: String?,
+    val genres: List<String>?,
+    val coverArtArchiveFront: Boolean,
+    val tracks: List<ReleaseTrack>,
+)
+
+data class ReleaseTrack(
+    val recordingId: String,
+    val title: String,
+    val trackNumber: String?,
+)

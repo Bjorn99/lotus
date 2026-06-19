@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.source.ShuffleOrder
 import com.dn0ne.player.EqualizerController
 import com.dn0ne.player.R
 import com.dn0ne.player.app.data.LyricsReader
+import com.dn0ne.player.app.data.LyricsSidecarReader
 import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.backup.BackupManager
 import com.dn0ne.player.app.data.backup.ExportResult
@@ -44,6 +45,7 @@ import com.dn0ne.player.app.presentation.components.playback.PlaybackState
 import com.dn0ne.player.app.presentation.components.settings.SettingsSheetState
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarController
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
+import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.ChangesSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.InfoSearchSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.LyricsControlSheetState
@@ -73,6 +75,7 @@ class PlayerViewModel(
     private val lyricsProvider: LyricsProvider,
     private val lyricsRepository: LyricsRepository,
     private val lyricsReader: LyricsReader,
+    private val lyricsSidecarReader: LyricsSidecarReader,
     private val playlistRepository: PlaylistRepository,
     private val lovedTracksRepository: LovedTracksRepository,
     private val trackStatsRepository: TrackStatsRepository,
@@ -296,6 +299,14 @@ class PlayerViewModel(
             initialValue = TrackInfoSheetState()
         )
 
+
+    private val _albumInfoSheetState = MutableStateFlow(AlbumInfoSheetState())
+    val albumInfoSheetState = _albumInfoSheetState.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = AlbumInfoSheetState()
+    )
+
     private val _pendingMetadata = Channel<Pair<Track, Metadata>>()
     val pendingMetadata = _pendingMetadata.receiveAsFlow()
 
@@ -467,6 +478,9 @@ class PlayerViewModel(
             is OnLyricsClick, is OnLyricsControlClick, is OnDeleteLyricsClick,
             is OnCopyLyricsFromTagClick, is OnWriteLyricsToTagClick,
             is OnFetchLyricsFromRemoteClick, is OnPublishLyricsOnRemoteClick -> handleLyricsEvent(event)
+
+            is OnFetchAlbumInfoClick, is OnAlbumSearchResultPick,
+            is OnCloseAlbumInfoSheet -> handleAlbumInfoEvent(event)
 
             is OnSettingsClick, is OnCloseSettingsClick, is OnScanFoldersClick -> handleSettingsEvent(event)
         }
@@ -1408,6 +1422,155 @@ class PlayerViewModel(
         }
     }
 
+    private fun handleAlbumInfoEvent(event: PlayerScreenEvent) {
+        when (event) {
+            is OnFetchAlbumInfoClick -> {
+                val playlist = event.playlist
+                val firstTrack = playlist.trackList.firstOrNull() ?: return
+                val albumName = firstTrack.album ?: playlist.name ?: return
+                val artistName = firstTrack.albumArtist?.takeIf { it.isNotBlank() }
+                    ?: firstTrack.artist ?: ""
+
+                _albumInfoSheetState.update {
+                    it.copy(
+                        isShown = true,
+                        playlist = playlist,
+                        isLoading = true,
+                        searchResults = emptyList(),
+                    )
+                }
+
+                viewModelScope.launch {
+                    val result = metadataProvider.searchMetadata(
+                        query = "\"$albumName\" AND artist:\"$artistName\"",
+                        trackDuration = 0L,
+                        matchDuration = false,
+                    )
+                    when (result) {
+                        is Result.Success -> {
+                            val seenAlbumIds = mutableSetOf<String>()
+                            val uniqueByAlbum = result.data.filter { item ->
+                                seenAlbumIds.add(item.albumId)
+                            }
+                            _albumInfoSheetState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    searchResults = uniqueByAlbum,
+                                )
+                            }
+                        }
+                        is Result.Error -> {
+                            when (result.error) {
+                                DataError.Network.BadRequest -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.query_was_corrupted)
+                                    )
+                                }
+                                DataError.Network.NoInternet -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.no_internet)
+                                    )
+                                }
+                                else -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.unknown_error_occurred)
+                                    )
+                                }
+                            }
+                            _albumInfoSheetState.update {
+                                it.copy(isLoading = false)
+                            }
+                        }
+                    }
+                }
+            }
+
+            is OnAlbumSearchResultPick -> {
+                _albumInfoSheetState.update {
+                    it.copy(isFetchingRelease = true)
+                }
+
+                viewModelScope.launch {
+                    val result = metadataProvider.getReleaseMetadata(
+                        releaseId = event.searchResult.albumId,
+                    )
+                    when (result) {
+                        is Result.Success -> {
+                            val releaseMetadata = result.data
+                            val tracks = _albumInfoSheetState.value.playlist?.trackList
+                                ?: return@launch
+                            val year = releaseMetadata.date?.substringBefore("-")
+                            val genre = releaseMetadata.genres?.firstOrNull()
+
+                            tracks.forEach { track ->
+                                if (track.format !in unsupportedWriteFormats) {
+                                    try {
+                                        _pendingMetadata.send(
+                                            track to Metadata(
+                                                albumArtist = releaseMetadata.artist,
+                                                year = year,
+                                                genre = genre,
+                                            )
+                                        )
+                                    } catch (_: Exception) {
+                                        // Channel send may fail; continue with next track
+                                    }
+                                }
+                            }
+
+                            _albumInfoSheetState.update {
+                                it.copy(
+                                    isShown = false,
+                                    isFetchingRelease = false,
+                                    playlist = null,
+                                    searchResults = emptyList(),
+                                )
+                            }
+
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(message = R.string.metadata_change_succeed)
+                            )
+                        }
+                        is Result.Error -> {
+                            when (result.error) {
+                                DataError.Network.NoInternet -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.no_internet)
+                                    )
+                                }
+                                DataError.Network.NotFound -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.cover_art_not_found)
+                                    )
+                                }
+                                else -> {
+                                    SnackbarController.sendEvent(
+                                        SnackbarEvent(message = R.string.unknown_error_occurred)
+                                    )
+                                }
+                            }
+                            _albumInfoSheetState.update {
+                                it.copy(isFetchingRelease = false)
+                            }
+                        }
+                    }
+                }
+            }
+
+            is OnCloseAlbumInfoSheet -> {
+                _albumInfoSheetState.update {
+                    it.copy(
+                        isShown = false,
+                        playlist = null,
+                        searchResults = emptyList(),
+                    )
+                }
+            }
+
+            else -> {}
+        }
+    }
+
     private fun handleSettingsEvent(event: PlayerScreenEvent) {
         when (event) {
             OnSettingsClick -> {
@@ -1587,9 +1750,49 @@ class PlayerViewModel(
                     )
                 }
 
-                var lyrics: Lyrics? = lyricsFetcher.fetchFromRemote(currentTrack)
-                    ?: lyricsFetcher.readFromTag(currentTrack, viewModelScope)
+                // 1. Cache
+                var lyrics: Lyrics? = lyricsRepository.getLyricsByUri(
+                    currentTrack.uri.toString()
+                )
+
+                // 2. Embedded tag
+                if (lyrics == null) {
+                    lyrics = lyricsFetcher.readFromTag(currentTrack, viewModelScope)
                         ?.also { lyricsRepository.insertLyrics(it) }
+                }
+
+                // 3. Sidecar .lrc
+                if (lyrics == null) {
+                    val treeUri = settings.sidecarFolderUri?.let { Uri.parse(it) }
+                    lyrics = lyricsSidecarReader.readSidecarLyrics(
+                        currentTrack.data, treeUri
+                    )?.let { lrcText ->
+                        try {
+                            val synced = lrcText.toSyncedLyrics()
+                            Lyrics(
+                                uri = currentTrack.uri.toString(),
+                                synced = synced,
+                                plain = synced.map { it.second },
+                                areFromRemote = false
+                            ).also { lyricsRepository.insertLyrics(it) }
+                        } catch (_: IllegalArgumentException) {
+                            Lyrics(
+                                uri = currentTrack.uri.toString(),
+                                plain = lrcText.split('\n'),
+                                areFromRemote = false
+                            ).also { lyricsRepository.insertLyrics(it) }
+                        }
+                    }
+                }
+
+                // 4. LRCLIB (forceRemote = true skips cache since we already
+                //    checked it in step 1)
+                if (lyrics == null) {
+                    lyrics = lyricsFetcher.fetchFromRemote(
+                        currentTrack,
+                        forceRemote = true
+                    )
+                }
 
                 _playbackState.update {
                     it.copy(
