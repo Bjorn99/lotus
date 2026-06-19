@@ -23,6 +23,7 @@ import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
+import com.dn0ne.player.core.util.RateLimiter
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
@@ -31,12 +32,16 @@ import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -107,6 +112,12 @@ val playerModule = module {
         )
     }
 
+    single {
+        RateLimiter().also {
+            it.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        }
+    }
+
     single<HttpClient> {
         HttpClient(OkHttp) {
             // Strict redirect policy: don't auto-follow. A poisoned DNS
@@ -134,6 +145,16 @@ val playerModule = module {
                 socketTimeoutMillis = 15_000
             }
 
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = 2)
+                retryOnException(maxRetries = 3, retryOnTimeout = true)
+                exponentialDelay(
+                    base = 2.0,
+                    maxDelayMs = 60_000L,
+                    randomizationMs = 1000,
+                )
+            }
+
             // Cap response size so a malicious or buggy upstream can't fill
             // memory with a multi-GB body. Headers-phase only — checks the
             // declared Content-Length before we consume the body. Responses
@@ -153,6 +174,7 @@ val playerModule = module {
             delegate = MusicBrainzMetadataProvider(
                 context = androidContext(),
                 client = get(),
+                rateLimiter = get(),
             ),
             isEnabled = { settings.networkLookupsEnabled },
         )
