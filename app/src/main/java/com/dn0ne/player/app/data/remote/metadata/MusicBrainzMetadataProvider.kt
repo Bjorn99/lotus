@@ -348,7 +348,7 @@ class MusicBrainzMetadataProvider(
 
 
     override suspend fun getReleaseMetadata(releaseId: String): Result<ReleaseMetadata, DataError> {
-        delay(1100)
+        rateLimiter.acquire()
         val response = try {
             client.get(musicBrainzEndpoint) {
                 url {
