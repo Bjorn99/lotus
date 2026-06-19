@@ -103,7 +103,7 @@ class MusicBrainzMetadataProvider(
             !MBID_REGEX.matches(query)
 
         if (shouldBroaden) {
-            delay(1100)
+            rateLimiter.acquire()
             val broadenedQuery = buildString {
                 append("(")
                 append(buildBroadenedQuery(query))
@@ -213,7 +213,7 @@ class MusicBrainzMetadataProvider(
         trackDuration: Long,
         matchDuration: Boolean,
     ): Result<List<MetadataSearchResult>, DataError> {
-        delay(1100)
+        rateLimiter.acquire()
 
         val escapedQuery = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
             query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
