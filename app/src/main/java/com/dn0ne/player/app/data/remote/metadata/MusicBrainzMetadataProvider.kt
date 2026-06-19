@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.ui.util.fastForEach
 import com.dn0ne.player.app.domain.metadata.MetadataSearchResult
+import com.dn0ne.player.app.domain.metadata.ReleaseMetadata
+import com.dn0ne.player.app.domain.metadata.ReleaseTrack
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import io.ktor.client.HttpClient
@@ -186,6 +188,51 @@ class MusicBrainzMetadataProvider(
                     Result.Error(DataError.Network.ParseError)
                 } catch (e: Throwable) {
                     Log.w(logTag, "Failed to parse MusicBrainz lookup response", e)
+                    Result.Error(DataError.Network.ParseError)
+                }
+            }
+            HttpStatusCode.BadRequest -> Result.Error(DataError.Network.BadRequest)
+            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
+            HttpStatusCode.RequestTimeout -> Result.Error(DataError.Network.RequestTimeout)
+            HttpStatusCode.InternalServerError -> Result.Error(DataError.Network.InternalServerError)
+            HttpStatusCode.ServiceUnavailable -> Result.Error(DataError.Network.ServiceUnavailable)
+            else -> Result.Error(DataError.Network.Unknown)
+        }
+    }
+
+
+    override suspend fun getReleaseMetadata(releaseId: String): Result<ReleaseMetadata, DataError> {
+        delay(1100)
+        val response = try {
+            client.get(musicBrainzEndpoint) {
+                url {
+                    appendPathSegments("release", releaseId)
+                    parameters.append("fmt", "json")
+                    parameters.append("inc", "recordings+artist-credits+tags+genres")
+                }
+                headers {
+                    append(HttpHeaders.Accept, ContentType.Application.Json.toString())
+                    append(HttpHeaders.UserAgent, userAgent)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            return Result.Error(e.toNetworkError())
+        }
+
+        return when (response.status) {
+            HttpStatusCode.OK -> {
+                try {
+                    val releaseDto: ReleaseDto = response.body()
+                    Result.Success(releaseDto.toReleaseMetadata())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: JsonConvertException) {
+                    Log.d(logTag, e.message, e)
+                    Result.Error(DataError.Network.ParseError)
+                } catch (e: Throwable) {
+                    Log.w(logTag, "Failed to parse MusicBrainz release response", e)
                     Result.Error(DataError.Network.ParseError)
                 }
             }
@@ -440,3 +487,71 @@ internal data class MediaTrack(
 internal data class Tag(
     val name: String
 )
+// DTOs for Release lookup (/ws/2/release/{id}?inc=recordings+artist-credits+tags+genres)
+@Serializable
+internal data class ReleaseDto(
+    val title: String,
+    val date: String? = null,
+    @SerialName("artist-credit")
+    val artistCredit: List<Artist> = emptyList(),
+    val tags: List<Tag>? = null,
+    val genres: List<GenreDto>? = null,
+    @SerialName("cover-art-archive")
+    val coverArtArchive: CoverArtArchiveDto? = null,
+    val media: List<ReleaseMediaDto> = emptyList(),
+)
+
+@Serializable
+internal data class GenreDto(
+    val name: String,
+)
+
+@Serializable
+internal data class CoverArtArchiveDto(
+    val front: Boolean = false,
+)
+
+@Serializable
+internal data class ReleaseMediaDto(
+    val tracks: List<ReleaseTrackDto> = emptyList(),
+)
+
+@Serializable
+internal data class ReleaseTrackDto(
+    val number: String? = null,
+    val title: String,
+    val recording: ReleaseRecordingDto,
+)
+
+@Serializable
+internal data class ReleaseRecordingDto(
+    val id: String,
+    val title: String,
+)
+
+internal fun ReleaseDto.toReleaseMetadata(): ReleaseMetadata {
+    val artist = artistCredit.ifEmpty { null }?.map {
+        it.name + (it.joinphrase ?: "")
+    }?.joinToString(separator = "") ?: ""
+    val genres = genres?.map { it.name }
+        ?: tags?.map { it.name }
+
+    val tracks = media.flatMap { mediaItem ->
+        mediaItem.tracks.map { track ->
+            ReleaseTrack(
+                recordingId = track.recording.id,
+                title = track.recording.title,
+                trackNumber = track.number,
+            )
+        }
+    }
+
+    return ReleaseMetadata(
+        title = title,
+        artist = artist,
+        date = date,
+        genres = genres,
+        coverArtArchiveFront = coverArtArchive?.front ?: false,
+        tracks = tracks,
+    )
+}
