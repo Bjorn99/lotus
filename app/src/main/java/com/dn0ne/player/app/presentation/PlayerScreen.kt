@@ -1207,6 +1207,19 @@ fun MainPlayerScreen(
         }
     }
 
+    val titleLarge = MaterialTheme.typography.titleLarge
+    val displaySmall = MaterialTheme.typography.displaySmall
+    val titleTextStyle = remember(collapseFraction) {
+        titleLarge.copy(
+            fontSize = lerp(
+                titleLarge.fontSize,
+                displaySmall.fontSize,
+                collapseFraction
+            ),
+            fontWeight = FontWeight.Bold
+        )
+    }
+
     LazyGridWithCollapsibleTabsTopBar(
         gridState = gridState,
         topBarTabs = topBarTabs,
@@ -1221,14 +1234,7 @@ fun MainPlayerScreen(
 
             onTabChange(it)
         },
-        tabTitleTextStyle = MaterialTheme.typography.titleLarge.copy(
-            fontSize = lerp(
-                MaterialTheme.typography.titleLarge.fontSize,
-                MaterialTheme.typography.displaySmall.fontSize,
-                collapseFraction
-            ),
-            fontWeight = FontWeight.Bold
-        ),
+        tabTitleTextStyle = titleTextStyle,
         topBarButtons = { tab ->
             AnimatedContent(
                 targetState = topBarContent,
@@ -1532,7 +1538,7 @@ fun MainPlayerScreen(
             alignment = Alignment.CenterHorizontally
         ),
         contentVerticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         gridCells = {
             if (it == Tab.Tracks || !gridPlaylists) GridCells.Fixed(1) else {
                 GridCells.Adaptive(150.dp)

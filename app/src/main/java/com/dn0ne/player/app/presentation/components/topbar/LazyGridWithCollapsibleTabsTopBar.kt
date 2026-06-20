@@ -124,7 +124,11 @@ fun LazyGridWithCollapsibleTabsTopBar(
     )
 
     LaunchedEffect(isInLandscapeOrientation) {
-        topBarHeight.snapTo(maxTopBarHeight)
+        if (isInLandscapeOrientation) {
+            topBarHeight.snapTo(minTopBarHeight)
+        } else {
+            topBarHeight.snapTo(maxTopBarHeight)
+        }
     }
 
     LaunchedEffect(topBarHeight.value) {
@@ -155,8 +159,10 @@ fun LazyGridWithCollapsibleTabsTopBar(
                     )
                 } else previousHeight
 
-                coroutineScope.launch {
-                    topBarHeight.snapTo(newHeight)
+                if (newHeight != previousHeight) {
+                    coroutineScope.launch {
+                        topBarHeight.snapTo(newHeight)
+                    }
                 }
                 return Offset(0f, newHeight - previousHeight)
             }
