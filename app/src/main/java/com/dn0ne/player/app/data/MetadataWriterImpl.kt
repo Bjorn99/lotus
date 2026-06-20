@@ -9,11 +9,14 @@ import android.content.IntentSender
 import android.media.MediaScannerConnection
 import android.os.Build
 import android.util.Log
+import com.dn0ne.player.app.data.db.TrackMetadataDao
+import com.dn0ne.player.app.data.db.TrackMetadataEntity
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.format
+import kotlinx.coroutines.runBlocking
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
 import org.jaudiotagger.audio.exceptions.CannotWriteException
@@ -27,7 +30,8 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 
 class MetadataWriterImpl(
-    private val context: Context
+    private val context: Context,
+    private val trackMetadataDao: TrackMetadataDao,
 ) : MetadataWriter {
     private val logTag = "Metadata Writer"
 
@@ -94,6 +98,10 @@ class MetadataWriterImpl(
                     }
 
                     lyrics?.let { tag.setField(FieldKey.LYRICS, it) }
+
+                    mbAlbumId?.let { tag.setField(FieldKey.MUSICBRAINZ_RELEASEID, it) }
+                    mbReleaseGroupId?.let { tag.setField(FieldKey.MUSICBRAINZ_RELEASE_GROUP_ID, it) }
+                    mbAlbumArtistId?.let { tag.setField(FieldKey.MUSICBRAINZ_RELEASEARTISTID, it) }
                 }
 
                 AudioFileIO.write(audioFile)
@@ -106,6 +114,22 @@ class MetadataWriterImpl(
                     }
                 }
                 MediaScannerConnection.scanFile(context, arrayOf(track.data), null, null)
+
+                if (metadata.mbAlbumId != null || metadata.mbReleaseGroupId != null
+                    || metadata.mbAlbumArtistId != null
+                ) {
+                    runBlocking {
+                        trackMetadataDao.upsert(
+                            TrackMetadataEntity(
+                                trackData = track.data,
+                                mbAlbumId = metadata.mbAlbumId,
+                                mbReleaseGroupId = metadata.mbReleaseGroupId,
+                                mbAlbumArtistId = metadata.mbAlbumArtistId,
+                            )
+                        )
+                    }
+                }
+
                 context.cacheDir?.deleteRecursively()
                 return Result.Success(Unit)
             } catch (e: SecurityException) {

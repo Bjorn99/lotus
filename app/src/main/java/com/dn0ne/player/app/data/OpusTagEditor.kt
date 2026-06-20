@@ -40,6 +40,9 @@ internal object OpusTagEditor {
         metadata.year?.let { fields["DATE"] = it }
         metadata.trackNumber?.let { fields["TRACKNUMBER"] = it }
         metadata.lyrics?.let { fields["LYRICS"] = it }
+        metadata.mbAlbumId?.let { fields["MUSICBRAINZ_ALBUMID"] = it }
+        metadata.mbReleaseGroupId?.let { fields["MUSICBRAINZ_RELEASEGROUPID"] = it }
+        metadata.mbAlbumArtistId?.let { fields["MUSICBRAINZ_ALBUMARTISTID"] = it }
 
         val vendorString = parseOpusTagsVendor(pages[1])
         val newPage = buildOpusTagsPage(
