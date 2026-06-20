@@ -326,7 +326,9 @@ class MainActivity : ComponentActivity() {
                             }
 
                             val coroutineScope = rememberCoroutineScope()
-                            ObserveAsEvents(flow = viewModel.pendingMetadata) { (track, metadata) ->
+                            ObserveAsEvents(flow = viewModel.pendingMetadata) { pendingWrite ->
+                                val track = pendingWrite.track
+                                val metadata = pendingWrite.metadata
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                     trackToMetadataPair = track to metadata
 
@@ -342,6 +344,7 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     checkMetadataWriteResult(result)
+                                    pendingWrite.onComplete(result)
                                 } else {
                                     if (!isWritePermissionGranted) {
                                         requestWritePermissionLauncher.launch(
@@ -358,6 +361,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
 
+                                        pendingWrite.onComplete(Result.Error(DataError.Local.NoWritePermission))
                                         return@ObserveAsEvents
                                     }
 
@@ -369,6 +373,7 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     checkMetadataWriteResult(result)
+                                    pendingWrite.onComplete(result)
                                 }
                             }
 
