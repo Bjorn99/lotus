@@ -1662,7 +1662,7 @@ class PlayerViewModel(
                                                 } else {
                                                     R.string.unknown_error_occurred
                                                 }
-                                                kotlinx.coroutines.GlobalScope.launch {
+                                                viewModelScope.launch {
                                                     SnackbarController.sendEvent(
                                                         SnackbarEvent(message = message)
                                                     )
