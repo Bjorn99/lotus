@@ -9,9 +9,7 @@ import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarController
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -31,22 +29,10 @@ class LyricsFetcher(
      * `LyricsReader` already handles the heavy I/O. Errors surface as a
      * snackbar launched on [scope] so callers don't block on the UI thread.
      */
-    fun readFromTag(track: Track, scope: CoroutineScope): Lyrics? {
-        val readResult = lyricsReader.readFromTag(track)
-        return when (readResult) {
+    fun readFromTag(track: Track): Lyrics? {
+        return when (val readResult = lyricsReader.readFromTag(track)) {
             is Result.Success -> readResult.data
-            is Result.Error -> {
-                val messageRes = when (readResult.error) {
-                    DataError.Local.NoReadPermission -> R.string.no_read_permission
-                    DataError.Local.FailedToRead -> R.string.failed_to_read
-                    DataError.Local.NoLyricsFound -> R.string.no_lyrics_found
-                    else -> R.string.unknown_error_occurred
-                }
-                scope.launch {
-                    SnackbarController.sendEvent(SnackbarEvent(message = messageRes))
-                }
-                null
-            }
+            is Result.Error -> null
         }
     }
 

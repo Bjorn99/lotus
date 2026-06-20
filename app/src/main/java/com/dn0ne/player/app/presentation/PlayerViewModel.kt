@@ -1342,7 +1342,7 @@ class PlayerViewModel(
                     val track = _trackInfoSheetState.value.track ?: return@launch
 
                     val lyricsFromRepository = lyricsRepository.getLyricsByUri(track.uri.toString())
-                    var lyricsFromTag: Lyrics? = lyricsFetcher.readFromTag(track, viewModelScope)
+                    var lyricsFromTag: Lyrics? = lyricsFetcher.readFromTag(track)
 
                     _lyricsControlSheetState.update {
                         it.copy(
@@ -1412,11 +1412,17 @@ class PlayerViewModel(
 
                         delay(5000)
 
-                        val fromTag = lyricsFetcher.readFromTag(track, viewModelScope)
+                        val fromTag = lyricsFetcher.readFromTag(track)
                         _lyricsControlSheetState.update {
                             it.copy(
                                 lyricsFromTag = fromTag,
                                 isWritingToTag = false
+                            )
+                        }
+
+                        if (fromTag == null) {
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(message = R.string.failed_to_read)
                             )
                         }
                     }
@@ -1913,7 +1919,7 @@ class PlayerViewModel(
 
                 // 2. Embedded tag
                 if (lyrics == null) {
-                    lyrics = lyricsFetcher.readFromTag(currentTrack, viewModelScope)
+                    lyrics = lyricsFetcher.readFromTag(currentTrack)
                         ?.also { lyricsRepository.insertLyrics(it) }
                 }
 
