@@ -354,7 +354,7 @@ class MusicBrainzMetadataProvider(
                 url {
                     appendPathSegments("release", releaseId)
                     parameters.append("fmt", "json")
-                    parameters.append("inc", "recordings+artist-credits+tags+genres")
+                    parameters.append("inc", "recordings+artist-credits+tags+genres+release-groups")
                 }
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -608,7 +608,8 @@ internal data class Recording(
 @Serializable
 internal data class Artist(
     val name: String,
-    val joinphrase: String? = null
+    val joinphrase: String? = null,
+    val id: String? = null,
 )
 
 @Serializable
@@ -704,12 +705,19 @@ internal data class ReleaseDto(
     val genres: List<GenreDto>? = null,
     @SerialName("cover-art-archive")
     val coverArtArchive: CoverArtArchiveDto? = null,
+    @SerialName("release-group")
+    val releaseGroup: ReleaseGroupRef? = null,
     val media: List<ReleaseMediaDto> = emptyList(),
 )
 
 @Serializable
 internal data class GenreDto(
     val name: String,
+)
+
+@Serializable
+internal data class ReleaseGroupRef(
+    val id: String,
 )
 
 @Serializable
@@ -759,5 +767,7 @@ internal fun ReleaseDto.toReleaseMetadata(): ReleaseMetadata {
         genres = genres,
         coverArtArchiveFront = coverArtArchive?.front ?: false,
         tracks = tracks,
+        releaseGroupId = releaseGroup?.id,
+        artistId = artistCredit.firstOrNull()?.id,
     )
 }
