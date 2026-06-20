@@ -365,7 +365,13 @@ class PlayerViewModel(
         initialValue = AlbumInfoSheetState()
     )
 
-    private val _pendingMetadata = Channel<Pair<Track, Metadata>>()
+    data class PendingWrite(
+        val track: Track,
+        val metadata: Metadata,
+        val onComplete: (Result<Unit, DataError.Local>) -> Unit,
+    )
+
+    private val _pendingMetadata = Channel<PendingWrite>()
     val pendingMetadata = _pendingMetadata.receiveAsFlow()
 
     private val _pendingTrackUris = Channel<Uri>()
@@ -540,7 +546,7 @@ class PlayerViewModel(
             is OnFetchLyricsFromRemoteClick, is OnPublishLyricsOnRemoteClick -> handleLyricsEvent(event)
 
             is OnFetchAlbumInfoClick, is OnAlbumSearchResultPick,
-            is OnCloseAlbumInfoSheet -> handleAlbumInfoEvent(event)
+            is OnCloseAlbumInfoSheet, is OnFetchCoverArtToggle -> handleAlbumInfoEvent(event)
 
             is OnSettingsClick, is OnCloseSettingsClick, is OnScanFoldersClick -> handleSettingsEvent(event)
         }
@@ -1132,7 +1138,7 @@ class PlayerViewModel(
                     )
                 }
                 viewModelScope.launch {
-                    _pendingMetadata.send(track to event.metadata)
+                    _pendingMetadata.send(PendingWrite(track, event.metadata) {})
                 }
             }
 
@@ -1401,7 +1407,7 @@ class PlayerViewModel(
                             )
                         }
                         _pendingMetadata.send(
-                            track to Metadata(lyrics = plain)
+                            PendingWrite(track, Metadata(lyrics = plain)) {}
                         )
 
                         delay(5000)
@@ -1534,10 +1540,7 @@ class PlayerViewModel(
         when (event) {
             is OnFetchAlbumInfoClick -> {
                 val playlist = event.playlist
-                val firstTrack = playlist.trackList.firstOrNull() ?: return
-                val albumName = firstTrack.album ?: playlist.name ?: return
-                val artistName = firstTrack.albumArtist?.takeIf { it.isNotBlank() }
-                    ?: firstTrack.artist ?: ""
+                val searchQuery = AlbumSearchQueryBuilder.build(playlist) ?: return
 
                 _albumInfoSheetState.update {
                     it.copy(
@@ -1545,15 +1548,30 @@ class PlayerViewModel(
                         playlist = playlist,
                         isLoading = true,
                         searchResults = emptyList(),
+                        fetchCoverArt = true,
                     )
                 }
 
                 viewModelScope.launch {
-                    val result = metadataProvider.searchReleases(
-                        query = "release:\"$albumName\" AND artist:\"$artistName\"",
+                    var result = metadataProvider.searchReleases(
+                        query = searchQuery.query,
                         trackDuration = 0L,
                         matchDuration = false,
                     )
+
+                    if (result is Result.Success &&
+                        result.data.size < 3 &&
+                        !searchQuery.isVA &&
+                        searchQuery.consensusArtist.isNotBlank()
+                    ) {
+                        val retryQuery = "release:\"${searchQuery.albumName}\""
+                        result = metadataProvider.searchReleases(
+                            query = retryQuery,
+                            trackDuration = 0L,
+                            matchDuration = false,
+                        )
+                    }
+
                     when (result) {
                         is Result.Success -> {
                             _albumInfoSheetState.update {
@@ -1565,21 +1583,18 @@ class PlayerViewModel(
                         }
                         is Result.Error -> {
                             when (result.error) {
-                                DataError.Network.BadRequest -> {
+                                DataError.Network.BadRequest ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.query_was_corrupted)
                                     )
-                                }
-                                DataError.Network.NoInternet -> {
+                                DataError.Network.NoInternet ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.no_internet)
                                     )
-                                }
-                                else -> {
+                                else ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.unknown_error_occurred)
                                     )
-                                }
                             }
                             _albumInfoSheetState.update {
                                 it.copy(isLoading = false)
@@ -1595,30 +1610,68 @@ class PlayerViewModel(
                 }
 
                 viewModelScope.launch {
-                    val result = metadataProvider.getReleaseMetadata(
+                    val releaseResult = metadataProvider.getReleaseMetadata(
                         releaseId = event.searchResult.albumId,
                     )
-                    when (result) {
+                    when (releaseResult) {
                         is Result.Success -> {
-                            val releaseMetadata = result.data
+                            val release = releaseResult.data
                             val tracks = _albumInfoSheetState.value.playlist?.trackList
                                 ?: return@launch
-                            val year = releaseMetadata.date?.substringBefore("-")
-                            val genre = releaseMetadata.genres?.firstOrNull()
+                            val year = release.date?.substringBefore("-")
+                            val genre = release.genres?.joinToString(" / ")
+                            val fetchCoverArt = _albumInfoSheetState.value.fetchCoverArt
 
-                            tracks.forEach { track ->
-                                if (track.format !in unsupportedWriteFormats) {
-                                    try {
-                                        _pendingMetadata.send(
-                                            track to Metadata(
-                                                albumArtist = releaseMetadata.artist,
+                            var coverArtBytes: ByteArray? = null
+                            if (fetchCoverArt) {
+                                val coverResult = metadataProvider.getCoverArtBytes(
+                                    event.searchResult
+                                )
+                                if (coverResult is Result.Success) {
+                                    coverArtBytes = coverResult.data
+                                }
+                            }
+
+                            val writableTracks = tracks.filter {
+                                it.format !in unsupportedWriteFormats
+                            }
+                            val totalCount = writableTracks.size
+                            var successCount = 0
+                            var completedCount = 0
+
+                            writableTracks.forEach { track ->
+                                try {
+                                    _pendingMetadata.send(
+                                        PendingWrite(
+                                            track,
+                                            Metadata(
+                                                albumArtist = release.artist,
                                                 year = year,
                                                 genre = genre,
+                                                coverArtBytes = coverArtBytes,
+                                                mbAlbumId = event.searchResult.albumId,
+                                                mbReleaseGroupId = release.releaseGroupId,
+                                                mbAlbumArtistId = release.artistId,
                                             )
-                                        )
-                                    } catch (_: Exception) {
-                                        // Channel send may fail; continue with next track
-                                    }
+                                        ) { writeResult ->
+                                            if (writeResult is Result.Success) successCount++
+                                            completedCount++
+                                            if (completedCount == totalCount) {
+                                                val message = if (successCount > 0) {
+                                                    R.string.metadata_change_succeed
+                                                } else {
+                                                    R.string.unknown_error_occurred
+                                                }
+                                                kotlinx.coroutines.GlobalScope.launch {
+                                                    SnackbarController.sendEvent(
+                                                        SnackbarEvent(message = message)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    )
+                                } catch (_: Exception) {
+                                    // Channel send may fail; continue with next track
                                 }
                             }
 
@@ -1630,28 +1683,21 @@ class PlayerViewModel(
                                     searchResults = emptyList(),
                                 )
                             }
-
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(message = R.string.metadata_change_succeed)
-                            )
                         }
                         is Result.Error -> {
-                            when (result.error) {
-                                DataError.Network.NoInternet -> {
+                            when (releaseResult.error) {
+                                DataError.Network.NoInternet ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.no_internet)
                                     )
-                                }
-                                DataError.Network.NotFound -> {
+                                DataError.Network.NotFound ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.cover_art_not_found)
                                     )
-                                }
-                                else -> {
+                                else ->
                                     SnackbarController.sendEvent(
                                         SnackbarEvent(message = R.string.unknown_error_occurred)
                                     )
-                                }
                             }
                             _albumInfoSheetState.update {
                                 it.copy(isFetchingRelease = false)
@@ -1668,6 +1714,12 @@ class PlayerViewModel(
                         playlist = null,
                         searchResults = emptyList(),
                     )
+                }
+            }
+
+            is OnFetchCoverArtToggle -> {
+                _albumInfoSheetState.update {
+                    it.copy(fetchCoverArt = !it.fetchCoverArt)
                 }
             }
 

@@ -9,4 +9,5 @@ data class AlbumInfoSheetState(
     val isLoading: Boolean = false,
     val isFetchingRelease: Boolean = false,
     val searchResults: List<MetadataSearchResult> = emptyList(),
+    val fetchCoverArt: Boolean = true,
 )
