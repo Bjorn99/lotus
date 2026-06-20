@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,7 +51,9 @@ import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -996,6 +999,9 @@ fun PlayerScreen(
                         onSearchResultClick = {
                             viewModel.onEvent(PlayerScreenEvent.OnAlbumSearchResultPick(it))
                         },
+                        onFetchCoverArtToggle = {
+                            viewModel.onEvent(PlayerScreenEvent.OnFetchCoverArtToggle)
+                        },
                         onDismiss = {
                             viewModel.onEvent(PlayerScreenEvent.OnCloseAlbumInfoSheet)
                         },
@@ -1935,6 +1941,7 @@ fun ScrollToTopAndLocateButtons(
 private fun AlbumInfoDialog(
     state: AlbumInfoSheetState,
     onSearchResultClick: (MetadataSearchResult) -> Unit,
+    onFetchCoverArtToggle: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -1945,12 +1952,12 @@ private fun AlbumInfoDialog(
         },
         text = {
             Column {
-                if (state.isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-
-                if (state.isFetchingRelease) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                if (state.isLoading || state.isFetchingRelease) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(16.dp)
+                    )
                 }
 
                 if (state.searchResults.isNotEmpty()) {
@@ -1974,6 +1981,35 @@ private fun AlbumInfoDialog(
                                 uri = context.resources.getString(R.string.musicbrainz_uri),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        item {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onFetchCoverArtToggle() }
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Checkbox(
+                                    checked = state.fetchCoverArt,
+                                    onCheckedChange = { onFetchCoverArtToggle() }
+                                )
+                                Text(
+                                    text = context.resources.getString(R.string.fetch_cover_art),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
+                            Text(
+                                text = context.resources.getString(R.string.cover_art_archive_attribution),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 48.dp)
                             )
                         }
                     }
