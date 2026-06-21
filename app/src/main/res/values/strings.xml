@@ -215,13 +215,7 @@
     <string name="no_lyrics_found">No lyrics found for this track</string>
     <string name="failed_to_write">Failed to write file. Please try again.</string>
 
-    <!-- Album info fetch -->
-    <string name="fetch_album_info">Fetch album info</string>
-    <string name="album_info">Album info</string>
     <string name="select_items">Select</string>
-    <string name="album_info_search_hint">Album name and artist</string>
-    <string name="fetch_cover_art">Fetch cover art</string>
-    <string name="cover_art_archive_attribution">MusicBrainz / Cover Art Archive</string>
 
     <!-- Manual editing screen -->
     <string name="edit">Edit</string>

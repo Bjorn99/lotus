@@ -130,7 +130,7 @@ class MetadataWriterImpl(
                     }
                 }
 
-                context.cacheDir?.deleteRecursively()
+                file?.delete()
                 return Result.Success(Unit)
             } catch (e: SecurityException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

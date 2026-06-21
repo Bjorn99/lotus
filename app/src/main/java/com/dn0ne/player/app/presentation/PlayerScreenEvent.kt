@@ -86,8 +86,4 @@ sealed interface PlayerScreenEvent {
     data object OnFetchLyricsFromRemoteClick: PlayerScreenEvent
     data object OnPublishLyricsOnRemoteClick: PlayerScreenEvent
 
-    data class OnFetchAlbumInfoClick(val playlist: Playlist): PlayerScreenEvent
-    data class OnAlbumSearchResultPick(val searchResult: MetadataSearchResult): PlayerScreenEvent
-    data object OnCloseAlbumInfoSheet: PlayerScreenEvent
-    data object OnFetchCoverArtToggle: PlayerScreenEvent
 }

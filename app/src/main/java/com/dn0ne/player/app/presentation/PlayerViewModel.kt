@@ -46,7 +46,7 @@ import com.dn0ne.player.app.presentation.components.playback.PlaybackState
 import com.dn0ne.player.app.presentation.components.settings.SettingsSheetState
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarController
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
-import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
+
 import com.dn0ne.player.app.presentation.components.trackinfo.ChangesSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.InfoSearchSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.LyricsControlSheetState
@@ -357,14 +357,6 @@ class PlayerViewModel(
             initialValue = TrackInfoSheetState()
         )
 
-
-    private val _albumInfoSheetState = MutableStateFlow(AlbumInfoSheetState())
-    val albumInfoSheetState = _albumInfoSheetState.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = AlbumInfoSheetState()
-    )
-
     data class PendingWrite(
         val track: Track,
         val metadata: Metadata,
@@ -544,9 +536,6 @@ class PlayerViewModel(
             is OnLyricsClick, is OnLyricsControlClick, is OnDeleteLyricsClick,
             is OnCopyLyricsFromTagClick, is OnWriteLyricsToTagClick,
             is OnFetchLyricsFromRemoteClick, is OnPublishLyricsOnRemoteClick -> handleLyricsEvent(event)
-
-            is OnFetchAlbumInfoClick, is OnAlbumSearchResultPick,
-            is OnCloseAlbumInfoSheet, is OnFetchCoverArtToggle -> handleAlbumInfoEvent(event)
 
             is OnSettingsClick, is OnCloseSettingsClick, is OnScanFoldersClick -> handleSettingsEvent(event)
         }
@@ -1535,197 +1524,6 @@ class PlayerViewModel(
                             )
                         }
                     }
-                }
-            }
-
-            else -> {}
-        }
-    }
-
-    private fun handleAlbumInfoEvent(event: PlayerScreenEvent) {
-        when (event) {
-            is OnFetchAlbumInfoClick -> {
-                val playlist = event.playlist
-                val searchQuery = AlbumSearchQueryBuilder.build(playlist) ?: return
-
-                _albumInfoSheetState.update {
-                    it.copy(
-                        isShown = true,
-                        playlist = playlist,
-                        isLoading = true,
-                        searchResults = emptyList(),
-                        fetchCoverArt = true,
-                    )
-                }
-
-                viewModelScope.launch {
-                    var result = metadataProvider.searchReleases(
-                        query = searchQuery.query,
-                        trackDuration = 0L,
-                        matchDuration = false,
-                    )
-
-                    if (result is Result.Success &&
-                        result.data.size < 3 &&
-                        !searchQuery.isVA &&
-                        searchQuery.consensusArtist.isNotBlank()
-                    ) {
-                        val retryQuery = "release:\"${searchQuery.albumName}\""
-                        result = metadataProvider.searchReleases(
-                            query = retryQuery,
-                            trackDuration = 0L,
-                            matchDuration = false,
-                        )
-                    }
-
-                    when (result) {
-                        is Result.Success -> {
-                            _albumInfoSheetState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    searchResults = result.data,
-                                )
-                            }
-                        }
-                        is Result.Error -> {
-                            when (result.error) {
-                                DataError.Network.BadRequest ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.query_was_corrupted)
-                                    )
-                                DataError.Network.NoInternet ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.no_internet)
-                                    )
-                                else ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.unknown_error_occurred)
-                                    )
-                            }
-                            _albumInfoSheetState.update {
-                                it.copy(isLoading = false)
-                            }
-                        }
-                    }
-                }
-            }
-
-            is OnAlbumSearchResultPick -> {
-                _albumInfoSheetState.update {
-                    it.copy(isFetchingRelease = true)
-                }
-
-                viewModelScope.launch {
-                    val releaseResult = metadataProvider.getReleaseMetadata(
-                        releaseId = event.searchResult.albumId,
-                    )
-                    when (releaseResult) {
-                        is Result.Success -> {
-                            val release = releaseResult.data
-                            val tracks = _albumInfoSheetState.value.playlist?.trackList
-                                ?: return@launch
-                            val year = release.date?.substringBefore("-")
-                            val genre = release.genres?.joinToString(" / ")
-                            val fetchCoverArt = _albumInfoSheetState.value.fetchCoverArt
-
-                            var coverArtBytes: ByteArray? = null
-                            if (fetchCoverArt) {
-                                val coverResult = metadataProvider.getCoverArtBytes(
-                                    event.searchResult
-                                )
-                                if (coverResult is Result.Success) {
-                                    coverArtBytes = coverResult.data
-                                }
-                            }
-
-                            val writableTracks = tracks.filter {
-                                it.format !in unsupportedWriteFormats
-                            }
-                            val totalCount = writableTracks.size
-                            var successCount = 0
-                            var completedCount = 0
-
-                            writableTracks.forEach { track ->
-                                try {
-                                    _pendingMetadata.send(
-                                        PendingWrite(
-                                            track,
-                                            Metadata(
-                                                albumArtist = release.artist,
-                                                year = year,
-                                                genre = genre,
-                                                coverArtBytes = coverArtBytes,
-                                                mbAlbumId = event.searchResult.albumId,
-                                                mbReleaseGroupId = release.releaseGroupId,
-                                                mbAlbumArtistId = release.artistId,
-                                            )
-                                        ) { writeResult ->
-                                            if (writeResult is Result.Success) successCount++
-                                            completedCount++
-                                            if (completedCount == totalCount) {
-                                                val message = if (successCount > 0) {
-                                                    R.string.metadata_change_succeed
-                                                } else {
-                                                    R.string.unknown_error_occurred
-                                                }
-                                                viewModelScope.launch {
-                                                    SnackbarController.sendEvent(
-                                                        SnackbarEvent(message = message)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    )
-                                } catch (_: Exception) {
-                                    // Channel send may fail; continue with next track
-                                }
-                            }
-
-                            _albumInfoSheetState.update {
-                                it.copy(
-                                    isShown = false,
-                                    isFetchingRelease = false,
-                                    playlist = null,
-                                    searchResults = emptyList(),
-                                )
-                            }
-                        }
-                        is Result.Error -> {
-                            when (releaseResult.error) {
-                                DataError.Network.NoInternet ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.no_internet)
-                                    )
-                                DataError.Network.NotFound ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.cover_art_not_found)
-                                    )
-                                else ->
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.unknown_error_occurred)
-                                    )
-                            }
-                            _albumInfoSheetState.update {
-                                it.copy(isFetchingRelease = false)
-                            }
-                        }
-                    }
-                }
-            }
-
-            is OnCloseAlbumInfoSheet -> {
-                _albumInfoSheetState.update {
-                    it.copy(
-                        isShown = false,
-                        playlist = null,
-                        searchResults = emptyList(),
-                    )
-                }
-            }
-
-            is OnFetchCoverArtToggle -> {
-                _albumInfoSheetState.update {
-                    it.copy(fetchCoverArt = !it.fetchCoverArt)
                 }
             }
 

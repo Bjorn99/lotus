@@ -455,7 +455,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        cacheDir?.deleteRecursively()
         super.onStop()
     }
 

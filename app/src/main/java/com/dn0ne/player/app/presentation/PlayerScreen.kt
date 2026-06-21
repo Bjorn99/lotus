@@ -127,7 +127,6 @@ import com.dn0ne.player.app.presentation.components.topbar.Tab
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
 import com.dn0ne.player.app.presentation.components.ProviderText
 import com.dn0ne.player.app.presentation.components.trackList
-import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchResultItem
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheet
@@ -544,9 +543,6 @@ fun PlayerScreen(
                                     !gridPlaylists
                                 )
                             },
-                            onFetchAlbumInfoClick = { playlist ->
-                                viewModel.onEvent(PlayerScreenEvent.OnFetchAlbumInfoClick(playlist))
-                            }
                         )
                     }
 
@@ -992,21 +988,6 @@ fun PlayerScreen(
                 )
 
 
-                val albumInfoSheetState by viewModel.albumInfoSheetState.collectAsState()
-                if (albumInfoSheetState.isShown) {
-                    AlbumInfoDialog(
-                        state = albumInfoSheetState,
-                        onSearchResultClick = {
-                            viewModel.onEvent(PlayerScreenEvent.OnAlbumSearchResultPick(it))
-                        },
-                        onFetchCoverArtToggle = {
-                            viewModel.onEvent(PlayerScreenEvent.OnFetchCoverArtToggle)
-                        },
-                        onDismiss = {
-                            viewModel.onEvent(PlayerScreenEvent.OnCloseAlbumInfoSheet)
-                        },
-                    )
-                }
 
                 if (showAddToOrCreatePlaylistSheet) {
                     val playlists by viewModel.playlists.collectAsState()
@@ -1164,7 +1145,6 @@ fun MainPlayerScreen(
     gridPlaylists: Boolean,
     onGridPlaylistsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onFetchAlbumInfoClick: (Playlist) -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -1845,16 +1825,6 @@ fun MainPlayerScreen(
                         onClick = {
                             val playlist = albumContextMenuPlaylist
                             albumContextMenuPlaylist = null
-                            playlist?.let { onFetchAlbumInfoClick(it) }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = context.resources.getString(R.string.fetch_album_info))
-                    }
-                    TextButton(
-                        onClick = {
-                            val playlist = albumContextMenuPlaylist
-                            albumContextMenuPlaylist = null
                             playlist?.let {
                                 isInSelectionMode = true
                                 selectedPlaylists.add(it)
@@ -1942,101 +1912,6 @@ fun ScrollToTopAndLocateButtons(
     }
 }
 
-
-@Composable
-private fun AlbumInfoDialog(
-    state: AlbumInfoSheetState,
-    onSearchResultClick: (MetadataSearchResult) -> Unit,
-    onFetchCoverArtToggle: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val context = LocalContext.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = context.resources.getString(R.string.album_info))
-        },
-        text = {
-            Column {
-                if (state.isLoading || state.isFetchingRelease) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(16.dp)
-                    )
-                }
-
-                if (state.searchResults.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(state.searchResults, key = { "${it.id}-${it.albumId}" }) { result ->
-                            SearchResultItem(
-                                searchResult = result,
-                                onClick = {
-                                    onSearchResultClick(result)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        item {
-                            ProviderText(
-                                providerText = context.resources.getString(R.string.search_results_provided_by),
-                                uri = context.resources.getString(R.string.musicbrainz_uri),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-
-                        item {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onFetchCoverArtToggle() }
-                                    .padding(vertical = 4.dp)
-                            ) {
-                                Checkbox(
-                                    checked = state.fetchCoverArt,
-                                    onCheckedChange = { onFetchCoverArtToggle() }
-                                )
-                                Text(
-                                    text = context.resources.getString(R.string.fetch_cover_art),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
-                            Text(
-                                text = context.resources.getString(R.string.cover_art_archive_attribution),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(start = 48.dp)
-                            )
-                        }
-                    }
-                }
-
-                if (!state.isLoading && state.searchResults.isEmpty() && !state.isFetchingRelease) {
-                    Text(
-                        text = context.resources.getString(R.string.search_no_results),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = context.resources.getString(R.string.cancel))
-            }
-        }
-    )
-}
 
 @Serializable
 private sealed interface PlayerRoutes {
