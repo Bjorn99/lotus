@@ -1148,10 +1148,6 @@ fun MainPlayerScreen(
 ) {
     val context = LocalContext.current
 
-    var collapseFraction by remember {
-        mutableFloatStateOf(0f)
-    }
-
     var searchFieldValue by rememberSaveable {
         mutableStateOf("")
     }
@@ -1187,19 +1183,6 @@ fun MainPlayerScreen(
         }
     }
 
-    val titleLarge = MaterialTheme.typography.titleLarge
-    val displaySmall = MaterialTheme.typography.displaySmall
-    val titleTextStyle = remember(collapseFraction) {
-        titleLarge.copy(
-            fontSize = lerp(
-                titleLarge.fontSize,
-                displaySmall.fontSize,
-                collapseFraction
-            ),
-            fontWeight = FontWeight.Bold
-        )
-    }
-
     LazyGridWithCollapsibleTabsTopBar(
         gridState = gridState,
         topBarTabs = topBarTabs,
@@ -1214,7 +1197,6 @@ fun MainPlayerScreen(
 
             onTabChange(it)
         },
-        tabTitleTextStyle = titleTextStyle,
         topBarButtons = { tab ->
             AnimatedContent(
                 targetState = topBarContent,
@@ -1509,9 +1491,6 @@ fun MainPlayerScreen(
                     }
                 }
             }
-        },
-        collapseFraction = {
-            collapseFraction = it
         },
         contentHorizontalArrangement = Arrangement.spacedBy(
             16.dp,

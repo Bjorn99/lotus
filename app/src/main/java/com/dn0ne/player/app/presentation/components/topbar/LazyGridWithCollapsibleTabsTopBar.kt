@@ -51,7 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableFloatStateOf
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,8 +69,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirstOrNull
@@ -96,7 +98,6 @@ fun LazyGridWithCollapsibleTabsTopBar(
     maxTopBarHeight: Dp = 250.dp,
     maxTopBarHeightLandscape: Dp = 150.dp,
     collapsedByDefault: Boolean = false,
-    collapseFraction: (Float) -> Unit = {},
     gridState: LazyGridState = rememberLazyGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     contentHorizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
@@ -132,13 +133,18 @@ fun LazyGridWithCollapsibleTabsTopBar(
         }
     }
 
-    var lastFraction by remember { mutableFloatStateOf(-1f) }
-    LaunchedEffect(topBarHeight.value) {
+    val titleLarge = MaterialTheme.typography.titleLarge
+    val displaySmall = MaterialTheme.typography.displaySmall
+    val activeTitleTextStyle = remember(topBarHeight.value) {
         val fraction = (topBarHeight.value - minTopBarHeight) / (maxTopBarHeight - minTopBarHeight)
-        if (kotlin.math.abs(fraction - lastFraction) >= 0.02f) {
-            lastFraction = fraction
-            collapseFraction(fraction)
-        }
+        titleLarge.copy(
+            fontSize = lerp(
+                titleLarge.fontSize,
+                displaySmall.fontSize,
+                fraction
+            ),
+            fontWeight = FontWeight.Bold
+        )
     }
 
     val topBarScrollConnection = remember {
@@ -327,7 +333,7 @@ fun LazyGridWithCollapsibleTabsTopBar(
                                 ) {
                                     TabTitle(
                                         selectedTab = selectedTab,
-                                        style = tabTitleTextStyle,
+                                        style = activeTitleTextStyle,
                                         sharedTransitionScope = this@SharedTransitionLayout,
                                         animatedVisibilityScope = this@AnimatedContent,
                                         boundTransformAnimationSpec = boundTransformAnimationSpec,
