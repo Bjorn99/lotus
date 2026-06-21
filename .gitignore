@@ -25,3 +25,6 @@ docs/superpowers/
 .worktrees/
 .codegraph/
 CLAUDE.md
+
+compose-metrics/
+compose-reports/

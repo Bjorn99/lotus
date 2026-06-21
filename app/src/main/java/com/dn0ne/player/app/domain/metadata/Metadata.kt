@@ -1,5 +1,8 @@
 package com.dn0ne.player.app.domain.metadata
 
+import androidx.compose.runtime.Stable
+
+@Stable
 data class Metadata(
     val title: String? = null,
     val artist: String? = null,
