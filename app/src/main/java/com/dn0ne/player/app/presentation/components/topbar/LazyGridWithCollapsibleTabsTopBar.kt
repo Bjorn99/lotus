@@ -71,6 +71,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.Velocity
@@ -440,6 +441,9 @@ fun TabTitle(
             Text(
                 text = context.resources.getString(selectedTab.titleResId),
                 style = style,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .sharedBounds(
                         sharedContentState = rememberSharedContentState(selectedTab),
@@ -447,26 +451,6 @@ fun TabTitle(
                         boundsTransform = { _, _ ->
                             boundTransformAnimationSpec
                         }
-                    )
-            )
-
-            Box(
-                modifier = Modifier
-                    .sharedBounds(
-                        sharedContentState = rememberSharedContentState(
-                            "indicator"
-                        ),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                        boundsTransform = { _, _ ->
-                            boundTransformAnimationSpec
-                        }
-                    )
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .clip(ShapeDefaults.ExtraLarge)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary
                     )
             )
         }
@@ -507,6 +491,9 @@ fun TabRowTitle(
                 Text(
                     text = context.resources.getString(tab.titleResId),
                     style = style,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .sharedBounds(
@@ -528,20 +515,7 @@ fun TabRowTitle(
                 }
                 Box(
                     modifier = Modifier
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(
-                                if (color != Color.Transparent) {
-                                    "indicator"
-                                } else {
-                                    "invisible-indicator"
-                                }
-                            ),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                            boundsTransform = { _, _ ->
-                                boundTransformAnimationSpec
-                            }
-                        )
+                        .padding(horizontal = 6.dp)
                         .fillMaxWidth()
                         .height(2.dp)
                         .clip(ShapeDefaults.ExtraLarge)
