@@ -1,7 +1,6 @@
 package com.dn0ne.player.app.data.remote.metadata
 
 import com.dn0ne.player.app.domain.metadata.MetadataSearchResult
-import com.dn0ne.player.app.domain.metadata.ReleaseMetadata
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 
@@ -28,15 +27,6 @@ class GatedMetadataProvider(
     ): Result<ByteArray, DataError> =
         if (isEnabled()) {
             delegate.getCoverArtBytes(searchResult)
-        } else {
-            Result.Error(DataError.Network.NoInternet)
-        }
-
-    override suspend fun getReleaseMetadata(
-        releaseId: String,
-    ): Result<ReleaseMetadata, DataError> =
-        if (isEnabled()) {
-            delegate.getReleaseMetadata(releaseId)
         } else {
             Result.Error(DataError.Network.NoInternet)
         }
