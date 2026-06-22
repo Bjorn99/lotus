@@ -1,0 +1,92 @@
+<h2>MBID Preservation — What We Can Actually Write</h2>
+<p class="subtitle">Album-level batch apply means we know the release, but not which recording goes to which track</p>
+
+<h3>The Constraint</h3>
+
+<div class="section">
+  <p>Since we <b>don't do per-track recording matching</b> (no acoustic fingerprinting until v2.0), we only know album-level MBIDs. Writing a wrong recording MBID is worse than writing none — it would mislead Picard/beets/Plex on future scans.</p>
+</div>
+
+<h3>What We Know vs What We'd Be Guessing</h3>
+
+<div class="section">
+  <table style="width: 100%; font-size: 13px;">
+    <tr style="background: var(--surface);">
+      <th style="padding: 8px; text-align: left;">MBID Field</th>
+      <th style="padding: 8px; text-align: center;">Confidence</th>
+      <th style="padding: 8px; text-align: left;">Source</th>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">MUSICBRAINZ_ALBUMID</td>
+      <td style="padding: 8px; text-align: center;"><span style="background: #2e7d32; color: white; padding: 2px 8px; border-radius: 4px;">Certain</span></td>
+      <td style="padding: 8px;">The releaseId we fetched</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">MUSICBRAINZ_RELEASEGROUPID</td>
+      <td style="padding: 8px; text-align: center;"><span style="background: #2e7d32; color: white; padding: 2px 8px; border-radius: 4px;">Certain</span></td>
+      <td style="padding: 8px;">ReleaseDto includes release-group via API inc parameter</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">MUSICBRAINZ_ALBUMARTISTID</td>
+      <td style="padding: 8px; text-align: center;"><span style="background: #2e7d32; color: white; padding: 2px 8px; border-radius: 4px;">Certain</span></td>
+      <td style="padding: 8px;">Artist-credit in release response includes artist MBIDs</td>
+    </tr>
+    <tr style="opacity: 0.4;">
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">MUSICBRAINZ_TRACKID</td>
+      <td style="padding: 8px; text-align: center;"><span style="background: #c62828; color: white; padding: 2px 8px; border-radius: 4px;">Can't know</span></td>
+      <td style="padding: 8px;">Needs per-track recording matching (v2.0 with AcoustID)</td>
+    </tr>
+    <tr style="opacity: 0.4;">
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">MUSICBRAINZ_RELEASETRACKID</td>
+      <td style="padding: 8px; text-align: center;"><span style="background: #c62828; color: white; padding: 2px 8px; border-radius: 4px;">Can't know</span></td>
+      <td style="padding: 8px;">Same — no per-track matching</td>
+    </tr>
+  </table>
+</div>
+
+<h3>Implementation Map</h3>
+
+<div class="section">
+  <div style="display: flex; gap: 16px;">
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+      <h4>ReleaseDto changes</h4>
+      <p style="font-size: 13px;">Need to parse:</p>
+      <ul style="font-size: 13px;">
+        <li>Artist MBIDs from <code>artist-credit</code> array</li>
+        <li>Release group ID (add <code>release-groups</code> to inc parameter)</li>
+      </ul>
+    </div>
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+      <h4>Metadata domain model</h4>
+      <p style="font-size: 13px;">Add nullable MBID fields:</p>
+      <ul style="font-size: 13px;">
+        <li><code>mbAlbumId: String?</code></li>
+        <li><code>mbReleaseGroupId: String?</code></li>
+        <li><code>mbAlbumArtistId: String?</code></li>
+      </ul>
+    </div>
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+      <h4>MetadataWriterImpl</h4>
+      <p style="font-size: 13px;">Write via:</p>
+      <ul style="font-size: 13px;">
+        <li>jaudiotagger <code>FieldKey.MUSICBRAINZ_*</code> for ID3v2</li>
+        <li>Vorbis Comment keys for FLAC/OGG</li>
+        <li>Already in jaudiotagger enum</li>
+      </ul>
+    </div>
+    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+      <h4>Room database</h4>
+      <p style="font-size: 13px;">Add columns to track entity:</p>
+      <ul style="font-size: 13px;">
+        <li>Nullable String columns</li>
+        <li>Migration needed</li>
+        <li>Indexed for future re-matching queries</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Recommendation: Write 3 album-level MBIDs. Skip track-level MBIDs.</h3>
+  <p>Writing wrong recording IDs is actively harmful — it would cause other tools to misidentify tracks. Writing album-level IDs is safe (they're correct) and provides the primary value: re-matching without re-searching, and interoperability with Picard/beets/Plex.</p>
+</div>

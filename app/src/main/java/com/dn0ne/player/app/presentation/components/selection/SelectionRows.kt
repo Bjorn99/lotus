@@ -58,7 +58,6 @@ fun LazyGridScope.selectionRows(
                 .clickable {
                     onRowClick(playlist)
                 }
-                .padding(8.dp)
                 .animateItem(fadeInSpec = null, fadeOutSpec = null)
         )
     }

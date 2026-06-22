@@ -4,6 +4,38 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.8.0 — Scrolling, search, and sidecar lyrics
+
+This release is a deep polish pass. Scrolling through your library is now smooth no matter how many tracks you have. MusicBrainz search works better for obscure artists. Lotus can find lyric files next to your music automatically, and playlists imported from desktop players just work.
+
+### Scrolling and performance
+
+- **Player screen scroll jank eliminated.** A cross-component callback that recomputed text styles every frame has been removed. The text sizing logic now lives entirely inside the scrolling component, so the player screen no longer re-renders on every scroll pixel.
+- **Tab bar text no longer wraps.** Tabs with longer names in Russian, German, and other languages now show a single line with an ellipsis instead of stacking letters vertically. The active-tab indicator is also simpler and no longer jitters during scroll.
+- **Top bar now collapses properly in landscape.** When the device is rotated sideways, the top bar correctly shrinks to its compact form instead of staying at full height.
+- **Inter font slimmed down.** The bundled font now covers only Latin-1 characters. Full character coverage is still available through the system font fallback.
+
+### MusicBrainz search improvements
+
+- **Three-stage search with smart broadening.** Lotus now tries a narrow recording search first. If that returns few results and the query is a single word, it broadens to an OR search across the recording, alias, and artist fields. If recording search still comes up short, it falls back to a release search and merges the two result sets. This catches obscure tracks where the MusicBrainz entry differs slightly from your file's tags.
+- **Release search no longer returns empty results.** The release endpoint was silently dropping every result because the parser expected track-level fields that the endpoint doesn't provide. Results are now built from release-level fields, so the release search path actually works.
+- **Rate limiter and retry.** MusicBrainz limits how fast you can hit their API. Lotus now paces requests at one per second and retries on server errors with exponential backoff, so bulk searches no longer fail partway through.
+
+### Sidecar lyrics
+
+- **Lotus now finds `.lrc` files next to your music automatically.** If you've granted access to a music folder through the folder browser, Lotus scans for lyric files matching `<songname>.lrc` and loads them before falling back to an online search. No configuration needed — drop an `.lrc` next to your music and it'll be picked up.
+
+### Playlist improvements
+
+- **M3U files with relative paths now import correctly.** Desktop players like VLC and foobar2000 export M3U playlists with paths relative to the playlist file. Lotus previously only understood absolute paths, so importing those files produced an empty playlist. Relative paths are now resolved against the playlist's own directory. Based on a patch by @uhrfra.
+- **Album, artist, genre, and folder tabs remember their sort order.** Switch to the Artists tab, sort by Title, go to the Albums tab and sort by Year — each tab now keeps its own preference instead of sharing one global setting.
+
+### Bug fixes
+
+- **Fixed: premature "lyrics not found" snackbar.** When Lotus read lyrics from an embedded tag, the lyrics sheet briefly showed a misleading error message before displaying the lyrics. The error no longer appears when lyrics come from a tag.
+- **Fixed: editing metadata on one track could affect another's MusicBrainz ID.** The internal key format for MusicBrainz IDs now matches across all code paths, so tag writes don't accidentally overwrite the wrong track.
+- **Fixed: duplicate track keys in playlist view.** A lambda used unescaped track IDs as LazyColumn keys, which could cause crashes when two tracks had keys that looked like paths.
+
 ## 1.7.1 — Inter font, seek bar improvements, and shuffle fix
 
 Lotus now uses the Inter font family everywhere. Inter was designed for on-screen readability, so text stays sharp whether you're browsing your library or reading synced lyrics. Nothing to configure — the font applies automatically.

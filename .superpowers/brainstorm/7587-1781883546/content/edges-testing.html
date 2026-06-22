@@ -1,0 +1,74 @@
+<h2>Design — Edge Cases & Testing (Section 5 of 5)</h2>
+
+<h3>Error Handling</h3>
+
+<div style="font-size: 13px; line-height: 1.8;">
+
+| Scenario | Behavior |
+|---|---|
+| Album has 0 tracks | Short-circuit, no query (existing guard: firstTrack check) |
+| All tracks have null album | Skip (existing guard: albumName check) |
+| All tracks have null albumArtist | Artist constraint uses track artist mode; <3 results triggers no-artist retry |
+| Cover Art Archive returns 404 | Skip cover art, still apply text metadata. No error to user. |
+| Cover art fetch network error | Skip cover art, still apply text metadata. Log warning. |
+| Release search returns 0 after retry | Dialog shows "No results" (existing behavior) |
+| Write fails for some tracks | Count tracked. Final snackbar: "Updated 8 of 12 tracks" |
+| Write fails for ALL tracks | Count tracked. Final snackbar: "Failed to update tracks" |
+| Rate limiter exhausted during retry | Standard Channel suspension — transparent to user |
+| Track in unsupported format | Skipped during queueing (existing guard: `format !in unsupportedWriteFormats`) |
+| MBID already exists in tags | Overwritten (idempotent — same release = same MBIDs) |
+
+</div>
+
+<h3>Edge Cases</h3>
+
+<div class="section" style="font-size: 13px; line-height: 1.8;">
+<ul>
+  <li><b>Single-track album:</b> Mode = that track's artist. Works fine. May not trigger VA detection properly but one-track compilations are rare.</li>
+  <li><b>Album name with quotes:</b> escapeLuceneQuery handles this (existing code)</li>
+  <li><b>Release with no genres/tags:</b> genre stays null, no crash</li>
+  <li><b>Release with no date:</b> year stays null, no crash</li>
+  <li><b>Release-group missing from API response:</b> nullable field, just omitted</li>
+  <li><b>Artist credit with no MBID:</b> nullable field, individual artists in credit lists may lack IDs</li>
+  <li><b>User rotates phone during fetch:</b> StateFlow survives config change</li>
+  <li><b>User dismisses dialog during fetch:</b> Coroutine continues in viewModelScope, writes proceed. Acceptable — metadata is metadata.</li>
+</ul>
+</div>
+
+<h3>Files Changed</h3>
+
+<div style="font-size: 13px; line-height: 1.8;">
+
+| File | Change |
+|---|---|
+| `MusicBrainzMetadataProvider.kt` | Add `release-groups` to inc param. Parse `artist.id` + `release-group.id`. Artist DTO gets nullable `id`. |
+| `Metadata.kt` | Add `mbAlbumId`, `mbReleaseGroupId`, `mbAlbumArtistId` to Metadata. Add `releaseGroupId`, `artistId` to ReleaseMetadata. |
+| `MetadataWriterImpl.kt` | Write 3 new FieldKey values. After successful write, upsert TrackMetadataEntity. |
+| `OpusTagEditor.kt` | Write 3 new Vorbis Comment keys. |
+| `PlayerViewModel.kt` | Rewrite `handleAlbumInfoEvent`: mode-based query builder, VA detection, retry logic, cover art fetch behind checkbox, write counting. |
+| `PlayerScreen.kt` | Enhanced AlbumInfoDialog with cover art checkbox. |
+| `AlbumInfoSheetState.kt` | Add `fetchCoverArt` boolean. |
+| `MainActivity.kt` | Write counting: track completions, fire final snackbar from ViewModel. |
+| `TrackMetadataEntity.kt` | **New:** Room entity + DAO. |
+| `PlayerModule.kt` | Wire TrackMetadataDao. |
+| `Room database` | Migration: new `track_metadata` table. |
+
+</div>
+
+<h3>Testing Strategy</h3>
+
+<div class="section" style="font-size: 13px; line-height: 1.8;">
+<ul>
+  <li><b>Unit test: query builder</b> — verify VA detection, mode selection, query string construction</li>
+  <li><b>Unit test: JSON deserialization</b> — ReleaseDto with release-group, artist IDs present and absent</li>
+  <li><b>Unit test: MetadataWriterImpl</b> — verify FieldKey writes (can mock AudioFileIO)</li>
+  <li><b>Integration test: Room migration</b> — verify track_metadata table creation</li>
+  <li><b>Manual test: VA album</b> — fetch metadata for a Various Artists compilation</li>
+  <li><b>Manual test: Cover art</b> — fetch with and without checkbox, verify tag written</li>
+  <li><b>Manual test: Write counting</b> — fetch on album with 12 tracks, verify correct snackbar</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</parameter>

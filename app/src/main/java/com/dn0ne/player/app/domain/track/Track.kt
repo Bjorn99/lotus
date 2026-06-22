@@ -1,10 +1,12 @@
 package com.dn0ne.player.app.domain.track
 
 import android.net.Uri
+import androidx.compose.runtime.Stable
 import androidx.media3.common.MediaItem
 import kotlinx.serialization.Serializable
 
 
+@Stable
 @Serializable(with = TrackSerializer::class)
 data class Track(
     val uri: Uri,

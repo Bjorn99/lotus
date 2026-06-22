@@ -8,6 +8,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.io.File
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -45,7 +46,7 @@ import com.dn0ne.player.app.presentation.components.playback.PlaybackState
 import com.dn0ne.player.app.presentation.components.settings.SettingsSheetState
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarController
 import com.dn0ne.player.app.presentation.components.snackbar.SnackbarEvent
-import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
+
 import com.dn0ne.player.app.presentation.components.trackinfo.ChangesSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.InfoSearchSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.LyricsControlSheetState
@@ -53,6 +54,7 @@ import com.dn0ne.player.app.presentation.components.trackinfo.ManualInfoEditShee
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheetState
 import com.dn0ne.player.core.data.MusicScanner
 import com.dn0ne.player.core.data.Settings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -145,6 +147,62 @@ class PlayerViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
         initialValue = _playlistSortOrder.value
+    )
+
+    private val _albumSort = MutableStateFlow(settings.albumSort)
+    val albumSort = _albumSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _albumSort.value
+    )
+
+    private val _albumSortOrder = MutableStateFlow(settings.albumSortOrder)
+    val albumSortOrder = _albumSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _albumSortOrder.value
+    )
+
+    private val _artistSort = MutableStateFlow(settings.artistSort)
+    val artistSort = _artistSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _artistSort.value
+    )
+
+    private val _artistSortOrder = MutableStateFlow(settings.artistSortOrder)
+    val artistSortOrder = _artistSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _artistSortOrder.value
+    )
+
+    private val _genreSort = MutableStateFlow(settings.genreSort)
+    val genreSort = _genreSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _genreSort.value
+    )
+
+    private val _genreSortOrder = MutableStateFlow(settings.genreSortOrder)
+    val genreSortOrder = _genreSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _genreSortOrder.value
+    )
+
+    private val _folderSort = MutableStateFlow(settings.folderSort)
+    val folderSort = _folderSort.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _folderSort.value
+    )
+
+    private val _folderSortOrder = MutableStateFlow(settings.folderSortOrder)
+    val folderSortOrder = _folderSortOrder.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = _folderSortOrder.value
     )
 
     // Loved-track URIs as a Set for O(1) "is this loved?" lookups in track
@@ -299,15 +357,13 @@ class PlayerViewModel(
             initialValue = TrackInfoSheetState()
         )
 
-
-    private val _albumInfoSheetState = MutableStateFlow(AlbumInfoSheetState())
-    val albumInfoSheetState = _albumInfoSheetState.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = AlbumInfoSheetState()
+    data class PendingWrite(
+        val track: Track,
+        val metadata: Metadata,
+        val onComplete: (Result<Unit, DataError.Local>) -> Unit,
     )
 
-    private val _pendingMetadata = Channel<Pair<Track, Metadata>>()
+    private val _pendingMetadata = Channel<PendingWrite>()
     val pendingMetadata = _pendingMetadata.receiveAsFlow()
 
     private val _pendingTrackUris = Channel<Uri>()
@@ -472,15 +528,14 @@ class PlayerViewModel(
             is OnRestoreCoverArtClick, is OnConfirmMetadataEditClick -> handleTrackInfoEvent(event)
 
             is OnPlaylistSelection, is OnTrackSortChange, is OnPlaylistSortChange,
+            is OnAlbumSortChange, is OnArtistSortChange, is OnGenreSortChange,
+            is OnFolderSortChange,
             is OnCreatePlaylistClick, is OnRenamePlaylistClick, is OnDeletePlaylistClick,
             is OnAddToPlaylist, is OnRemoveFromPlaylist, is OnPlaylistReorder -> handlePlaylistEvent(event)
 
             is OnLyricsClick, is OnLyricsControlClick, is OnDeleteLyricsClick,
             is OnCopyLyricsFromTagClick, is OnWriteLyricsToTagClick,
             is OnFetchLyricsFromRemoteClick, is OnPublishLyricsOnRemoteClick -> handleLyricsEvent(event)
-
-            is OnFetchAlbumInfoClick, is OnAlbumSearchResultPick,
-            is OnCloseAlbumInfoSheet -> handleAlbumInfoEvent(event)
 
             is OnSettingsClick, is OnCloseSettingsClick, is OnScanFoldersClick -> handleSettingsEvent(event)
         }
@@ -1072,7 +1127,7 @@ class PlayerViewModel(
                     )
                 }
                 viewModelScope.launch {
-                    _pendingMetadata.send(track to event.metadata)
+                    _pendingMetadata.send(PendingWrite(track, event.metadata) {})
                 }
             }
 
@@ -1153,6 +1208,54 @@ class PlayerViewModel(
                 }
             }
 
+            is OnAlbumSortChange -> {
+                event.sort?.let { sort ->
+                    settings.albumSort = sort
+                    _albumSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.albumSortOrder = order
+                    _albumSortOrder.update { order }
+                }
+            }
+
+            is OnArtistSortChange -> {
+                event.sort?.let { sort ->
+                    settings.artistSort = sort
+                    _artistSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.artistSortOrder = order
+                    _artistSortOrder.update { order }
+                }
+            }
+
+            is OnGenreSortChange -> {
+                event.sort?.let { sort ->
+                    settings.genreSort = sort
+                    _genreSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.genreSortOrder = order
+                    _genreSortOrder.update { order }
+                }
+            }
+
+            is OnFolderSortChange -> {
+                event.sort?.let { sort ->
+                    settings.folderSort = sort
+                    _folderSort.update { sort }
+                }
+
+                event.order?.let { order ->
+                    settings.folderSortOrder = order
+                    _folderSortOrder.update { order }
+                }
+            }
+
             is OnCreatePlaylistClick -> {
                 viewModelScope.launch {
                     playlistEditor.create(
@@ -1228,7 +1331,7 @@ class PlayerViewModel(
                     val track = _trackInfoSheetState.value.track ?: return@launch
 
                     val lyricsFromRepository = lyricsRepository.getLyricsByUri(track.uri.toString())
-                    var lyricsFromTag: Lyrics? = lyricsFetcher.readFromTag(track, viewModelScope)
+                    var lyricsFromTag: Lyrics? = lyricsFetcher.readFromTag(track)
 
                     _lyricsControlSheetState.update {
                         it.copy(
@@ -1293,16 +1396,22 @@ class PlayerViewModel(
                             )
                         }
                         _pendingMetadata.send(
-                            track to Metadata(lyrics = plain)
+                            PendingWrite(track, Metadata(lyrics = plain)) {}
                         )
 
                         delay(5000)
 
-                        val fromTag = lyricsFetcher.readFromTag(track, viewModelScope)
+                        val fromTag = lyricsFetcher.readFromTag(track)
                         _lyricsControlSheetState.update {
                             it.copy(
                                 lyricsFromTag = fromTag,
                                 isWritingToTag = false
+                            )
+                        }
+
+                        if (fromTag == null) {
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(message = R.string.failed_to_read)
                             )
                         }
                     }
@@ -1415,155 +1524,6 @@ class PlayerViewModel(
                             )
                         }
                     }
-                }
-            }
-
-            else -> {}
-        }
-    }
-
-    private fun handleAlbumInfoEvent(event: PlayerScreenEvent) {
-        when (event) {
-            is OnFetchAlbumInfoClick -> {
-                val playlist = event.playlist
-                val firstTrack = playlist.trackList.firstOrNull() ?: return
-                val albumName = firstTrack.album ?: playlist.name ?: return
-                val artistName = firstTrack.albumArtist?.takeIf { it.isNotBlank() }
-                    ?: firstTrack.artist ?: ""
-
-                _albumInfoSheetState.update {
-                    it.copy(
-                        isShown = true,
-                        playlist = playlist,
-                        isLoading = true,
-                        searchResults = emptyList(),
-                    )
-                }
-
-                viewModelScope.launch {
-                    val result = metadataProvider.searchMetadata(
-                        query = "\"$albumName\" AND artist:\"$artistName\"",
-                        trackDuration = 0L,
-                        matchDuration = false,
-                    )
-                    when (result) {
-                        is Result.Success -> {
-                            val seenAlbumIds = mutableSetOf<String>()
-                            val uniqueByAlbum = result.data.filter { item ->
-                                seenAlbumIds.add(item.albumId)
-                            }
-                            _albumInfoSheetState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    searchResults = uniqueByAlbum,
-                                )
-                            }
-                        }
-                        is Result.Error -> {
-                            when (result.error) {
-                                DataError.Network.BadRequest -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.query_was_corrupted)
-                                    )
-                                }
-                                DataError.Network.NoInternet -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.no_internet)
-                                    )
-                                }
-                                else -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.unknown_error_occurred)
-                                    )
-                                }
-                            }
-                            _albumInfoSheetState.update {
-                                it.copy(isLoading = false)
-                            }
-                        }
-                    }
-                }
-            }
-
-            is OnAlbumSearchResultPick -> {
-                _albumInfoSheetState.update {
-                    it.copy(isFetchingRelease = true)
-                }
-
-                viewModelScope.launch {
-                    val result = metadataProvider.getReleaseMetadata(
-                        releaseId = event.searchResult.albumId,
-                    )
-                    when (result) {
-                        is Result.Success -> {
-                            val releaseMetadata = result.data
-                            val tracks = _albumInfoSheetState.value.playlist?.trackList
-                                ?: return@launch
-                            val year = releaseMetadata.date?.substringBefore("-")
-                            val genre = releaseMetadata.genres?.firstOrNull()
-
-                            tracks.forEach { track ->
-                                if (track.format !in unsupportedWriteFormats) {
-                                    try {
-                                        _pendingMetadata.send(
-                                            track to Metadata(
-                                                albumArtist = releaseMetadata.artist,
-                                                year = year,
-                                                genre = genre,
-                                            )
-                                        )
-                                    } catch (_: Exception) {
-                                        // Channel send may fail; continue with next track
-                                    }
-                                }
-                            }
-
-                            _albumInfoSheetState.update {
-                                it.copy(
-                                    isShown = false,
-                                    isFetchingRelease = false,
-                                    playlist = null,
-                                    searchResults = emptyList(),
-                                )
-                            }
-
-                            SnackbarController.sendEvent(
-                                SnackbarEvent(message = R.string.metadata_change_succeed)
-                            )
-                        }
-                        is Result.Error -> {
-                            when (result.error) {
-                                DataError.Network.NoInternet -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.no_internet)
-                                    )
-                                }
-                                DataError.Network.NotFound -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.cover_art_not_found)
-                                    )
-                                }
-                                else -> {
-                                    SnackbarController.sendEvent(
-                                        SnackbarEvent(message = R.string.unknown_error_occurred)
-                                    )
-                                }
-                            }
-                            _albumInfoSheetState.update {
-                                it.copy(isFetchingRelease = false)
-                            }
-                        }
-                    }
-                }
-            }
-
-            is OnCloseAlbumInfoSheet -> {
-                _albumInfoSheetState.update {
-                    it.copy(
-                        isShown = false,
-                        playlist = null,
-                        searchResults = emptyList(),
-                    )
                 }
             }
 
@@ -1757,7 +1717,7 @@ class PlayerViewModel(
 
                 // 2. Embedded tag
                 if (lyrics == null) {
-                    lyrics = lyricsFetcher.readFromTag(currentTrack, viewModelScope)
+                    lyrics = lyricsFetcher.readFromTag(currentTrack)
                         ?.also { lyricsRepository.insertLyrics(it) }
                 }
 
@@ -1804,12 +1764,24 @@ class PlayerViewModel(
         }
     }
 
-    fun parseM3U(playlistName: String, fileContent: String) {
+    fun parseM3U(playlistName: String, fileContent: String, m3uDirectory: String?) {
         viewModelScope.launch {
-            val paths = fileContent.lines().fastFilter { it.startsWith("/") }
-            val tracks = paths.map { path ->
-                _trackList.value.fastFirstOrNull { path == it.data }
-            }.filterNotNull()
+            val tracks = withContext(Dispatchers.IO) {
+                fileContent.lines()
+                    .filter { it.isNotBlank() && !it.startsWith("#") }
+                    .map { line ->
+                        when {
+                            line.startsWith("/") -> line
+                            m3uDirectory != null -> runCatching {
+                                File(m3uDirectory, line).canonicalPath
+                            }.onFailure { if (it is CancellationException) throw it }
+                                .getOrNull()
+                            else -> null
+                        }
+                    }
+                    .filterNotNull()
+                    .mapNotNull { path -> _trackList.value.fastFirstOrNull { path == it.data } }
+            }
             val name = playlistName.filter { it.isDigit() || it.isLetter() || it.isWhitespace() }
 
             playlistRepository.insertPlaylist(

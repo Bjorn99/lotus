@@ -1,0 +1,65 @@
+<h2>Design — Architecture & Data Flow</h2>
+<p class="subtitle">Section 1 of 5. Same Channel-based async pipeline. Same files. Targeted changes.</p>
+
+<h3>Component Map</h3>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">ReleaseDto (API layer)</h4>
+  <p>Add <code>release-groups</code> to inc param. Parse <code>artist.id</code> from artist-credit. Parse release-group MBID.</p>
+  <div class="label">MusicBrainzMetadataProvider.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">ReleaseMetadata (domain)</h4>
+  <p>Add <code>releaseGroupId: String?</code> and <code>artistId: String?</code> fields. Existing fields unchanged.</p>
+  <div class="label">Metadata.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">Metadata (domain)</h4>
+  <p>Add 3 MBID fields + coverArtBytes (already exists). All nullable.</p>
+  <div class="label">Metadata.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">TrackMetadataEntity (Room)</h4>
+  <p>New: 4 columns keyed by track path. DAO with upsert + query.</p>
+  <div class="label">New file in db/</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">MetadataWriterImpl</h4>
+  <p>3 new jaudiotagger FieldKey writes + Room upsert. OPUS path gets Vorbis Comment keys.</p>
+  <div class="label">MetadataWriterImpl.kt + OpusTagEditor.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">PlayerViewModel</h4>
+  <p>Rewritten handleAlbumInfoEvent: mode-based artist, VA detection, retry logic, cover art checkbox, write counting via Channel result.</p>
+  <div class="label">PlayerViewModel.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">PlayerScreen</h4>
+  <p>AlbumInfoDialog: cover art checkbox, richer result display. No new composable — just enhanced AlertDialog.</p>
+  <div class="label">PlayerScreen.kt</div>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+  <h4 style="margin-top: 0;">MainActivity</h4>
+  <p>Write counting: send result back via a callback or shared state. Show final snackbar.</p>
+  <div class="label">MainActivity.kt</div>
+</div>
+
+</div>
+
+<h3 style="margin-top: 24px;">Data That Flows Through the Channel (unchanged pattern)</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; line-height: 1.8;">
+Track + Metadata(albumArtist, year, genre, <span style="color: var(--accent);">coverArtBytes</span>, <span style="color: var(--accent);">mbAlbumId</span>, <span style="color: var(--accent);">mbReleaseGroupId</span>, <span style="color: var(--accent);">mbAlbumArtistId</span>)
+</div>
+
+<p style="margin-top: 12px;">Channel decoupling stays. Fetch → queue → background write. <b style="color: var(--accent);">New:</b> result counter feeds back to ViewModel for accurate snackbar.</p>
+</div>

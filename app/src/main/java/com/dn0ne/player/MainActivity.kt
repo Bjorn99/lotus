@@ -8,6 +8,7 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import java.io.File
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -185,11 +186,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-        val pickedPlaylistChannel = Channel<Pair<String, String>>()
+        val pickedPlaylistChannel = Channel<Triple<String, String, String?>>()
         val playlistPicker =
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 uri?.let {
                     val name = Uri.decode(it.toString()).substringAfterLast('/').substringBeforeLast('.')
+                    val m3uDirectory = getDirectoryFromDocumentUri(it)
                     var content: String? = null
                     contentResolver.openInputStream(it)?.use { input ->
                         content = input.readBytes().toString(Charsets.UTF_8)
@@ -197,7 +199,7 @@ class MainActivity : ComponentActivity() {
 
                     content?.let {
                         lifecycleScope.launch {
-                            pickedPlaylistChannel.send(name to content)
+                            pickedPlaylistChannel.send(Triple(name, content, m3uDirectory))
                         }
                     }
                 }
@@ -324,7 +326,9 @@ class MainActivity : ComponentActivity() {
                             }
 
                             val coroutineScope = rememberCoroutineScope()
-                            ObserveAsEvents(flow = viewModel.pendingMetadata) { (track, metadata) ->
+                            ObserveAsEvents(flow = viewModel.pendingMetadata) { pendingWrite ->
+                                val track = pendingWrite.track
+                                val metadata = pendingWrite.metadata
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                     trackToMetadataPair = track to metadata
 
@@ -340,6 +344,7 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     checkMetadataWriteResult(result)
+                                    pendingWrite.onComplete(result)
                                 } else {
                                     if (!isWritePermissionGranted) {
                                         requestWritePermissionLauncher.launch(
@@ -356,6 +361,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
 
+                                        pendingWrite.onComplete(Result.Error(DataError.Local.NoWritePermission))
                                         return@ObserveAsEvents
                                     }
 
@@ -367,6 +373,7 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     checkMetadataWriteResult(result)
+                                    pendingWrite.onComplete(result)
                                 }
                             }
 
@@ -389,8 +396,8 @@ class MainActivity : ComponentActivity() {
                                 viewModel.onLyricsPicked(lyrics)
                             }
 
-                            ObserveAsEvents(pickedPlaylistChannel.receiveAsFlow()) { (name, content) ->
-                                viewModel.parseM3U(name, content)
+                            ObserveAsEvents(pickedPlaylistChannel.receiveAsFlow()) { (name, content, directory) ->
+                                viewModel.parseM3U(name, content, directory)
                             }
 
                             if (viewModel.settings.scanOnAppLaunch.value) {
@@ -448,7 +455,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        cacheDir?.deleteRecursively()
         super.onStop()
     }
 
@@ -531,11 +537,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun getPathFromFolderUri(uri: Uri): String {
+    private fun extractStoragePath(uri: Uri, schemePrefix: String): String {
         val decoded = Uri.decode(uri.toString())
-        val sd = decoded.substringAfter("tree/").substringBefore(':').takeIf { it != "primary" }
-            ?: "emulated/0"
+        val sd = decoded.substringAfter("$schemePrefix/").substringBefore(':')
+            .takeIf { it != "primary" } ?: "emulated/0"
         val path = decoded.substringAfterLast(':')
         return "/storage/$sd/$path"
     }
+
+    private fun getPathFromFolderUri(uri: Uri): String =
+        extractStoragePath(uri, "tree")
+
+    private fun getDirectoryFromDocumentUri(uri: Uri): String? =
+        File(extractStoragePath(uri, "document")).parent
 }

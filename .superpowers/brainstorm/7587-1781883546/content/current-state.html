@@ -1,0 +1,101 @@
+<h2>Album Metadata Fetch — Current vs Proposed Flow</h2>
+<p class="subtitle">7 gaps identified in the v1.8 implementation. Each one is a specific place in the pipeline.</p>
+
+<h3>Current Flow (Gaps Marked)</h3>
+
+<div class="section">
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.8;">
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">1</span>
+      <span>User long-presses album → "Fetch album info"</span>
+    </div>
+    <div style="padding-left: 20px; border-left: 2px solid var(--border); margin-left: 12px; padding-top: 8px; padding-bottom: 8px;">
+      <span style="color: var(--error); font-weight: bold;">GAP 7:</span> Uses <b>first track's</b> albumArtist/artist for search query<br>
+      <span style="color: var(--secondary); font-weight: bold;">GAP 4:</span> "Various Artists" doesn't match MB's VA format
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">2</span>
+      <span>searchReleases("release:Album AND artist:Artist")</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">3</span>
+      <span>User picks release from AlertDialog list</span>
+    </div>
+    <div style="padding-left: 20px; border-left: 2px solid var(--border); margin-left: 12px; padding-top: 8px; padding-bottom: 8px;">
+      Dialog shows: title, artist, album, year — no format/country/track count to disambiguate variants
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">4</span>
+      <span>getReleaseMetadata(releaseId) → ReleaseMetadata</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--error); color: white; padding: 4px 8px; border-radius: 4px;">5</span>
+      <span><b>No changes preview</b> — immediately batch-applies on selection</span>
+    </div>
+    <div style="padding-left: 20px; border-left: 2px solid var(--border); margin-left: 12px; padding-top: 8px; padding-bottom: 8px;">
+      <span style="color: var(--error); font-weight: bold;">GAP 6:</span> Blind apply. Desktop tools show diff before writing.
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">6</span>
+      <span>Per-track Metadata composed:</span>
+    </div>
+    <div style="padding-left: 20px; border-left: 2px solid var(--border); margin-left: 12px; padding-top: 8px; padding-bottom: 8px;">
+      <span style="color: var(--error); font-weight: bold;">GAP 1:</span> coverArtArchiveFront <b>ignored</b> — not wired to getCoverArtBytes<br>
+      <span style="color: var(--error); font-weight: bold;">GAP 2:</span> <b>genres.firstOrNull()</b> — drops all but first genre<br>
+      <span style="color: var(--error); font-weight: bold;">GAP 3:</span> No MBIDs written to tags (album, artist, recording, release-group)
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding-top: 4px;">
+      <span style="background: var(--secondary); color: white; padding: 4px 8px; border-radius: 4px;">7</span>
+      <span>Enqueued to _pendingMetadata Channel → MainActivity writes in background</span>
+    </div>
+    <div style="padding-left: 20px; border-left: 2px solid var(--border); margin-left: 12px; padding-top: 8px; padding-bottom: 8px;">
+      <span style="color: var(--error); font-weight: bold;">GAP 5:</span> Snackbar "success" fires on <b>queue</b>, not after write completion
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Where the Gaps Live</h3>
+  <table style="width: 100%; font-size: 13px;">
+    <tr style="background: var(--surface);">
+      <th style="padding: 8px; text-align: left;">Gap</th>
+      <th style="padding: 8px; text-align: left;">File</th>
+      <th style="padding: 8px; text-align: left;">Difficulty</th>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">1. Cover art</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerViewModel.kt</td>
+      <td style="padding: 8px;"><span style="background: #2e7d32; color: white; padding: 2px 6px; border-radius: 4px;">Easy</span> — getCoverArtBytes exists</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">2. All genres</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerViewModel.kt (1 line)</td>
+      <td style="padding: 8px;"><span style="background: #2e7d32; color: white; padding: 2px 6px; border-radius: 4px;">Easy</span> — join all genres</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">3. MBID preservation</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">Metadata.kt + MetadataWriterImpl.kt</td>
+      <td style="padding: 8px;"><span style="background: #e65100; color: white; padding: 2px 6px; border-radius: 4px;">Medium</span> — new tag fields</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">4. VA handling</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerViewModel.kt</td>
+      <td style="padding: 8px;"><span style="background: #ef6c00; color: white; padding: 2px 6px; border-radius: 4px;">Medium</span> — query logic</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">5. Write result</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerViewModel.kt + MainActivity.kt</td>
+      <td style="padding: 8px;"><span style="background: #ef6c00; color: white; padding: 2px 6px; border-radius: 4px;">Medium</span> — Channel refactor</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">6. Changes preview</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerScreen.kt (new composable)</td>
+      <td style="padding: 8px;"><span style="background: #c62828; color: white; padding: 2px 6px; border-radius: 4px;">Complex</span> — new UI surface</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px;">7. Artist extraction</td>
+      <td style="padding: 8px; font-family: monospace; font-size: 12px;">PlayerViewModel.kt</td>
+      <td style="padding: 8px;"><span style="background: #2e7d32; color: white; padding: 2px 6px; border-radius: 4px;">Easy</span> — mode/consensus</td>
+    </tr>
+  </table>
+</div>

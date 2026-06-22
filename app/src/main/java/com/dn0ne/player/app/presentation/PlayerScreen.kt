@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,7 +51,9 @@ import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -124,7 +127,6 @@ import com.dn0ne.player.app.presentation.components.topbar.Tab
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
 import com.dn0ne.player.app.presentation.components.ProviderText
 import com.dn0ne.player.app.presentation.components.trackList
-import com.dn0ne.player.app.presentation.components.trackinfo.AlbumInfoSheetState
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchResultItem
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheet
@@ -244,6 +246,14 @@ fun PlayerScreen(
                 val trackSortOrder by viewModel.trackSortOrder.collectAsState()
                 val playlistSort by viewModel.playlistSort.collectAsState()
                 val playlistSortOrder by viewModel.playlistSortOrder.collectAsState()
+                val albumSort by viewModel.albumSort.collectAsState()
+                val albumSortOrder by viewModel.albumSortOrder.collectAsState()
+                val artistSort by viewModel.artistSort.collectAsState()
+                val artistSortOrder by viewModel.artistSortOrder.collectAsState()
+                val genreSort by viewModel.genreSort.collectAsState()
+                val genreSortOrder by viewModel.genreSortOrder.collectAsState()
+                val folderSort by viewModel.folderSort.collectAsState()
+                val folderSortOrder by viewModel.folderSortOrder.collectAsState()
 
                 // Hoisted to PlayerScreen scope so the NavHost composables and
                 // PlayerSheet (rendered outside the NavHost) can all read the
@@ -432,6 +442,14 @@ fun PlayerScreen(
                             trackSortOrder = trackSortOrder,
                             playlistSort = playlistSort,
                             playlistSortOrder = playlistSortOrder,
+                            albumSort = albumSort,
+                            albumSortOrder = albumSortOrder,
+                            artistSort = artistSort,
+                            artistSortOrder = artistSortOrder,
+                            genreSort = genreSort,
+                            genreSortOrder = genreSortOrder,
+                            folderSort = folderSort,
+                            folderSortOrder = folderSortOrder,
                             onTrackSortChange = { sort, order ->
                                 viewModel.onEvent(PlayerScreenEvent.OnTrackSortChange(sort, order))
                             },
@@ -441,6 +459,26 @@ fun PlayerScreen(
                                         sort,
                                         order
                                     )
+                                )
+                            },
+                            onAlbumSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnAlbumSortChange(sort, order)
+                                )
+                            },
+                            onArtistSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnArtistSortChange(sort, order)
+                                )
+                            },
+                            onGenreSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnGenreSortChange(sort, order)
+                                )
+                            },
+                            onFolderSortChange = { sort, order ->
+                                viewModel.onEvent(
+                                    PlayerScreenEvent.OnFolderSortChange(sort, order)
                                 )
                             },
                             onPlaylistSelection = { playlist ->
@@ -505,9 +543,6 @@ fun PlayerScreen(
                                     !gridPlaylists
                                 )
                             },
-                            onFetchAlbumInfoClick = { playlist ->
-                                viewModel.onEvent(PlayerScreenEvent.OnFetchAlbumInfoClick(playlist))
-                            }
                         )
                     }
 
@@ -953,18 +988,6 @@ fun PlayerScreen(
                 )
 
 
-                val albumInfoSheetState by viewModel.albumInfoSheetState.collectAsState()
-                if (albumInfoSheetState.isShown) {
-                    AlbumInfoDialog(
-                        state = albumInfoSheetState,
-                        onSearchResultClick = {
-                            viewModel.onEvent(PlayerScreenEvent.OnAlbumSearchResultPick(it))
-                        },
-                        onDismiss = {
-                            viewModel.onEvent(PlayerScreenEvent.OnCloseAlbumInfoSheet)
-                        },
-                    )
-                }
 
                 if (showAddToOrCreatePlaylistSheet) {
                     val playlists by viewModel.playlists.collectAsState()
@@ -1099,8 +1122,20 @@ fun MainPlayerScreen(
     trackSortOrder: SortOrder,
     playlistSort: PlaylistSort,
     playlistSortOrder: SortOrder,
+    albumSort: PlaylistSort,
+    albumSortOrder: SortOrder,
+    artistSort: PlaylistSort,
+    artistSortOrder: SortOrder,
+    genreSort: PlaylistSort,
+    genreSortOrder: SortOrder,
+    folderSort: PlaylistSort,
+    folderSortOrder: SortOrder,
     onTrackSortChange: (TrackSort?, SortOrder?) -> Unit,
     onPlaylistSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onAlbumSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onArtistSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onGenreSortChange: (PlaylistSort?, SortOrder?) -> Unit,
+    onFolderSortChange: (PlaylistSort?, SortOrder?) -> Unit,
     onPlaylistSelection: (Playlist) -> Unit,
     onAlbumPlaylistSelection: (Playlist) -> Unit,
     onArtistPlaylistSelection: (Playlist) -> Unit,
@@ -1110,13 +1145,8 @@ fun MainPlayerScreen(
     gridPlaylists: Boolean,
     onGridPlaylistsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onFetchAlbumInfoClick: (Playlist) -> Unit = {},
 ) {
     val context = LocalContext.current
-
-    var collapseFraction by remember {
-        mutableFloatStateOf(0f)
-    }
 
     var searchFieldValue by rememberSaveable {
         mutableStateOf("")
@@ -1167,14 +1197,6 @@ fun MainPlayerScreen(
 
             onTabChange(it)
         },
-        tabTitleTextStyle = MaterialTheme.typography.titleLarge.copy(
-            fontSize = lerp(
-                MaterialTheme.typography.titleLarge.fontSize,
-                MaterialTheme.typography.displaySmall.fontSize,
-                collapseFraction
-            ),
-            fontWeight = FontWeight.Bold
-        ),
         topBarButtons = { tab ->
             AnimatedContent(
                 targetState = topBarContent,
@@ -1210,6 +1232,50 @@ fun MainPlayerScreen(
                                         },
                                         onSortOrderChange = {
                                             onTrackSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Albums) {
+                                    PlaylistSortButton(
+                                        sort = albumSort,
+                                        order = albumSortOrder,
+                                        onSortChange = {
+                                            onAlbumSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onAlbumSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Artists) {
+                                    PlaylistSortButton(
+                                        sort = artistSort,
+                                        order = artistSortOrder,
+                                        onSortChange = {
+                                            onArtistSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onArtistSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Genres) {
+                                    PlaylistSortButton(
+                                        sort = genreSort,
+                                        order = genreSortOrder,
+                                        onSortChange = {
+                                            onGenreSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onGenreSortChange(null, it)
+                                        }
+                                    )
+                                } else if (tab == Tab.Folders) {
+                                    PlaylistSortButton(
+                                        sort = folderSort,
+                                        order = folderSortOrder,
+                                        onSortChange = {
+                                            onFolderSortChange(it, null)
+                                        },
+                                        onSortOrderChange = {
+                                            onFolderSortChange(null, it)
                                         }
                                     )
                                 } else {
@@ -1426,15 +1492,12 @@ fun MainPlayerScreen(
                 }
             }
         },
-        collapseFraction = {
-            collapseFraction = it
-        },
         contentHorizontalArrangement = Arrangement.spacedBy(
             16.dp,
             alignment = Alignment.CenterHorizontally
         ),
         contentVerticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         gridCells = {
             if (it == Tab.Tracks || !gridPlaylists) GridCells.Fixed(1) else {
                 GridCells.Adaptive(150.dp)
@@ -1615,8 +1678,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = albumPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = albumSort,
+                    playlistSortOrder = albumSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_album),
                     showSinglePreview = true,
                     onPlaylistClick = onAlbumPlaylistSelection,
@@ -1640,8 +1703,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = artistPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = artistSort,
+                    playlistSortOrder = artistSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_artist),
                     onPlaylistClick = onArtistPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
@@ -1665,8 +1728,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = genrePlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = genreSort,
+                    playlistSortOrder = genreSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_genre),
                     onPlaylistClick = onGenrePlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
@@ -1690,8 +1753,8 @@ fun MainPlayerScreen(
                 TabContent(
                     playlists = folderPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
-                    playlistSort = playlistSort,
-                    playlistSortOrder = playlistSortOrder,
+                    playlistSort = folderSort,
+                    playlistSortOrder = folderSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_folder),
                     onPlaylistClick = onFolderPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
@@ -1737,16 +1800,6 @@ fun MainPlayerScreen(
             },
             text = {
                 Column {
-                    TextButton(
-                        onClick = {
-                            val playlist = albumContextMenuPlaylist
-                            albumContextMenuPlaylist = null
-                            playlist?.let { onFetchAlbumInfoClick(it) }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = context.resources.getString(R.string.fetch_album_info))
-                    }
                     TextButton(
                         onClick = {
                             val playlist = albumContextMenuPlaylist
@@ -1838,71 +1891,6 @@ fun ScrollToTopAndLocateButtons(
     }
 }
 
-
-@Composable
-private fun AlbumInfoDialog(
-    state: AlbumInfoSheetState,
-    onSearchResultClick: (MetadataSearchResult) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val context = LocalContext.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = context.resources.getString(R.string.album_info))
-        },
-        text = {
-            Column {
-                if (state.isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-
-                if (state.isFetchingRelease) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-
-                if (state.searchResults.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(state.searchResults, key = { "${"$"}{it.id}-${"$"}{it.albumId}" }) { result ->
-                            SearchResultItem(
-                                searchResult = result,
-                                onClick = {
-                                    onSearchResultClick(result)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        item {
-                            ProviderText(
-                                providerText = context.resources.getString(R.string.search_results_provided_by),
-                                uri = context.resources.getString(R.string.musicbrainz_uri),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
-
-                if (!state.isLoading && state.searchResults.isEmpty() && !state.isFetchingRelease) {
-                    Text(
-                        text = context.resources.getString(R.string.search_no_results),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = context.resources.getString(R.string.cancel))
-            }
-        }
-    )
-}
 
 @Serializable
 private sealed interface PlayerRoutes {

@@ -1,0 +1,18 @@
+{"type":"server-started","port":57460,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:57460","screen_dir":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content","state_dir":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/state"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/current-state.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/mbids.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/write-feedback.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      Count writes, show single snackbar at end\n      The Channel fires N track writes. Track successes and failures in a counter. When all N complete, fire one snackbar: \"Updated 10 of 12 tracks\" (or \"All 12 tracks updated successfully\").\n      \n        ProsUser gets accurate informationOne snackbar, not 12Surfaces partial failures\n        ConsSnackbar delayed until last write finishesNew state to manage (write-in-progress counter)","choice":"a","id":null,"timestamp":1781884389089}
+{"source":"user-event","type":"click","text":"A\n    \n      Count writes, show single snackbar at end\n      The Channel fires N track writes. Track successes and failures in a counter. When all N complete, fire one snackbar: \"Updated 10 of 12 tracks\" (or \"All 12 tracks updated successfully\").\n      \n        ProsUser gets accurate informationOne snackbar, not 12Surfaces partial failures\n        ConsSnackbar delayed until last write finishesNew state to manage (write-in-progress counter)","choice":"a","id":null,"timestamp":1781884397007}
+{"source":"user-event","type":"click","text":"A\n    \n      Count writes, show single snackbar at end\n      The Channel fires N track writes. Track successes and failures in a counter. When all N complete, fire one snackbar: \"Updated 10 of 12 tracks\" (or \"All 12 tracks updated successfully\").\n      \n        ProsUser gets accurate informationOne snackbar, not 12Surfaces partial failures\n        ConsSnackbar delayed until last write finishesNew state to manage (write-in-progress counter)","choice":"a","id":null,"timestamp":1781884397187}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/design-overview.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/mbid-storage.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/architecture.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/query-design.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/metadata-writing.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/ui-api.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/edges-testing.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/ui-polish.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/ui-audit.html"}
+{"type":"screen-added","file":"/home/brana/src/lotus/.superpowers/brainstorm/7587-1781883546/content/padding-fix.html"}
+{"type":"server-stopped","reason":"idle timeout"}

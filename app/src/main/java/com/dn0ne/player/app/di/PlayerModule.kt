@@ -15,6 +15,7 @@ import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
 import com.dn0ne.player.app.data.db.PlaylistDao
+import com.dn0ne.player.app.data.db.TrackMetadataDao
 import com.dn0ne.player.app.data.db.TrackStatsDao
 import com.dn0ne.player.app.data.remote.lyrics.ChainLyricsProvider
 import com.dn0ne.player.app.data.remote.lyrics.GatedLyricsProvider
@@ -24,6 +25,7 @@ import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
+import com.dn0ne.player.core.util.RateLimiter
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
@@ -32,12 +34,16 @@ import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.presentation.PlayerViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -93,6 +99,21 @@ internal val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
+// v3 → v4: add track_metadata for MusicBrainz ID persistence. Purely additive
+// — backfilled to empty (no pre-existing MBIDs to recover).
+internal val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `track_metadata` (" +
+                "`track_data` TEXT NOT NULL, " +
+                "`mb_album_id` TEXT, " +
+                "`mb_release_group_id` TEXT, " +
+                "`mb_album_artist_id` TEXT, " +
+                "PRIMARY KEY(`track_data`))"
+        )
+    }
+}
+
 val playerModule = module {
 
     single {
@@ -106,6 +127,12 @@ val playerModule = module {
         SavedPlayerState(
             context = androidContext()
         )
+    }
+
+    single {
+        RateLimiter().also {
+            it.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        }
     }
 
     single<HttpClient> {
@@ -135,6 +162,16 @@ val playerModule = module {
                 socketTimeoutMillis = 15_000
             }
 
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = 2)
+                retryOnException(maxRetries = 3, retryOnTimeout = true)
+                exponentialDelay(
+                    base = 2.0,
+                    maxDelayMs = 60_000L,
+                    randomizationMs = 1000,
+                )
+            }
+
             // Cap response size so a malicious or buggy upstream can't fill
             // memory with a multi-GB body. Headers-phase only — checks the
             // declared Content-Length before we consume the body. Responses
@@ -154,13 +191,17 @@ val playerModule = module {
             delegate = MusicBrainzMetadataProvider(
                 context = androidContext(),
                 client = get(),
+                rateLimiter = get(),
             ),
             isEnabled = { settings.networkLookupsEnabled },
         )
     }
 
     single<MetadataWriter> {
-        MetadataWriterImpl(context = androidContext())
+        MetadataWriterImpl(
+            context = androidContext(),
+            trackMetadataDao = get(),
+        )
     }
 
     single<LyricsProvider> {
@@ -181,13 +222,14 @@ val playerModule = module {
             LotusDatabase::class.java,
             LotusDatabase.NAME,
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .build()
     }
     single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
     single<LyricsDao> { get<LotusDatabase>().lyricsDao() }
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
     single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
+    single<TrackMetadataDao> { get<LotusDatabase>().trackMetadataDao() }
 
     single {
         LyricsRepository(dao = get())

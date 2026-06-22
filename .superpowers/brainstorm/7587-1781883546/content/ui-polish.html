@@ -1,0 +1,107 @@
+<h2>UI Design — AlbumInfoDialog</h2>
+<p class="subtitle">The app's design language: Material 3 dark, Inter font, surfaceContainer cards, ShapeDefaults.Medium, spacedBy(16.dp). All existing dialogs use AlertDialog with TextButton actions.</p>
+
+<h3>Before vs After</h3>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Current (v1.8)</div>
+    <div class="mockup-body" style="padding: 8px;">
+      <div style="background: #1a1a1a; border-radius: 24px; padding: 20px; max-width: 340px; margin: 0 auto;">
+        <div style="font-size: 18px; font-weight: 500; color: #e0e0e0; margin-bottom: 16px;">Album info</div>
+
+        <div style="height: 4px; background: #64b5f6; border-radius: 2px; margin-bottom: 12px;"></div>
+        <div style="color: #888; font-size: 12px; text-align: center; padding: 12px 0;">Loading...</div>
+
+        <div style="background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 8px;">
+          <div style="font-size: 15px; font-weight: 500; color: #e0e0e0;">Abbey Road</div>
+          <div style="font-size: 11px; color: #999;">Album · The Beatles · 1969</div>
+        </div>
+        <div style="background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 8px;">
+          <div style="font-size: 15px; font-weight: 500; color: #e0e0e0;">Abbey Road (Remaster)</div>
+          <div style="font-size: 11px; color: #999;">Album · The Beatles · 2009</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <div style="padding: 8px 12px; color: #64b5f6; font-size: 12px; font-weight: 500;">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Proposed</div>
+    <div class="mockup-body" style="padding: 8px;">
+      <div style="background: #1a1a1a; border-radius: 24px; padding: 20px; max-width: 340px; margin: 0 auto;">
+        <div style="font-size: 18px; font-weight: 500; color: #e0e0e0; margin-bottom: 16px;">Album info</div>
+
+        <div style="background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 8px;">
+          <div style="font-size: 15px; font-weight: 500; color: #e0e0e0;">Abbey Road</div>
+          <div style="font-size: 11px; color: #999; margin-top: 2px;">The Beatles · 1969</div>
+          <div style="font-size: 10px; color: #666; margin-top: 1px;">UK original pressing</div>
+        </div>
+        <div style="background: #252525; border-radius: 12px; padding: 12px; margin-bottom: 8px; border: 1px solid #64b5f6;">
+          <div style="font-size: 15px; font-weight: 500; color: #e0e0e0;">Abbey Road (2009 Remaster)</div>
+          <div style="font-size: 11px; color: #999; margin-top: 2px;">The Beatles · 2009</div>
+          <div style="font-size: 10px; color: #666; margin-top: 1px;">Enhanced reissue</div>
+        </div>
+
+        <div style="border-top: 1px solid #2a2a2a; margin: 12px 0;"></div>
+
+        <div style="display: flex; align-items: center; gap: 0; padding: 4px 0; border-radius: 8px;">
+          <div style="width: 20px; height: 20px; border: 2px solid #64b5f6; border-radius: 4px; background: #64b5f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: #1a1a1a; font-size: 12px; font-weight: 700;">✓</span>
+          </div>
+          <span style="font-size: 13px; color: #ccc; margin-left: 8px;">Fetch cover art</span>
+        </div>
+        <div style="font-size: 10px; color: #666; margin-left: 28px; margin-bottom: 4px;">MusicBrainz / Cover Art Archive</div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+          <div style="padding: 8px 12px; color: #64b5f6; font-size: 12px; font-weight: 500;">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Implementation</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.6; margin-top: 16px;">
+
+<p><b>Cover art checkbox row:</b></p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 12px; border-radius: 4px; margin: 8px 0; line-height: 1.8;">
+Row(verticalAlignment = CenterVertically) {<br>
+&nbsp;&nbsp;Checkbox(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;checked = state.fetchCoverArt,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;onCheckedChange = { onFetchCoverArtToggle(it) }<br>
+&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;Text("Fetch cover art")<br>
+}<br>
+Text("MusicBrainz / Cover Art Archive",<br>
+&nbsp;&nbsp;style = MaterialTheme.typography.labelSmall,<br>
+&nbsp;&nbsp;color = MaterialTheme.colorScheme.onSurfaceVariant,<br>
+&nbsp;&nbsp;modifier = Modifier.padding(start = 48.dp)<br>
+)
+</div>
+
+<p style="margin-top: 12px;"><b>States:</b></p>
+<ul>
+  <li><b>Loading (isLoading):</b> Single centered CircularProgressIndicator. No LinearProgressIndicator — that pattern is for the search sheet, not a selection dialog.</li>
+  <li><b>Results ready:</b> LazyColumn of SearchResultItems (existing), then cover art checkbox, then ProviderText attribution.</li>
+  <li><b>Fetching release (isFetchingRelease):</b> Fade out results, fade in CircularProgressIndicator. No separate indicator row.</li>
+  <li><b>No results + not loading:</b> "No results found" text.</li>
+</ul>
+
+<p style="margin-top: 12px;"><b>Key design decisions:</b></p>
+<ul>
+  <li>Keep AlertDialog — consistent with context menu dialog and SearchHintDialog</li>
+  <li>Border highlight on selected result (using Modifier.border with primary color) — clear which item is being hovered/tapped</li>
+  <li>Checkbox uses Material 3 defaults (no custom styling needed)</li>
+  <li>Attribution line uses labelSmall typography (same as existing ProviderText pattern)</li>
+  <li>Divider separates results from the checkbox — visually groups the action from the content</li>
+  <li>Default fetchCoverArt = true (opt-out, not opt-in — cover art is the expected behavior)</li>
+</ul>
+</div>
+</div>
+</div>
+</parameter>

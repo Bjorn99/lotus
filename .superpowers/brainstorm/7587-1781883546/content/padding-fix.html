@@ -1,0 +1,148 @@
+<h2>Architectural Analysis — Complete Padding System</h2>
+
+<h3>Current Reality (LazyGridScope variants used in PlayerScreen)</h3>
+
+<table style="width: 100%; font-size: 13px;">
+  <tr style="background: var(--surface);">
+    <th style="padding: 8px; text-align: left;">Tab</th>
+    <th style="padding: 8px; text-align: center;">Grid contentPadding</th>
+    <th style="padding: 8px; text-align: center;">Item modifier</th>
+    <th style="padding: 8px; text-align: center;">Content from edge</th>
+    <th style="padding: 8px; text-align: center;">Visual feel</th>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Tracks</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 11px;">fillMaxWidth()</td>
+    <td style="padding: 8px; text-align: center; background: #2e7d32; color: white;">16dp</td>
+    <td style="padding: 8px;">Wider — content reaches toward edges</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Albums / Artists (rows)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 11px;">.padding(8.dp)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+    <td style="padding: 8px;">Narrower — more inset</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Albums / Artists (cards)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 11px;">.padding(8.dp)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+    <td style="padding: 8px;">Narrower — more inset</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Selection (tracks)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 11px;">fillMaxWidth()</td>
+    <td style="padding: 8px; text-align: center; background: #2e7d32; color: white;">16dp</td>
+    <td style="padding: 8px;">Wider</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Selection (rows)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 11px;">.padding(8.dp)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+    <td style="padding: 8px;">Narrower</td>
+  </tr>
+</table>
+
+<p style="margin-top: 8px; color: #888; font-size: 12px;">Tracks = 16dp from edge. Albums = 24dp from edge. They differ by 8dp — visible to the eye.</p>
+
+<h3>The Architectural Principle</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px;">
+  <p style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Container sets screen-edge boundaries. Items define internal layout.</p>
+
+  <div style="display: flex; gap: 16px;">
+    <div style="flex: 1; background: var(--bg); border-radius: 8px; padding: 12px;">
+      <div class="label">Tier 1 — Container (grid)</div>
+      <p style="font-size: 13px;"><code>contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)</code></p>
+      <p style="font-size: 12px; color: #999;">Single source of truth for where content sits relative to the screen edge. Applies to ALL tabs identically. No exceptions.</p>
+    </div>
+    <div style="flex: 1; background: var(--bg); border-radius: 8px; padding: 12px;">
+      <div class="label">Tier 2 — Items (content)</div>
+      <p style="font-size: 13px;">Items span column-to-column. Internal spacing (between text and icons, between cover art and labels) is the item's responsibility. Items do NOT add their own screen-edge margin.</p>
+    </div>
+  </div>
+</div>
+
+<h3>The Fix</h3>
+
+<div style="font-size: 13px; line-height: 1.6;">
+
+<p><b>Grid container (PlayerScreen.kt:1529):</b> Add top padding. Keep horizontal 16dp.</p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 4px 0;">
+contentPadding = PaddingValues(<br>
+&nbsp;&nbsp;<span style="color: var(--accent);">horizontal = 16.dp,</span><br>
+&nbsp;&nbsp;<span style="color: var(--accent);">vertical = 8.dp</span><br>
+)
+</div>
+
+<p style="margin-top: 12px;"><b>Item-level cleanup (remove redundant horizontal margin):</b></p>
+
+<table style="font-size: 11px; width: 100%;">
+  <tr style="background: var(--surface);">
+    <th style="padding: 6px; text-align: left;">File</th>
+    <th style="padding: 6px; text-align: left;">Current</th>
+    <th style="padding: 6px; text-align: left;">Change</th>
+    <th style="padding: 6px;">Reason</th>
+  </tr>
+  <tr>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">PlaylistRows.kt:75</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">.padding(8.dp)</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px; color: var(--accent);">remove</td>
+    <td style="padding: 6px;">Card clip provides visual boundary. Grid handles edge spacing.</td>
+  </tr>
+  <tr>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">SelectionRows.kt:61</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">.padding(8.dp)</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px; color: var(--accent);">remove</td>
+    <td style="padding: 6px;">Same reason</td>
+  </tr>
+  <tr>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">PlaylistCards.kt:170</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px;">.padding(spaceBetween)</td>
+    <td style="padding: 6px; font-family: monospace; font-size: 10px; color: var(--accent);">remove from outer modifier</td>
+    <td style="padding: 6px;">Internal card padding becomes internal-only</td>
+  </tr>
+</table>
+
+<p style="margin-top: 12px; color: #2e7d32;">Result: ALL tabs = 16dp from screen edge. Zero exceptions.</p>
+</div>
+
+<h3>The Other Fixes</h3>
+
+<div style="font-size: 13px; line-height: 1.6;">
+
+<p><b>Title jank</b> — LazyGridWithCollapsibleTabsTopBar.kt onPreScroll guard:</p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 4px 0;">
+<span style="color: var(--accent);">if (newHeight != previousHeight) {</span><br>
+&nbsp;&nbsp;coroutineScope.launch {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;topBarHeight.snapTo(newHeight)<br>
+&nbsp;&nbsp;}<br>
+<span style="color: var(--accent);">}</span>
+</div>
+<p style="font-size: 12px; color: #999;">Already proven in ColumnWithCollapsibleTopBar. Same fix, different file.</p>
+
+<p style="margin-top: 12px;"><b>Landscape bug</b> — LazyGridWithCollapsibleTabsTopBar.kt:127:</p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 4px 0;">
+<span style="text-decoration: line-through; color: #c62828;">topBarHeight.snapTo(maxTopBarHeight)</span><br>
+<span style="color: var(--accent);">topBarHeight.snapTo(minTopBarHeight)</span>  ← conserve vertical space
+</div>
+
+<p style="margin-top: 12px;"><b>Memoize TextStyle</b> — MainPlayerScreen title lerp:</p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 4px 0;">
+<span style="color: #666;">// Wrap in remember(collapseFraction)</span><br>
+val tabTitleTextStyle = <span style="color: var(--accent);">remember(collapseFraction) {</span><br>
+&nbsp;&nbsp;MaterialTheme.typography.titleLarge.copy(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fontSize = lerp(titleLarge.fontSize, displaySmall.fontSize, collapseFraction),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fontWeight = FontWeight.Bold<br>
+&nbsp;&nbsp;)<br>
+<span style="color: var(--accent);">}</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</parameter>

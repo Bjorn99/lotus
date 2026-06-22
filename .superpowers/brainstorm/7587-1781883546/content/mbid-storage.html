@@ -1,0 +1,40 @@
+<h2>MBID Storage — Reality Check</h2>
+<p class="subtitle">Tracks are loaded from MediaStore, not Room. There's no existing "tracks" table to add columns to.</p>
+
+<h3>The Situation</h3>
+
+<div class="section">
+  <p><code>Track</code> is a domain model built from <code>ContentResolver</code> queries — metadata lives in audio file tags, not in a database table. The Room database currently stores only <code>LovedTrackEntity</code> and <code>TrackStatsEntity</code>.</p>
+</div>
+
+<h3>Two Paths Forward</h3>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Audio file tags only — no Room</h3>
+      <p>Write MBIDs to file tags via jaudiotagger FieldKey. Other tools read them. Lotus re-reads from tags when needed (v2.0 re-matching).</p>
+      <div class="pros-cons" style="margin-top: 12px; font-size: 13px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Zero database changes</li><li>No migration</li><li>Picard/beets/Plex see the IDs immediately</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Can't query by MBID without re-reading files</li><li>No DB-level uniqueness for future features</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>New lightweight Room entity + file tags</h3>
+      <p>Create <code>TrackMetadataEntity(trackData, mbAlbumId?, mbReleaseGroupId?, mbAlbumArtistId?)</code>. Just 4 columns, keyed by track path.</p>
+      <div class="pros-cons" style="margin-top: 12px; font-size: 13px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Queryable by MBID without tag re-read</li><li>Ready for v2.0 AcoustID re-matching</li><li>Simple migration (new table, no data migration)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>New entity + DAO + migration</li><li>More code to write and maintain</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Recommendation</h3>
+<p>Option A (audio file tags only) is the right call for v1.8. We have <b>zero</b> features that need to query by MBID today. v2.0's AcoustID integration is the natural point to add a Room table — when we actually need to query against it. Adding a table now with no consumer is speculative infrastructure.</p>
+<p>This is different from my earlier recommendation because I discovered Track isn't persisted in Room. The "Option B" I endorsed assumed existing DB infrastructure that doesn't exist.</p>
+</div>

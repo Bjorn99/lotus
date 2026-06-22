@@ -1,0 +1,81 @@
+<h2>Design — Metadata Writing (Gaps 1, 2, 3, 5)</h2>
+<p class="subtitle">Section 3 of 5. What gets written and how.</p>
+
+<h3>Metadata Domain Model — Additions</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; line-height: 1.6;">
+data class Metadata(
+    val title: String? = null,
+    val artist: String? = null,
+    val album: String? = null,
+    val albumArtist: String? = null,
+    <span style="color: var(--accent);">val genre: String? = null,          // Gap 2: now all genres, joined</span>
+    val year: String? = null,
+    val trackNumber: String? = null,
+    val coverArtBytes: ByteArray? = null,     // Gap 1: now used from album flow
+    val lyrics: String? = null,
+    <span style="color: var(--accent);">val mbAlbumId: String? = null,            // Gap 3</span>
+    <span style="color: var(--accent);">val mbReleaseGroupId: String? = null,     // Gap 3</span>
+    <span style="color: var(--accent);">val mbAlbumArtistId: String? = null,      // Gap 3</span>
+)
+</div>
+
+<h3>MetadataWriterImpl — 3 New FieldKey Writes</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 12px; line-height: 1.8; font-family: monospace;">
+<span style="color: #666;">// In writeMetadata(), after existing tag.setField() calls:</span>
+mbAlbumId?.let { tag.setField(FieldKey.<span style="color: var(--accent);">MUSICBRAINZ_ALBUMID</span>, it) }
+mbReleaseGroupId?.let { tag.setField(FieldKey.<span style="color: var(--accent);">MUSICBRAINZ_RELEASE_GROUP_ID</span>, it) }
+mbAlbumArtistId?.let { tag.setField(FieldKey.<span style="color: var(--accent);">MUSICBRAINZ_RELEASEARTISTID</span>, it) }
+</div>
+<p style="font-size: 12px; margin-top: 4px;">jaudiotagger handles the format-specific mapping: TXXX frames for ID3v2, Vorbis Comment keys for FLAC/OGG.</p>
+
+<h3>OpusTagEditor — Vorbis Comment Keys</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 12px; line-height: 1.8; font-family: monospace;">
+<span style="color: #666;">// In update(), alongside existing fields:</span>
+metadata.mbAlbumId?.let { fields[<span style="color: var(--accent);">"MUSICBRAINZ_ALBUMID"</span>] = it }
+metadata.mbReleaseGroupId?.let { fields[<span style="color: var(--accent);">"MUSICBRAINZ_RELEASEGROUPID"</span>] = it }
+metadata.mbAlbumArtistId?.let { fields[<span style="color: var(--accent);">"MUSICBRAINZ_ALBUMARTISTID"</span>] = it }
+</div>
+
+<h3>Genre Joining (Gap 2)</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 13px;">
+<p>In <code>handleAlbumInfoEvent</code>, replace:</p>
+<div style="font-family: monospace; font-size: 12px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 8px 0;">
+<span style="opacity: 0.4;">val genre = releaseMetadata.genres?.firstOrNull()</span>
+</div>
+<p>With:</p>
+<div style="font-family: monospace; font-size: 12px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 8px 0;">
+<span style="color: var(--accent);">val genre = releaseMetadata.genres?.joinToString(" / ")</span>
+</div>
+<p style="color: #888;">jaudiotagger's FieldKey.GENRE writes the whole string. For ID3v2, multiple genres can be null-separated — but " / " is the convention this app already uses (see SearchResultItem genres display). Consistent.</p>
+</div>
+</div>
+
+<h3>Write Result Counting (Gap 5)</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.6;">
+<p>Change private val <code>_pendingMetadata</code> from <code>Channel&lt;Pair&lt;Track, Metadata&gt;&gt;</code> to carry a completion callback:</p>
+<div style="font-family: monospace; font-size: 12px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 8px 0;">
+data class PendingWrite(track: Track, metadata: Metadata, onComplete: (Result) -> Unit)
+</div>
+<p>The ViewModel queues N writes, each with a callback that increments a counter. When counter == N, fire the final snackbar: "Updated 10 tracks" or "Updated 8 of 12 tracks."</p>
+<p>Alternative (simpler): use a <code>CompletableDeferred</code> per write, collect in ViewModel coroutine. Same effect, no callback lambda allocation.</p>
+</div>
+
+<h3>TrackMetadataEntity (Room)</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 12px; line-height: 1.8; font-family: monospace;">
+@Entity(tableName = "track_metadata")
+data class TrackMetadataEntity(
+    @PrimaryKey val trackData: String,     // file path = unique key
+    val mbAlbumId: String? = null,
+    val mbReleaseGroupId: String? = null,
+    val mbAlbumArtistId: String? = null,
+)
+</div>
+<p style="font-size: 12px; margin-top: 8px;">Simple upsert in MetadataWriterImpl after tag write succeeds. Same transaction scope.</p>
+</div>
+</div>

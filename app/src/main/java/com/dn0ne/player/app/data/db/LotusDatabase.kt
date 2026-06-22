@@ -9,8 +9,9 @@ import androidx.room.RoomDatabase
         LyricsEntity::class,
         LovedTrackEntity::class,
         TrackStatsEntity::class,
+        TrackMetadataEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class LotusDatabase : RoomDatabase() {
@@ -18,6 +19,7 @@ abstract class LotusDatabase : RoomDatabase() {
     abstract fun lyricsDao(): LyricsDao
     abstract fun lovedTrackDao(): LovedTrackDao
     abstract fun trackStatsDao(): TrackStatsDao
+    abstract fun trackMetadataDao(): TrackMetadataDao
 
     companion object {
         const val NAME = "lotus.db"

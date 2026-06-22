@@ -207,8 +207,8 @@ fun WavingSeekBar(
                     handleOffset.toDp() - (handleSize + handlePadding * 2) / 2
                 },
                 animationSpec = spring(
-                    dampingRatio = 0.6f,
-                    stiffness = 400f,
+                    dampingRatio = 0.5f,
+                    stiffness = 300f,
                 ),
                 label = "seek-bar-handle-position-animation"
             )
@@ -298,7 +298,7 @@ fun FilledSeekBarSegment(
         targetValue = when {
             enableWaving -> canvasHeight
             isHandleInDrag -> 0f
-            else -> canvasHeight / 6f
+            else -> canvasHeight / 2.5f
         },
         label = "wave-height"
     )
@@ -317,21 +317,28 @@ fun FilledSeekBarSegment(
         remember { mutableFloatStateOf(0f) }
     }
 
+    var frozenOffset by remember { mutableFloatStateOf(0f) }
+    if (enableWaving) {
+        frozenOffset = offset
+    }
+
     Canvas(modifier = modifier
         .onGloballyPositioned {
             canvasHeight = it.size.height.toFloat()
         }
     ) {
 
+        val effectiveOffset = if (enableWaving) offset else frozenOffset
+
         val step = (waveWidth / 6f).coerceAtLeast(2f)
         val path = Path().apply {
-            moveTo(x = 0f, y = canvasHeight / 2 + waveHeight * cos(-offset / waveWidth) / 2)
+            moveTo(x = 0f, y = canvasHeight / 2 + waveHeight * cos(-effectiveOffset / waveWidth) / 2)
             var x = step
             while (x < size.width) {
-                lineTo(x, canvasHeight / 2 + waveHeight * cos((x - offset) / waveWidth) / 2)
+                lineTo(x, canvasHeight / 2 + waveHeight * cos((x - effectiveOffset) / waveWidth) / 2)
                 x += step
             }
-            lineTo(x = size.width, y = canvasHeight / 2 + waveHeight * cos((size.width - offset) / waveWidth) / 2)
+            lineTo(x = size.width, y = canvasHeight / 2 + waveHeight * cos((size.width - effectiveOffset) / waveWidth) / 2)
         }
 
         drawPath(

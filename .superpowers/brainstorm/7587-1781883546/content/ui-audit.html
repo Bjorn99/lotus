@@ -1,0 +1,104 @@
+<h2>Phase 1 — Root Cause Investigation Results</h2>
+
+<h3>Root Cause 1: Double-padding across tabs</h3>
+<p class="subtitle">The grid container adds horizontal padding, and then each content type adds its OWN padding too — with different amounts.</p>
+
+<table style="width: 100%; font-size: 13px;">
+  <tr style="background: var(--surface);">
+    <th style="padding: 8px; text-align: left;">Tab</th>
+    <th style="padding: 8px; text-align: center;">Grid contentPadding</th>
+    <th style="padding: 8px; text-align: center;">Item padding</th>
+    <th style="padding: 8px; text-align: center;">Effective</th>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Tracks</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center;">16dp (trackList)</td>
+    <td style="padding: 8px; text-align: center; background: #c62828; color: white;">32dp</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Albums/Artists (rows)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center;">8dp (playlistRows)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Albums/Artists (cards)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center;">8dp (playlistCards)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Selection (tracks)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center;">16dp (selectionList)</td>
+    <td style="padding: 8px; text-align: center; background: #c62828; color: white;">32dp</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px;">Selection (rows)</td>
+    <td style="padding: 8px; text-align: center;">16dp</td>
+    <td style="padding: 8px; text-align: center;">8dp (selectionRows)</td>
+    <td style="padding: 8px; text-align: center; background: #e65100; color: white;">24dp</td>
+  </tr>
+</table>
+
+<div style="margin-top: 12px; padding: 12px; background: var(--surface); border-radius: 8px; font-size: 13px;">
+  <b>Files:</b> <code>PlayerScreen.kt:1529</code> sets <code>contentPadding = PaddingValues(horizontal = 16.dp)</code> on the grid.
+  <code>TrackList.kt:54</code> adds <code>.padding(horizontal = 16.dp)</code> per track item.
+  <code>PlaylistRows.kt:75</code> adds <code>.padding(8.dp)</code> per row.
+  <code>PlaylistCards.kt:170</code> adds <code>.padding(spaceBetween)</code> (8dp default) per card.
+</div>
+
+<h3>Root Cause 2: Title letter jank — unconditional snapTo + style recomputation</h3>
+<div style="font-size: 13px; line-height: 1.6;">
+
+<p><b>A. snapTo launched every scroll frame:</b></p>
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 4px 0;">
+<span style="color: #666;">// LazyGridWithCollapsibleTabsTopBar.kt:158 — NO guard on height change</span><br>
+coroutineScope.launch {<br>
+&nbsp;&nbsp;topBarHeight.snapTo(newHeight)  <span style="color: #c62828;">← fires every frame, even when unchanged</span><br>
+}<br>
+<br>
+<span style="color: #666;">// ColumnWithCollapsibleTopBar.kt:120 — HAS guard (added in v1.8 Task 5a)</span><br>
+<span style="color: #2e7d32;">if (newHeight != previousHeight) {</span><br>
+&nbsp;&nbsp;coroutineScope.launch {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;topBarHeight.snapTo(newHeight)<br>
+&nbsp;&nbsp;}<br>
+}<br>
+</div>
+
+<p style="margin-top: 12px;"><b>B. TextStyle recreated every frame:</b> The <code>collapseFraction</code> fires on every animation frame, causing <code>titleLarge.copy(fontSize = lerp(...))</code> to create a new TextStyle object each time. <code>TabTitle</code> then re-measures its <code>IntrinsicSize.Min</code> width on every recomposition.</p>
+
+<p><b>C. Shared bounds animation:</b> <code>SharedTransitionLayout</code> with <code>rememberSharedContentState</code> triggers bounds recalculation when the text changes between collapsed/expanded states. The <code>AnimatedContent</code> for <code>showTabRow</code> toggles cause the shared bounds to animate from one text position to another.</p>
+</div>
+
+<h3>Root Cause 3: Landscape orientation bug</h3>
+<div style="font-size: 13px; line-height: 1.6;">
+
+<div style="font-family: monospace; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 4px; margin: 8px 0;">
+<span style="color: #666;">// LazyGridWithCollapsibleTabsTopBar.kt:127 — WRONG</span><br>
+LaunchedEffect(isInLandscapeOrientation) {<br>
+&nbsp;&nbsp;<span style="color: #c62828;">topBarHeight.snapTo(maxTopBarHeight)</span>  <span style="color: #c62828;">← takes MORE space in narrow landscape</span><br>
+}<br>
+<br>
+<span style="color: #666;">// ColumnWithCollapsibleTopBar.kt:91 — CORRECT</span><br>
+LaunchedEffect(isInLandscapeOrientation) {<br>
+&nbsp;&nbsp;<span style="color: #2e7d32;">if (isInLandscapeOrientation) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;topBarHeight.snapTo(minTopBarHeight)</span>  <span style="color: #2e7d32;">← conserves vertical space</span><br>
+&nbsp;&nbsp;}<br>
+}
+</div>
+
+<p>The LazyGrid variant takes MORE space in landscape. The Column variant takes less. This is likely the source of device-specific issues — landscape vs portrait behavior diverges.</p>
+</div>
+
+<h3>Root Cause 4: No vertical padding on grid content</h3>
+<div style="font-size: 13px; line-height: 1.6;">
+<p><code>contentPadding = PaddingValues(horizontal = 16.dp)</code> — no top/bottom padding. The first grid item starts at y=0, flush against the top bar boundary. On some devices the content appears cramped against the top bar, especially when the bar is collapsed to 60dp.</p>
+<p>Bottom spacing is handled by a 200dp spacer item at the end of each grid — but this doesn't account for navigation bars or other system chrome.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</parameter>

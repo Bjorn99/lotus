@@ -48,6 +48,22 @@ sealed interface PlayerScreenEvent {
         val sort: PlaylistSort? = null,
         val order: SortOrder? = null
     ): PlayerScreenEvent
+    data class OnAlbumSortChange(
+        val sort: PlaylistSort? = null,
+        val order: SortOrder? = null
+    ): PlayerScreenEvent
+    data class OnArtistSortChange(
+        val sort: PlaylistSort? = null,
+        val order: SortOrder? = null
+    ): PlayerScreenEvent
+    data class OnGenreSortChange(
+        val sort: PlaylistSort? = null,
+        val order: SortOrder? = null
+    ): PlayerScreenEvent
+    data class OnFolderSortChange(
+        val sort: PlaylistSort? = null,
+        val order: SortOrder? = null
+    ): PlayerScreenEvent
 
     data class OnCreatePlaylistClick(val name: String): PlayerScreenEvent
     data class OnRenamePlaylistClick(val name: String, val playlist: Playlist): PlayerScreenEvent
@@ -70,7 +86,4 @@ sealed interface PlayerScreenEvent {
     data object OnFetchLyricsFromRemoteClick: PlayerScreenEvent
     data object OnPublishLyricsOnRemoteClick: PlayerScreenEvent
 
-    data class OnFetchAlbumInfoClick(val playlist: Playlist): PlayerScreenEvent
-    data class OnAlbumSearchResultPick(val searchResult: MetadataSearchResult): PlayerScreenEvent
-    data object OnCloseAlbumInfoSheet: PlayerScreenEvent
 }
