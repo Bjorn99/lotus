@@ -40,7 +40,7 @@ prior work are theirs. Application ID:
 - Edit track metadata or fetch it from [MusicBrainz](https://musicbrainz.org/)
 - **Global library search** across tracks, albums, artists, genres, and playlists
 - **Smart playlists** — Recently Added and Random Mix, auto-generated
-- **Export playlists to M3U** for use in other players
+- **Import and export M3U playlists** — compatible with VLC, foobar2000, and other desktop players
 - **Backup and restore** — save your playlists and loved tracks to a JSON file
 - **Loved tracks** — mark tracks as loved, browse them as a playlist
 - **Sleep timer** — presets (15/30/45/60/90 min) with optional finish-current-track
@@ -54,14 +54,14 @@ prior work are theirs. Application ID:
 - **Room storage** — migrated from Realm to Android's official Room library, dropping ~10 MB from the APK
 - **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation), all on-device
 - **Per-track artwork** — display cover art embedded in individual audio files, with album-art fallback
-- **Improved lyrics and metadata** — multi-source fetching from LRCLIB and MusicBrainz, hardened network layer, embedded LRC parsing, plus publish your own lyrics
+- **Improved lyrics and metadata** — multi-source fetching from LRCLIB, MusicBrainz, and sidecar `.lrc` files next to your music; hardened network layer; embedded LRC parsing; plus publish your own lyrics
 - **Global library search** — single search field across tracks, albums, artists, genres, and playlists
 - **Backup and restore** — export playlists and loved tracks to JSON, restore on any device
 - **CI pipeline** — unit tests, linting (detekt + ktlint + Android lint), and signed release builds on every tag
 - **Crash logging** — uncaught exceptions written to a private log, shareable from the About page
 - **Network hardening** — HTTPS-only, zero redirects without a host allow-list, response size caps
 - **Listening stats** — play/skip counts and top charts, with a privacy toggle that stops counting and clears data
-- **25+ unit tests** covering shuffle logic, Room migrations, lyrics gating, and backup compatibility
+- **Player performance** — scroll jank eliminated, Inter font subset to Latin-1 for smaller APK, Compose strong skipping via @Stable annotations
 
 ## Smart Shuffle
 
