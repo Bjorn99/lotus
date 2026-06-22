@@ -23,6 +23,7 @@ keystore.properties
 docs/research/
 docs/superpowers/
 .worktrees/
+.agents/
 .claude/
 .codegraph/
 CLAUDE.md
