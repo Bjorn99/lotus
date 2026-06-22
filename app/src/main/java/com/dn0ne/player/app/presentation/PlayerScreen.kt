@@ -51,16 +51,12 @@ import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RippleConfiguration
@@ -88,7 +84,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.fastFirstOrNull
@@ -125,10 +120,8 @@ import com.dn0ne.player.app.presentation.components.settings.Theme
 import com.dn0ne.player.app.presentation.components.topbar.LazyGridWithCollapsibleTabsTopBar
 import com.dn0ne.player.app.presentation.components.topbar.Tab
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
-import com.dn0ne.player.app.presentation.components.ProviderText
 import com.dn0ne.player.app.presentation.components.trackList
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
-import com.dn0ne.player.app.presentation.components.trackinfo.SearchResultItem
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheet
 import com.kmpalette.color
 import com.kmpalette.rememberDominantColorState
