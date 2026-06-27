@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
@@ -35,7 +34,7 @@ val releaseSigningAvailable =
 
 android {
     namespace = "com.dn0ne.player"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.dn0ne.lotus.community"
@@ -64,7 +63,7 @@ android {
 
     sourceSets {
         getByName("androidTest") {
-            assets.srcDirs("$projectDir/schemas")
+            assets.directories.add("$projectDir/schemas")
         }
     }
 
@@ -150,8 +149,8 @@ android {
 
     testOptions {
         managedDevices {
-            devices {
-                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6Api34").apply {
+            localDevices {
+                maybeCreate("pixel6Api34").apply {
                     device = "Pixel 6"
                     apiLevel = 34
                     systemImageSource = "aosp"
