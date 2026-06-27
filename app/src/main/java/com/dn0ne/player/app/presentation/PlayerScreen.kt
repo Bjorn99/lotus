@@ -80,6 +80,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -183,12 +184,12 @@ fun PlayerScreen(
     DynamicMaterialTheme(
         seedColor = colorToApply,
         primary = colorToApply.takeIf { it.toHct().chroma <= 20 },
-        useDarkTheme = when (appearance) {
+        isDark = when (appearance) {
             Theme.Appearance.System -> isSystemInDarkTheme()
             Theme.Appearance.Light -> false
             Theme.Appearance.Dark -> true
         },
-        withAmoled = amoledDarkTheme,
+        isAmoled = amoledDarkTheme,
         style = when (paletteStyle) {
             Theme.PaletteStyle.TonalSpot -> PaletteStyle.TonalSpot
             Theme.PaletteStyle.Neutral -> PaletteStyle.Neutral
@@ -200,7 +201,7 @@ fun PlayerScreen(
             Theme.PaletteStyle.Fidelity -> PaletteStyle.Fidelity
             Theme.PaletteStyle.Content -> PaletteStyle.Content
         },
-        animationSpec = tween(300, 200),
+        animationSpec = tween<Color>(300, 200),
         animate = true
     ) {
         val rippleColor = MaterialTheme.colorScheme.primaryContainer

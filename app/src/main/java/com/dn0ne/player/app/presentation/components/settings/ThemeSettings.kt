@@ -306,7 +306,7 @@ fun ThemeSettings(
                 ) {
                     DynamicMaterialTheme(
                         seedColor = dominantColorState.color,
-                        useDarkTheme = when(selectedAppearance) {
+                        isDark = when(selectedAppearance) {
                             Appearance.System -> isDarkTheme
                             Appearance.Light -> false
                             Appearance.Dark -> true

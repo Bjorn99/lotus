@@ -81,53 +81,6 @@
       "groupSlug": "agp-kotlin"
     },
     {
-      "description": "Hold the AGP + Kotlin + KSP group on minor and major bumps while we're on Kotlin 2.0.20. Bumping any of these past the current minor pulls a kotlin-stdlib whose binary metadata kotlinc 2.0 cannot read, so the build dies before it even reaches our code. Patches still flow. When we plan a coordinated Kotlin upgrade (Gradle wrapper + AGP + Kotlin + KSP + a sweep of kotlin-coupled libs), remove this rule. matchDepNames is used because matchPackageNames does not catch version-catalog refs like the 'kotlin' key in libs.versions.toml.",
-      "matchDepNames": [
-        "com.android.application",
-        "com.android.tools.build:gradle",
-        "org.jetbrains.kotlin.android",
-        "org.jetbrains.kotlin.plugin.compose",
-        "org.jetbrains.kotlin.plugin.serialization",
-        "org.jetbrains.kotlin:kotlin-stdlib",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json",
-        "com.google.devtools.ksp",
-        "io.insert-koin:koin-bom",
-        "io.insert-koin:koin-androidx-compose",
-        "io.insert-koin:koin-core",
-        "io.insert-koin:koin-android"
-      ],
-      "matchUpdateTypes": ["major", "minor"],
-      "enabled": false
-    },
-    {
-      "description": "coil 3.1.0+ transitively pulls kotlin-stdlib 2.1+, incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
-      "matchPackageNames": [
-        "io.coil-kt.coil3:**"
-      ],
-      "allowedVersions": "<3.1.0"
-    },
-    {
-      "description": "materialkolor 3.0.0+ is compiled with Kotlin 2.2.0+ binary metadata, incompatible with our kotlinc 2.0.20. Hold until the coordinated Kotlin upgrade lands.",
-      "matchDepNames": [
-        "com.materialkolor:material-kolor"
-      ],
-      "allowedVersions": "<3.0.0"
-    },
-    {
-      "description": "androidx.core 1.19+ ships an AAR metadata gate that rejects builds on compileSdk 36 / AGP 8.x — it requires compileSdk 37 and AGP 9.1.0. Hold until the coordinated platform bump (Kotlin + AGP + compileSdk) lands.",
-      "matchPackageNames": [
-        "androidx.core:**"
-      ],
-      "allowedVersions": "<1.19.0"
-    },
-    {
-      "description": "Room 2.8+ relies on a newer kotlinx-serialization-core API (typeParametersSerializers default impl) that our pinned kotlinx-serialization-json 1.7.3 does not provide. Loading FieldBundle$$serializer throws AbstractMethodError at build time. Lift this cap alongside the kotlinx-serialization bump in the coordinated platform upgrade.",
-      "matchPackageNames": [
-        "androidx.room:**"
-      ],
-      "allowedVersions": "<2.8.0"
-    },
-    {
       "description": "Detekt and ktlint can move on their own — they're CI-only and breakage is loud.",
       "matchPackageNames": [
         "io.gitlab.arturbosch.detekt",
