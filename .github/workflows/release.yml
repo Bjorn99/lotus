@@ -158,6 +158,16 @@ jobs:
           LOTUS_KEY_PASSWORD: ${{ secrets.LOTUS_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --stacktrace
 
+      - name: Rename APKs to lotus-<versionName>-<abi>
+        run: |
+          set -euo pipefail
+          VERSION=$(grep 'versionName = ' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/' | head -n1)
+          cd app/build/outputs/apk/release
+          for f in app-*.apk; do
+            mv "$f" "lotus-${VERSION}-${f#app-}"
+          done
+          ls -1 *.apk
+
       - name: Verify APKs are signed with the release key
         run: |
           set -euo pipefail

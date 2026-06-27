@@ -126,25 +126,9 @@ android {
         }
     }
 
-    applicationVariants.all {
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "lotus-${defaultConfig.versionName}-${name}.apk"
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=${layout.buildDirectory.get().asFile.absolutePath}/compose-metrics",
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=${layout.buildDirectory.get().asFile.absolutePath}/compose-reports",
-        )
     }
     buildFeatures {
         compose = true
@@ -177,9 +161,13 @@ android {
     }
 }
 
-tasks.withType<com.android.build.gradle.internal.tasks.CompileArtProfileTask> {
-    enabled = false
+composeCompiler {
+    metricsDestination = layout.buildDirectory.dir("compose_metrics")
+    reportsDestination = layout.buildDirectory.dir("compose_reports")
 }
+
+tasks.matching { it.name.startsWith("compile") && it.name.contains("ArtProfile") }
+    .configureEach { enabled = false }
 
 dependencies {
 
