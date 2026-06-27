@@ -30,3 +30,6 @@ CLAUDE.md
 
 compose-metrics/
 compose-reports/
+settings.local.json
+.claude/settings.local.json
+.envrc
