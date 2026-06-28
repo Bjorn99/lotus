@@ -4,6 +4,12 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.8.1
+
+- Fixed tab names overflowing on narrow screens and top bar staying collapsed after tab switches
+- Fixed per-track artwork not applying in album, playlist, and track list views — embedded art now shows everywhere when the setting is enabled
+- Fixed MusicBrainz metadata search treating AND, OR, and NOT in query text as search operators instead of literal words
+
 ## 1.8.0 — Scrolling, search, and sidecar lyrics
 
 This release is a deep polish pass. Scrolling through your library is now smooth no matter how many tracks you have. MusicBrainz search works better for obscure artists. Lotus can find lyric files next to your music automatically, and playlists imported from desktop players just work.
