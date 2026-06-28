@@ -35,12 +35,19 @@ internal val MBID_REGEX =
     Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 internal val LUCENE_SPECIAL =
     Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^\"~*?:\\\\/])")
+// Lucene word-level boolean operators — uppercase only, must be
+// standalone tokens (word-boundary delimited). Lowercasing them
+// preserves the user's intent while preventing Lucene from
+// interpreting them as operators that break the query.
+internal val AND_OR_NOT = Regex("\\b(AND|OR|NOT)\\b")
 internal val HAS_LUCENE_SYNTAX = Regex("\"")
 internal val FIELD_NORMALIZE =
     Regex("""\b(Artist|Release|Recording|Track|Dur|Tag|Alias|Arid|Reid|Rgid):""")
 
 internal fun escapeLuceneQuery(query: String): String {
-    return query.replace(LUCENE_SPECIAL, "\\\\$1")
+    return query
+        .replace(LUCENE_SPECIAL, "\\\\$1")
+        .replace(AND_OR_NOT) { it.value.lowercase() }
 }
 
 private fun buildBroadenedQuery(query: String): String {
@@ -68,6 +75,8 @@ class MusicBrainzMetadataProvider(
     ): Result<List<MetadataSearchResult>, DataError> {
         rateLimiter.acquire()
 
+        Log.d(logTag, "search: query=\"$query\" matchDuration=$matchDuration trackDuration=$trackDuration")
+
         if (MBID_REGEX.matches(query)) {
             return lookupByMbid(query)
         }
@@ -87,6 +96,8 @@ class MusicBrainzMetadataProvider(
 
         // Stage 1: Narrow recording search
         val recordingResult = searchRecordings(narrowQuery)
+        val stage1Count = if (recordingResult is Result.Success) recordingResult.data.size else -1
+        Log.d(logTag, "search: stage1 narrow count=$stage1Count query=\"$narrowQuery\"")
         when (recordingResult) {
             is Result.Error -> return recordingResult
             is Result.Success -> {
@@ -113,6 +124,8 @@ class MusicBrainzMetadataProvider(
                 }
             }
             val broadenedResult = searchRecordings(broadenedQuery)
+            val stage2Count = if (broadenedResult is Result.Success) broadenedResult.data.size else -1
+            Log.d(logTag, "search: stage2 broadened count=$stage2Count query=\"$broadenedQuery\"")
             when (broadenedResult) {
                 is Result.Success -> {
                     if (broadenedResult.data.size >= 3) {
@@ -123,6 +136,7 @@ class MusicBrainzMetadataProvider(
             }
         }
 
+        Log.d(logTag, "search: final returning ${(recordingResult as? Result.Success)?.data?.size ?: "error"} results")
         return recordingResult
     }
 
