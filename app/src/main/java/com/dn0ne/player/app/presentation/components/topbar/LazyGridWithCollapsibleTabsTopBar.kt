@@ -289,9 +289,13 @@ fun LazyGridWithCollapsibleTabsTopBar(
                     tabListState.layoutInfo.viewportSize.width
                 }
             }
-            val maxTabWidth = with(density) {
-                (viewportWidth / topBarTabs.size.coerceAtLeast(3).toFloat()).toDp()
-            }
+            val maxTabWidth = 120.dp
+            // Fixed dp value — NOT derived from viewportWidth because
+            // viewportWidth is 0 during initial tab-row composition,
+            // which would cause 0dp max-width items to crash the
+            // scrollToItem call (forceRemeasure with zero-width items
+            // triggers "Place was called on a node which was placed
+            // already" in LookaheadPassDelegate).
             val boundTransformAnimationSpec = remember { spring<Rect>() }
             val contentAnimationSpec = remember { spring<Float>() }
 
