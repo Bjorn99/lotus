@@ -70,6 +70,7 @@ fun SettingsSheet(
     onBackupExport: (Uri, (ExportResult) -> Unit) -> Unit,
     onBackupImport: (Uri, (ImportResult) -> Unit) -> Unit,
     dominantColorState: DominantColorState<ImageBitmap>,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -350,6 +351,7 @@ fun SettingsSheet(
                         onOpenPrivacyClick = {
                             navController.navigate(SettingsRoutes.Privacy)
                         },
+                        perTrackArtwork = perTrackArtwork,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

@@ -1014,6 +1014,7 @@ fun PlayerScreen(
                 val settingsSheetState by viewModel.settingsSheetState.collectAsState()
                 SettingsSheet(
                     state = settingsSheetState,
+                    perTrackArtwork = perTrackArtwork,
                     onFolderPick = onFolderPick,
                     onSidecarFolderPick = onSidecarFolderPick,
                     onPlaylistPick = onPlaylistPick,
