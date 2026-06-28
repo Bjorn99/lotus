@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -126,11 +127,24 @@ fun LazyGridWithCollapsibleTabsTopBar(
         } else maxTopBarHeight
     )
 
+    var selectedTab by rememberSaveable {
+        mutableStateOf(defaultSelectedTab)
+    }
+
     LaunchedEffect(isInLandscapeOrientation) {
         if (isInLandscapeOrientation) {
             topBarHeight.snapTo(minTopBarHeight)
         } else {
             topBarHeight.snapTo(maxTopBarHeight)
+        }
+    }
+
+    LaunchedEffect(selectedTab) {
+        if (topBarHeight.value < maxTopBarHeight) {
+            topBarHeight.animateTo(
+                targetValue = maxTopBarHeight,
+                animationSpec = spring(stiffness = Spring.StiffnessMedium)
+            )
         }
     }
 
@@ -192,9 +206,6 @@ fun LazyGridWithCollapsibleTabsTopBar(
         }
     }
 
-    var selectedTab by rememberSaveable {
-        mutableStateOf(defaultSelectedTab)
-    }
     var showTabRow by remember {
         mutableStateOf(false)
     }
@@ -275,6 +286,9 @@ fun LazyGridWithCollapsibleTabsTopBar(
                 derivedStateOf {
                     tabListState.layoutInfo.viewportSize.width
                 }
+            }
+            val maxTabWidth = with(density) {
+                (viewportWidth / topBarTabs.size.coerceAtLeast(3).toFloat()).toDp()
             }
             val boundTransformAnimationSpec = remember { spring<Rect>() }
             val contentAnimationSpec = remember { spring<Float>() }
@@ -399,7 +413,8 @@ fun LazyGridWithCollapsibleTabsTopBar(
                                             },
                                             sharedTransitionScope = this@SharedTransitionLayout,
                                             animatedVisibilityScope = this@AnimatedContent,
-                                            boundTransformAnimationSpec = boundTransformAnimationSpec
+                                            boundTransformAnimationSpec = boundTransformAnimationSpec,
+                                            modifier = Modifier.widthIn(max = maxTabWidth)
                                         )
                                     }
 
