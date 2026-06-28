@@ -139,12 +139,14 @@ fun LazyGridWithCollapsibleTabsTopBar(
         }
     }
 
+    // Reset collapsed top bar to full height on tab change.
+    // Using snapTo instead of animateTo to avoid layout collision
+    // with the tab row's own scrollToItem animation — the two
+    // concurrent animations cause "Place was called on a node
+    // which was placed already" (IllegalStateException).
     LaunchedEffect(selectedTab) {
         if (topBarHeight.value < maxTopBarHeight) {
-            topBarHeight.animateTo(
-                targetValue = maxTopBarHeight,
-                animationSpec = spring(stiffness = Spring.StiffnessMedium)
-            )
+            topBarHeight.snapTo(maxTopBarHeight)
         }
     }
 
