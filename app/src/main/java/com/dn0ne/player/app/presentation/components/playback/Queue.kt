@@ -72,6 +72,7 @@ fun Queue(
     onReorderingQueue: (from: Int, to: Int) -> Unit,
     onTrackClick: (Track, Playlist) -> Unit,
     onBackClick: () -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     Box {
         val context = LocalContext.current
@@ -279,6 +280,7 @@ fun Queue(
                             }
                             onRemoveFromQueueClick(index)
                         },
+                        perTrackArtwork = perTrackArtwork,
                         dragHandle = {
                             IconButton(
                                 onClick = {},

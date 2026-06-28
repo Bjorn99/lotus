@@ -41,6 +41,7 @@ fun LazyGridScope.playlistRows(
     onRowClick: (Playlist) -> Unit,
     onLongClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
+    perTrackArtwork: Boolean = false,
 ) {
     if (playlists.isEmpty()) {
         item(
@@ -63,6 +64,10 @@ fun LazyGridScope.playlistRows(
             coverArtPreviewUris = playlist.trackList
                 .take(if (showSinglePreview) 1 else 4)
                 .map { it.coverArtUri },
+            trackUris = playlist.trackList
+                .take(if (showSinglePreview) 1 else 4)
+                .map { it.uri },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .clip(ShapeDefaults.Medium)
                 .combinedClickable(
@@ -82,6 +87,8 @@ fun PlaylistRow(
     title: String,
     trackCount: Int,
     coverArtPreviewUris: List<Uri>,
+    trackUris: List<Uri> = emptyList(),
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -101,6 +108,8 @@ fun PlaylistRow(
                 if (coverArtPreviewUris.size <= 1) {
                     CoverArt(
                         uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
+                        trackUri = trackUris.firstOrNull(),
+                        perTrackArtwork = perTrackArtwork,
                         onCoverArtLoaded = { bitmap ->
                             bitmap?.let {
                                 coroutineScope.launch {
@@ -115,6 +124,8 @@ fun PlaylistRow(
                 } else {
                     FourArtsPreview(
                         coverArtPreviewUris = coverArtPreviewUris,
+                        trackUris = trackUris,
+                        perTrackArtwork = perTrackArtwork,
                         containerShape = ShapeDefaults.Small,
                         artShape = ShapeDefaults.ExtraSmall,
                         spaceBetween = 2.dp,

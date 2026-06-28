@@ -84,6 +84,7 @@ fun LibraryStatsScreen(
     trackRepository: TrackRepository,
     onBackClick: () -> Unit,
     onOpenPrivacyClick: () -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -164,6 +165,7 @@ fun LibraryStatsScreen(
                     viewState.mostPlayed.forEach { item ->
                         StatsTrackRow(
                             track = item.track,
+                            perTrackArtwork = perTrackArtwork,
                             metric = pluralPlays(context, item.stats.playCount),
                         )
                     }
@@ -178,6 +180,7 @@ fun LibraryStatsScreen(
                     viewState.mostListenedTo.forEach { item ->
                         StatsTrackRow(
                             track = item.track,
+                            perTrackArtwork = perTrackArtwork,
                             metric = formatDuration(item.stats.totalListeningMs),
                         )
                     }
@@ -192,6 +195,7 @@ fun LibraryStatsScreen(
                     viewState.recentlyPlayed.forEach { item ->
                         StatsTrackRow(
                             track = item.track,
+                            perTrackArtwork = perTrackArtwork,
                             metric = pluralPlays(context, item.stats.playCount),
                         )
                     }
@@ -363,7 +367,7 @@ private fun StatsSection(
 }
 
 @Composable
-private fun StatsTrackRow(track: Track, metric: String) {
+private fun StatsTrackRow(track: Track, metric: String, perTrackArtwork: Boolean = false) {
     val context = LocalContext.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -373,6 +377,8 @@ private fun StatsTrackRow(track: Track, metric: String) {
     ) {
         CoverArt(
             uri = track.coverArtUri,
+            trackUri = track.uri,
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .size(44.dp)
                 .clip(ShapeDefaults.Small),

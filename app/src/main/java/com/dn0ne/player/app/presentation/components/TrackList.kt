@@ -24,6 +24,7 @@ fun LazyListScope.trackList(
     onViewTrackInfoClick: (Track) -> Unit,
     onGoToAlbumClick: (Track) -> Unit,
     onGoToArtistClick: (Track) -> Unit,
+    perTrackArtwork: Boolean = false,
     onLongClick: (Track) -> Unit = {}
 ) {
     if (trackList.isEmpty()) {
@@ -49,6 +50,7 @@ fun LazyListScope.trackList(
             onViewTrackInfoClick = { onViewTrackInfoClick(track) },
             onGoToAlbumClick = { onGoToAlbumClick(track) },
             onGoToArtistClick = { onGoToArtistClick(track) },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -71,6 +73,7 @@ fun LazyGridScope.trackList(
     onViewTrackInfoClick: (Track) -> Unit,
     onGoToAlbumClick: (Track) -> Unit,
     onGoToArtistClick: (Track) -> Unit,
+    perTrackArtwork: Boolean = false,
     onLongClick: (Track) -> Unit,
 ) {
     if (trackList.isEmpty()) {
@@ -96,6 +99,7 @@ fun LazyGridScope.trackList(
             onViewTrackInfoClick = { onViewTrackInfoClick(track) },
             onGoToAlbumClick = { onGoToAlbumClick(track) },
             onGoToArtistClick = { onGoToArtistClick(track) },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .fillMaxWidth()
                 .animateItem(fadeInSpec = null, fadeOutSpec = null)

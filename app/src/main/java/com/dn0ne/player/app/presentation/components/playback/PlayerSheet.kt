@@ -280,6 +280,7 @@ fun PlayerSheet(
                     onGoToArtistClick = onGoToArtistClick,
                     onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
                     onLyricsClick = onLyricsClick,
+                    perTrackArtwork = settings.perTrackArtwork,
                     lyricsTextStyle = MaterialTheme.typography.headlineMedium
                         .copy(
                             fontSize = settings.lyricsFontSize,
@@ -614,6 +615,7 @@ fun ExpandedPlayer(
     onTrackClick: (Track, Playlist) -> Unit,
     lovedUris: Set<String>,
     onToggleLovedClick: (Track) -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -695,6 +697,8 @@ fun ExpandedPlayer(
                     ) { track ->
                         CoverArt(
                             uri = track.coverArtUri,
+                            trackUri = track.uri,
+                            perTrackArtwork = perTrackArtwork,
                             onCoverArtLoaded = onCoverArtLoaded,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -768,6 +772,8 @@ fun ExpandedPlayer(
                     ) { track ->
                         CoverArt(
                             uri = track.coverArtUri,
+                            trackUri = track.uri,
+                            perTrackArtwork = perTrackArtwork,
                             onCoverArtLoaded = onCoverArtLoaded,
                             modifier = Modifier
                                 .weight(1f)
@@ -920,7 +926,8 @@ fun ExpandedPlayer(
                 onTrackClick = onTrackClick,
                 onBackClick = {
                     showQueue = false
-                }
+                },
+                perTrackArtwork = perTrackArtwork,
             )
         }
 

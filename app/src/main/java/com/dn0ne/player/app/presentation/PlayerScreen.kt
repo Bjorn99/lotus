@@ -236,6 +236,7 @@ fun PlayerScreen(
                     }
                 }
 
+                val perTrackArtwork = viewModel.settings.perTrackArtwork
                 val trackSort by viewModel.trackSort.collectAsState()
                 val trackSortOrder by viewModel.trackSortOrder.collectAsState()
                 val playlistSort by viewModel.playlistSort.collectAsState()
@@ -537,6 +538,7 @@ fun PlayerScreen(
                                     !gridPlaylists
                                 )
                             },
+                            perTrackArtwork = perTrackArtwork,
                         )
                     }
 
@@ -589,6 +591,7 @@ fun PlayerScreen(
                                 playlist = playlist,
                                 currentTrack = currentTrack,
                                 lovedUris = lovedUris,
+                                perTrackArtwork = perTrackArtwork,
                                 onTrackClick = { track, playlist ->
                                     viewModel.onEvent(
                                         PlayerScreenEvent.OnTrackClick(
@@ -700,6 +703,7 @@ fun PlayerScreen(
                                 playlist = playlist,
                                 currentTrack = currentTrack,
                                 lovedUris = lovedUris,
+                                perTrackArtwork = perTrackArtwork,
                                 onRenamePlaylistClick = {
                                     showRenameSheet = true
                                 },
@@ -1040,7 +1044,8 @@ private fun LazyGridScope.TabContent(
     isInSelectionMode: Boolean,
     selectedPlaylists: List<Playlist>,
     onEnterSelectionMode: (Playlist) -> Unit,
-    onToggleSelection: (Playlist) -> Unit
+    onToggleSelection: (Playlist) -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     if (gridPlaylists) {
         if (!isInSelectionMode) {
@@ -1050,6 +1055,7 @@ private fun LazyGridScope.TabContent(
                 sortOrder = playlistSortOrder,
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
+                perTrackArtwork = perTrackArtwork,
                 onCardClick = onPlaylistClick,
                 onLongClick = { onEnterSelectionMode(it) }
             )
@@ -1061,6 +1067,7 @@ private fun LazyGridScope.TabContent(
                 sortOrder = playlistSortOrder,
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
+                perTrackArtwork = perTrackArtwork,
                 onCardClick = { onToggleSelection(it) }
             )
         }
@@ -1072,6 +1079,7 @@ private fun LazyGridScope.TabContent(
                 sortOrder = playlistSortOrder,
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
+                perTrackArtwork = perTrackArtwork,
                 onRowClick = onPlaylistClick,
                 onLongClick = { onEnterSelectionMode(it) }
             )
@@ -1083,6 +1091,7 @@ private fun LazyGridScope.TabContent(
                 sortOrder = playlistSortOrder,
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
+                perTrackArtwork = perTrackArtwork,
                 onRowClick = { onToggleSelection(it) }
             )
         }
@@ -1139,6 +1148,7 @@ fun MainPlayerScreen(
     gridPlaylists: Boolean,
     onGridPlaylistsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -1530,6 +1540,7 @@ fun MainPlayerScreen(
                         onViewTrackInfoClick = onViewTrackInfoClick,
                         onGoToAlbumClick = onGoToAlbumClick,
                         onGoToArtistClick = onGoToArtistClick,
+                        perTrackArtwork = perTrackArtwork,
                         onLongClick = {
                             isInSelectionMode = true
                             selectedTracks.add(it)
@@ -1547,7 +1558,8 @@ fun MainPlayerScreen(
                             if (selectedTracks.isEmpty()) {
                                 isInSelectionMode = false
                             }
-                        }
+                        },
+                        perTrackArtwork = perTrackArtwork,
                     )
                 }
             }
@@ -1568,6 +1580,7 @@ fun MainPlayerScreen(
                                 sortOrder = playlistSortOrder,
                                 fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                                 showSinglePreview = false,
+                                perTrackArtwork = perTrackArtwork,
                                 // Smart playlists navigate to the immutable view
                                 // (same as album/artist/genre) — they can't be
                                 // renamed or reordered.
@@ -1586,6 +1599,7 @@ fun MainPlayerScreen(
                             sortOrder = playlistSortOrder,
                             fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                             showSinglePreview = false,
+                            perTrackArtwork = perTrackArtwork,
                             onCardClick = onPlaylistSelection,
                             onLongClick = {
                                 isInSelectionMode = true
@@ -1600,6 +1614,7 @@ fun MainPlayerScreen(
                             sortOrder = playlistSortOrder,
                             fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                             showSinglePreview = false,
+                            perTrackArtwork = perTrackArtwork,
                             onCardClick = {
                                 if (it in selectedPlaylists) {
                                     selectedPlaylists.remove(it)
@@ -1625,6 +1640,7 @@ fun MainPlayerScreen(
                                 sortOrder = playlistSortOrder,
                                 fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                                 showSinglePreview = false,
+                                perTrackArtwork = perTrackArtwork,
                                 onRowClick = onAlbumPlaylistSelection,
                                 onLongClick = { /* smart lists aren't selectable */ }
                             )
@@ -1640,6 +1656,7 @@ fun MainPlayerScreen(
                             sortOrder = playlistSortOrder,
                             fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                             showSinglePreview = false,
+                            perTrackArtwork = perTrackArtwork,
                             onRowClick = onPlaylistSelection,
                             onLongClick = {
                                 isInSelectionMode = true
@@ -1654,6 +1671,7 @@ fun MainPlayerScreen(
                             sortOrder = playlistSortOrder,
                             fallbackPlaylistTitle = context.resources.getString(R.string.unknown),
                             showSinglePreview = false,
+                            perTrackArtwork = perTrackArtwork,
                             onRowClick = {
                                 if (it in selectedPlaylists) {
                                     selectedPlaylists.remove(it)
@@ -1670,6 +1688,7 @@ fun MainPlayerScreen(
 
             Tab.Albums -> {
                 TabContent(
+                    perTrackArtwork = perTrackArtwork,
                     playlists = albumPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = albumSort,
@@ -1695,6 +1714,7 @@ fun MainPlayerScreen(
 
             Tab.Artists -> {
                 TabContent(
+                    perTrackArtwork = perTrackArtwork,
                     playlists = artistPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = artistSort,
@@ -1720,6 +1740,7 @@ fun MainPlayerScreen(
 
             Tab.Genres -> {
                 TabContent(
+                    perTrackArtwork = perTrackArtwork,
                     playlists = genrePlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = genreSort,
@@ -1745,6 +1766,7 @@ fun MainPlayerScreen(
 
             Tab.Folders -> {
                 TabContent(
+                    perTrackArtwork = perTrackArtwork,
                     playlists = folderPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = folderSort,
@@ -1783,6 +1805,7 @@ fun MainPlayerScreen(
         onAlbumPlaylistClick = onAlbumPlaylistSelection,
         onArtistPlaylistClick = onArtistPlaylistSelection,
         onGenrePlaylistClick = onGenrePlaylistSelection,
+        perTrackArtwork = perTrackArtwork,
     )
 
     if (albumContextMenuPlaylist != null) {

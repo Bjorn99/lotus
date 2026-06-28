@@ -40,6 +40,7 @@ fun LazyGridScope.selectionRows(
     sortOrder: SortOrder,
     onRowClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
+    perTrackArtwork: Boolean = false,
 ) {
     items(
         items = playlists.sortedBy(sort, sortOrder),
@@ -52,6 +53,10 @@ fun LazyGridScope.selectionRows(
             coverArtPreviewUris = playlist.trackList
                 .take(if (showSinglePreview) 1 else 4)
                 .map { it.coverArtUri },
+            trackUris = playlist.trackList
+                .take(if (showSinglePreview) 1 else 4)
+                .map { it.uri },
+            perTrackArtwork = perTrackArtwork,
             isSelected = playlist in selectedPlaylists,
             modifier = Modifier
                 .clip(ShapeDefaults.Medium)
@@ -68,6 +73,8 @@ fun SelectionRow(
     title: String,
     trackCount: Int,
     coverArtPreviewUris: List<Uri>,
+    trackUris: List<Uri> = emptyList(),
+    perTrackArtwork: Boolean = false,
     isSelected: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -88,6 +95,8 @@ fun SelectionRow(
                 if (coverArtPreviewUris.size <= 1) {
                     CoverArt(
                         uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
+                        trackUri = trackUris.firstOrNull(),
+                        perTrackArtwork = perTrackArtwork,
                         onCoverArtLoaded = { bitmap ->
                             bitmap?.let {
                                 coroutineScope.launch {
@@ -102,6 +111,8 @@ fun SelectionRow(
                 } else {
                     FourArtsPreview(
                         coverArtPreviewUris = coverArtPreviewUris,
+                        trackUris = trackUris,
+                        perTrackArtwork = perTrackArtwork,
                         containerShape = ShapeDefaults.Small,
                         artShape = ShapeDefaults.ExtraSmall,
                         spaceBetween = 2.dp,

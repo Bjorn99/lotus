@@ -41,6 +41,7 @@ fun TrackListItem(
     onGoToArtistClick: () -> Unit,
     onRemoveFromPlaylistClick: (() -> Unit)? = null,
     dragHandle: (@Composable () -> Unit)? = null,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -67,6 +68,8 @@ fun TrackListItem(
 
             CoverArt(
                 uri = track.coverArtUri,
+                trackUri = track.uri,
+                perTrackArtwork = perTrackArtwork,
                 modifier = Modifier
                     .size(60.dp)
                     .clip(ShapeDefaults.Small)

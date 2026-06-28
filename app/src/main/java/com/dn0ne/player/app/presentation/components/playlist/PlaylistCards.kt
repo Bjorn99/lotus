@@ -54,6 +54,7 @@ fun LazyGridScope.playlistCards(
     onCardClick: (Playlist) -> Unit,
     onLongClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
+    perTrackArtwork: Boolean = false,
 ) {
     if (playlists.isEmpty()) {
         item(
@@ -76,6 +77,10 @@ fun LazyGridScope.playlistCards(
             coverArtPreviewUris = playlist.trackList
                 .take(if (showSinglePreview) 1 else 4)
                 .map { it.coverArtUri },
+            trackUris = playlist.trackList
+                .take(if (showSinglePreview) 1 else 4)
+                .map { it.uri },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .clip(ShapeDefaults.Large)
                 .combinedClickable(
@@ -95,6 +100,8 @@ fun PlaylistCard(
     title: String,
     trackCount: Int,
     coverArtPreviewUris: List<Uri>,
+    trackUris: List<Uri> = emptyList(),
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -107,6 +114,8 @@ fun PlaylistCard(
                 val coroutineScope = rememberCoroutineScope()
                 CoverArt(
                     uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
+                    trackUri = trackUris.firstOrNull(),
+                    perTrackArtwork = perTrackArtwork,
                     onCoverArtLoaded = { bitmap ->
                         bitmap?.let {
                             coroutineScope.launch {
@@ -130,6 +139,8 @@ fun PlaylistCard(
             } else {
                 FourArtsPreview(
                     coverArtPreviewUris = coverArtPreviewUris,
+                    trackUris = trackUris,
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -157,6 +168,8 @@ fun PlaylistCard(
 @Composable
 fun FourArtsPreview(
     coverArtPreviewUris: List<Uri>,
+    trackUris: List<Uri> = emptyList(),
+    perTrackArtwork: Boolean = false,
     containerShape: Shape = ShapeDefaults.Large,
     artShape: Shape = ShapeDefaults.Small,
     spaceBetween: Dp = 8.dp,
@@ -173,6 +186,8 @@ fun FourArtsPreview(
             coverArtPreviewUris.getOrNull(0)?.let {
                 CoverArt(
                     uri = it,
+                    trackUri = trackUris.getOrNull(0),
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -184,6 +199,8 @@ fun FourArtsPreview(
             coverArtPreviewUris.getOrNull(1)?.let {
                 CoverArt(
                     uri = it,
+                    trackUri = trackUris.getOrNull(1),
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -197,6 +214,8 @@ fun FourArtsPreview(
             coverArtPreviewUris.getOrNull(2)?.let {
                 CoverArt(
                     uri = it,
+                    trackUri = trackUris.getOrNull(2),
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -208,6 +227,8 @@ fun FourArtsPreview(
             coverArtPreviewUris.getOrNull(3)?.let {
                 CoverArt(
                     uri = it,
+                    trackUri = trackUris.getOrNull(3),
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)

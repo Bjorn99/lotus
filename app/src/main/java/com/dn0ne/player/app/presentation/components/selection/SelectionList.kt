@@ -15,7 +15,8 @@ import com.dn0ne.player.app.domain.track.Track
 fun LazyListScope.selectionList(
     trackList: List<Track>,
     selectedTracks: List<Track>,
-    onTrackClick: (Track) -> Unit
+    onTrackClick: (Track) -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     items(
         items = trackList,
@@ -25,6 +26,7 @@ fun LazyListScope.selectionList(
             track = track,
             isSelected = track in selectedTracks,
             onClick = { onTrackClick(track) },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -37,7 +39,8 @@ fun LazyListScope.selectionList(
 fun LazyGridScope.selectionList(
     trackList: List<Track>,
     selectedTracks: List<Track>,
-    onTrackClick: (Track) -> Unit
+    onTrackClick: (Track) -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     items(
         items = trackList,
@@ -47,6 +50,7 @@ fun LazyGridScope.selectionList(
             track = track,
             isSelected = track in selectedTracks,
             onClick = { onTrackClick(track) },
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier.fillMaxWidth()
         )
     }

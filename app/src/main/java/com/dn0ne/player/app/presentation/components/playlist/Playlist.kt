@@ -75,7 +75,8 @@ fun Playlist(
     trackSortOrder: SortOrder,
     onTrackSortChange: (TrackSort?, SortOrder?) -> Unit,
     onBackClick: () -> Unit,
-    replaceSearchWithFilter: Boolean
+    replaceSearchWithFilter: Boolean,
+    perTrackArtwork: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -380,6 +381,7 @@ fun Playlist(
                 onViewTrackInfoClick = onViewTrackInfoClick,
                 onGoToAlbumClick = onGoToAlbumClick,
                 onGoToArtistClick = onGoToArtistClick,
+                perTrackArtwork = perTrackArtwork,
                 onLongClick = {
                     isInSelectionMode = true
                     selectedTracks.add(it)
@@ -397,7 +399,8 @@ fun Playlist(
                     if (selectedTracks.isEmpty()) {
                         isInSelectionMode = false
                     }
-                }
+                },
+                perTrackArtwork = perTrackArtwork,
             )
         }
     }

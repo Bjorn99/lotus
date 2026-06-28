@@ -94,7 +94,8 @@ fun MutablePlaylist(
     onGoToArtistClick: (Track) -> Unit,
     onTrackListReorder: (List<Track>) -> Unit,
     onBackClick: () -> Unit,
-    replaceSearchWithFilter: Boolean
+    replaceSearchWithFilter: Boolean,
+    perTrackArtwork: Boolean = false,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -475,6 +476,7 @@ fun MutablePlaylist(
                         onViewTrackInfoClick = { onViewTrackInfoClick(track) },
                         onGoToAlbumClick = { onGoToAlbumClick(track) },
                         onGoToArtistClick = { onGoToArtistClick(track) },
+                        perTrackArtwork = perTrackArtwork,
                         onLongClick = {
                             isInSelectionMode = true
                             selectedTracks.add(track)
@@ -532,7 +534,8 @@ fun MutablePlaylist(
                     if (selectedTracks.isEmpty()) {
                         isInSelectionMode = false
                     }
-                }
+                },
+                perTrackArtwork = perTrackArtwork,
             )
         }
     }

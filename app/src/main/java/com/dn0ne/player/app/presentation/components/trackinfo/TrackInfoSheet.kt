@@ -78,6 +78,7 @@ fun TrackInfoSheet(
     onPublishLyricsOnRemoteClick: () -> Unit,
     matchDurationWhenSearchMetadata: Boolean,
     onMatchDurationWhenSearchMetadataClick: () -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -223,6 +224,8 @@ fun TrackInfoSheet(
                         state.track?.run {
                             CoverArt(
                                 uri = coverArtUri,
+                                trackUri = uri,
+                                perTrackArtwork = perTrackArtwork,
                                 modifier = Modifier
                                     .requiredWidthIn(max = 400.dp)
                                     .fillMaxWidth()

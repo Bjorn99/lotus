@@ -29,6 +29,7 @@ fun SelectionListItem(
     track: Track,
     isSelected: Boolean,
     onClick: () -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -49,6 +50,8 @@ fun SelectionListItem(
 
             CoverArt(
                 uri = track.coverArtUri,
+                trackUri = track.uri,
+                perTrackArtwork = perTrackArtwork,
                 modifier = Modifier
                     .size(60.dp)
                     .clip(ShapeDefaults.Small)

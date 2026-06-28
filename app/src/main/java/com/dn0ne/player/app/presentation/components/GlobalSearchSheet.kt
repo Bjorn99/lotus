@@ -74,6 +74,7 @@ fun GlobalSearchSheet(
     onAlbumPlaylistClick: (Playlist) -> Unit,
     onArtistPlaylistClick: (Playlist) -> Unit,
     onGenrePlaylistClick: (Playlist) -> Unit,
+    perTrackArtwork: Boolean = false,
 ) {
     if (!isVisible) return
     Dialog(
@@ -155,13 +156,17 @@ fun GlobalSearchSheet(
                                 )
                             }
                             items(tracks.take(TRACK_LIMIT), key = { "t-" + it.uri }) { track ->
-                                CompactTrackRow(track) {
-                                    onTrackClick(
-                                        track,
-                                        Playlist(name = null, trackList = tracks)
-                                    )
-                                    onDismiss()
-                                }
+                                CompactTrackRow(
+                                    track,
+                                    perTrackArtwork = perTrackArtwork,
+                                    onClick = {
+                                        onTrackClick(
+                                            track,
+                                            Playlist(name = null, trackList = tracks)
+                                        )
+                                        onDismiss()
+                                    }
+                                )
                             }
                         }
                         if (albums.isNotEmpty()) {
@@ -300,7 +305,7 @@ private fun EmptyState(icon: ImageVector, text: String) {
 }
 
 @Composable
-private fun CompactTrackRow(track: Track, onClick: () -> Unit) {
+private fun CompactTrackRow(track: Track, perTrackArtwork: Boolean = false, onClick: () -> Unit) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -312,6 +317,8 @@ private fun CompactTrackRow(track: Track, onClick: () -> Unit) {
     ) {
         CoverArt(
             uri = track.coverArtUri,
+            trackUri = track.uri,
+            perTrackArtwork = perTrackArtwork,
             modifier = Modifier
                 .size(44.dp)
                 .clip(ShapeDefaults.Small)

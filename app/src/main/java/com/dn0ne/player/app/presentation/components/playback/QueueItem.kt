@@ -36,6 +36,7 @@ fun QueueItem(
     onClick: () -> Unit,
     onRemoveFromQueueClick: () -> Unit,
     dragHandle: @Composable () -> Unit,
+    perTrackArtwork: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -59,6 +60,8 @@ fun QueueItem(
 
             CoverArt(
                 uri = track.coverArtUri,
+                trackUri = track.uri,
+                perTrackArtwork = perTrackArtwork,
                 modifier = Modifier
                     .size(60.dp)
                     .clip(ShapeDefaults.Small)

@@ -42,6 +42,7 @@ fun LazyGridScope.selectionCards(
     sortOrder: SortOrder,
     onCardClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
+    perTrackArtwork: Boolean = false,
 ) {
     items(
         items = playlists.sortedBy(sort, sortOrder),
@@ -54,6 +55,10 @@ fun LazyGridScope.selectionCards(
             coverArtPreviewUris = playlist.trackList
                 .take(if (showSinglePreview) 1 else 4)
                 .map { it.coverArtUri },
+            trackUris = playlist.trackList
+                .take(if (showSinglePreview) 1 else 4)
+                .map { it.uri },
+            perTrackArtwork = perTrackArtwork,
             isSelected = playlist in selectedPlaylists,
             modifier = Modifier
                 .clip(ShapeDefaults.Large)
@@ -70,6 +75,8 @@ fun SelectionCard(
     title: String,
     trackCount: Int,
     coverArtPreviewUris: List<Uri>,
+    trackUris: List<Uri> = emptyList(),
+    perTrackArtwork: Boolean = false,
     isSelected: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -83,6 +90,8 @@ fun SelectionCard(
                 val coroutineScope = rememberCoroutineScope()
                 CoverArt(
                     uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
+                    trackUri = trackUris.firstOrNull(),
+                    perTrackArtwork = perTrackArtwork,
                     onCoverArtLoaded = { bitmap ->
                         bitmap?.let {
                             coroutineScope.launch {
@@ -106,6 +115,8 @@ fun SelectionCard(
             } else {
                 FourArtsPreview(
                     coverArtPreviewUris = coverArtPreviewUris,
+                    trackUris = trackUris,
+                    perTrackArtwork = perTrackArtwork,
                     modifier = Modifier.fillMaxWidth()
                 )
 
