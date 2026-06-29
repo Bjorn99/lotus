@@ -31,7 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -289,13 +289,6 @@ fun LazyGridWithCollapsibleTabsTopBar(
                     tabListState.layoutInfo.viewportSize.width
                 }
             }
-            val maxTabWidth = 120.dp
-            // Fixed dp value — NOT derived from viewportWidth because
-            // viewportWidth is 0 during initial tab-row composition,
-            // which would cause 0dp max-width items to crash the
-            // scrollToItem call (forceRemeasure with zero-width items
-            // triggers "Place was called on a node which was placed
-            // already" in LookaheadPassDelegate).
             val boundTransformAnimationSpec = remember { spring<Rect>() }
             val contentAnimationSpec = remember { spring<Float>() }
 
@@ -419,8 +412,7 @@ fun LazyGridWithCollapsibleTabsTopBar(
                                             },
                                             sharedTransitionScope = this@SharedTransitionLayout,
                                             animatedVisibilityScope = this@AnimatedContent,
-                                            boundTransformAnimationSpec = boundTransformAnimationSpec,
-                                            modifier = Modifier.widthIn(max = maxTabWidth)
+                                            boundTransformAnimationSpec = boundTransformAnimationSpec
                                         )
                                     }
 

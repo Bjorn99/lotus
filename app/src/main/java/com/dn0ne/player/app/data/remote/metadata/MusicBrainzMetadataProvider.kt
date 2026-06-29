@@ -50,6 +50,22 @@ internal fun escapeLuceneQuery(query: String): String {
         .replace(AND_OR_NOT) { it.value.lowercase() }
 }
 
+// Applies Lucene escaping AND boolean-operator lowercasing regardless
+// of whether the query contains explicit Lucene syntax (quotes).
+// Extracted so both the FIELD_NORMALIZE path and the plain-user-query
+// path get the same treatment.
+private fun normalizeQuery(query: String): String {
+    val lowercased = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
+        query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
+    } else {
+        query
+    }
+    // Always escape special characters and lowercase boolean operators,
+    // even when the query contains Lucene field syntax — the user may
+    // have quoted a phrase but still have stray AND/OR/NOT outside it.
+    return escapeLuceneQuery(lowercased)
+}
+
 private fun buildBroadenedQuery(query: String): String {
     val term = escapeLuceneQuery(query)
     return "recording:\"$term\" OR alias:\"$term\" OR artist:\"$term\""
@@ -81,14 +97,13 @@ class MusicBrainzMetadataProvider(
             return lookupByMbid(query)
         }
 
-        val escapedQuery = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
-            query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
-        } else {
-            escapeLuceneQuery(query)
-        }
+        val normalizedQuery = normalizeQuery(query)
 
+        // Query with the optional duration filter appended as a Lucene
+        // AND clause.  We also keep the unfiltered query so we can
+        // fall back if the duration filter kills all results.
         val narrowQuery = buildString {
-            append(escapedQuery)
+            append(normalizedQuery)
             if (matchDuration && trackDuration > 0) {
                 append(" AND dur:[${trackDuration - 15000} TO ${trackDuration + 15000}]")
             }
@@ -101,9 +116,23 @@ class MusicBrainzMetadataProvider(
         when (recordingResult) {
             is Result.Error -> return recordingResult
             is Result.Success -> {
-                if (recordingResult.data.size >= 3) {
+                if (recordingResult.data.size >= 1) {
                     return recordingResult
                 }
+            }
+        }
+
+        // If the duration filter was on and we got zero results, retry
+        // without it — a mistagged duration shouldn't prevent finding
+        // the track entirely.
+        if (matchDuration && trackDuration > 0 && recordingResult is Result.Success && recordingResult.data.isEmpty()) {
+            rateLimiter.acquire()
+            Log.d(logTag, "search: retrying without duration filter, query=\"$normalizedQuery\"")
+            val noDurResult = searchRecordings(normalizedQuery)
+            val noDurCount = if (noDurResult is Result.Success) noDurResult.data.size else -1
+            Log.d(logTag, "search: no-dur fallback count=$noDurCount")
+            if (noDurResult is Result.Success && noDurResult.data.isNotEmpty()) {
+                return noDurResult
             }
         }
 
@@ -128,7 +157,7 @@ class MusicBrainzMetadataProvider(
             Log.d(logTag, "search: stage2 broadened count=$stage2Count query=\"$broadenedQuery\"")
             when (broadenedResult) {
                 is Result.Success -> {
-                    if (broadenedResult.data.size >= 3) {
+                    if (broadenedResult.data.size >= 1) {
                         return broadenedResult
                     }
                 }
