@@ -164,18 +164,24 @@
     <!-- Search tips dialog -->
     <string name="got_it">Got it</string>
     <string name="search_tips">Search tips</string>
-    <string name="search_explain">We use the MusicBrainz API to help you find track info. You can make your searches more precise using simple filters.</string>
+    <string name="search_explain">We use the MusicBrainz API to help you find track info.</string>
+    <string name="recipe_header">Quick recipe</string>
+    <string name="recipe_explain">For the most accurate results, search by artist AND recording name together. Field names must be lowercase, operators must be UPPERCASE:</string>
+    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
     <string name="quotes_explain_header">Quotes for exact matches</string>
     <string name="quotes_explain">Use quotes to find specific words or phrases:</string>
     <string name="quotes_example_1">\"4:44\"</string>
     <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
-    <string name="field_explain_header">Search by artist or album</string>
-    <string name="field_explain">You can search for a specific artist or album like this:</string>
+    <string name="field_explain_header">Search by field</string>
+    <string name="field_explain">You can search by artist, album, or recording (track) name:</string>
     <string name="field_example_1">artist:\"Jay-Z\"</string>
     <string name="field_example_2">release:\"Over You\"</string>
+    <string name="field_example_3">recording:\"Still Falling For You\"</string>
+    <string name="field_reference_header">Field reference</string>
+    <string name="field_reference_explain">artist: — artist or performer name\nrecording: — song or track title (use this, not track:)\nrelease: — album, EP, or single name\n\nTip: track: is not a valid MusicBrainz field — use recording: for song names. MusicBrainz searches recording titles by default, so you can also search without a field prefix.</string>
     <string name="combine_explain_header">Combine searches</string>
-    <string name="combine_explain">Use \"AND\" to connect different search terms:</string>
-    <string name="combine_example">\"4:44\" AND artist:\"Jay-Z\" AND release:\"4:44\"</string>
+    <string name="combine_explain">Use AND, OR, NOT (uppercase) to combine field searches. Without quotes or field prefixes, these words are treated as literal text:</string>
+    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
     <string name="mbid_lookup_header">MusicBrainz ID lookup</string>
     <string name="mbid_lookup_explain">Paste a MusicBrainz ID (UUID) to find the exact recording, even when text search fails:</string>
     <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
@@ -361,7 +367,10 @@
     <string name="filter">Filter</string>
     <string name="import_playlist">Import playlist</string>
     <string name="import_playlist_explain">Add playlist from M3U file</string>
-    <string name="imported_successfully">Imported successfully.</string>
+    <string name="imported_successfully">Imported %1$d tracks.</string>
+    <string name="m3u_imported_partial">Imported %1$d of %2$d tracks (%3$d not found).</string>
+    <string name="m3u_no_tracks_found">No tracks from playlist found on device.</string>
+    <string name="m3u_import_empty">Playlist file contains no tracks.</string>
 
     <!-- Lyrics settings -->
     <string name="dark_theme_for_lyrics">Dark theme for lyrics</string>

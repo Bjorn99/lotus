@@ -1192,6 +1192,7 @@ fun MainPlayerScreen(
         gridState = gridState,
         topBarTabs = topBarTabs,
         defaultSelectedTab = defaultTab,
+        titleSideReserve = 156.dp,
         onTabChange = {
             showSearchField = false
             searchFieldValue = ""

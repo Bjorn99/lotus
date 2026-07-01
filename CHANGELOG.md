@@ -6,9 +6,27 @@ Each release page is built from the matching section below, so the wording is ai
 
 ## 1.8.1
 
-- Fixed tab names overflowing on narrow screens and top bar staying collapsed after tab switches
-- Fixed per-track artwork not applying in album, playlist, and track list views — embedded art now shows everywhere when the setting is enabled
-- Fixed MusicBrainz metadata search treating AND, OR, and NOT in query text as search operators instead of literal words
+### Collapsing header
+
+- **Fixed two crashes in the tab bar.** Tapping a tab while the top bar was animating caused a layout collision, and a rare startup crash left the bar with zero-width tabs.
+- **Tab titles auto-size to prevent clipping.** The title font shrinks to fit the available space, and the transient ellipsis that flickered during tab switches has been replaced with a clean clip. Long tab names in Cyrillic and other wide scripts now fit without truncation.
+- **The tab animation no longer bleeds into the grid.** The scale-up effect when switching to the tab row stays contained in the bar area.
+
+### Per-track artwork
+
+- **Fixed per-track artwork not appearing in album, playlist, and track list views.** Embedded cover art now shows everywhere when the setting is enabled, including the library stats screen.
+
+### MusicBrainz search
+
+- **Plain-text searches handle AND, OR, and NOT as literal words.** Searching for "Roses AND Thorns" no longer trips over boolean operators.
+- **Explicit Lucene queries now work correctly.** Queries like `artist:"Alter Bridge" AND recording:"Slip to the Void"` preserve the operators as intended.
+- **Search retries without the duration filter** when an exact-duration match returns no results, and any valid match is returned immediately.
+- **Search hints expanded** with a quick recipe, a `recording:` field example, and a field reference that lists which field names are valid.
+
+### M3U import
+
+- **M3U files from other devices now import correctly.** Tracks are matched by filename when the full path doesn't exist on the device.
+- **Import shows how many tracks were found.** The snackbar reports the count — all matched, partial, or none — instead of a single generic message.
 
 ## 1.8.0 — Scrolling, search, and sidecar lyrics
 

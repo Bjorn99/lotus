@@ -326,7 +326,7 @@
     <string name="filter">Фільтр</string>
     <string name="import_playlist">Імпортувати плейлист</string>
     <string name="import_playlist_explain">Додати плейлист з M3U файлу</string>
-    <string name="imported_successfully">Імпортовано успішно</string>
+    <string name="imported_successfully">Імпортовано доріжок: %1$d.</string>
 
     <!-- Lyrics settings -->
     <string name="dark_theme_for_lyrics">Темне оформлення для тексту</string>

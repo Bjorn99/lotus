@@ -4,5 +4,6 @@ import androidx.annotation.StringRes
 
 data class SnackbarEvent(
     @StringRes val message: Int,
-    val action: SnackbarAction? = null
+    val action: SnackbarAction? = null,
+    val formatArgs: List<Any> = emptyList()
 )

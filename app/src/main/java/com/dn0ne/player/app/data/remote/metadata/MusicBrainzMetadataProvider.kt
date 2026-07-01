@@ -45,29 +45,43 @@ internal val FIELD_NORMALIZE =
     Regex("""\b(Artist|Release|Recording|Track|Dur|Tag|Alias|Arid|Reid|Rgid):""")
 
 internal fun escapeLuceneQuery(query: String): String {
-    return query
-        .replace(LUCENE_SPECIAL, "\\\\$1")
-        .replace(AND_OR_NOT) { it.value.lowercase() }
+    return query.replace(LUCENE_SPECIAL, "\\\\$1")
 }
 
-// Applies Lucene escaping AND boolean-operator lowercasing regardless
-// of whether the query contains explicit Lucene syntax (quotes).
-// Extracted so both the FIELD_NORMALIZE path and the plain-user-query
-// path get the same treatment.
+// Normalizes a user query for MusicBrainz Lucene search.
+//
+// Two paths:
+// 1. Plain text (no quotes, no field: syntax) — escape special chars
+//    AND lowercase AND/OR/NOT.  "Roses AND Thorns" → literal "and".
+// 2. Lucene syntax (quotes present) — the user is writing a structured
+//    query.  Lowercase field names (Artist: → artist:) and escape
+//    special chars, but preserve AND/OR/NOT as boolean operators.
 private fun normalizeQuery(query: String): String {
-    val lowercased = if (HAS_LUCENE_SYNTAX.containsMatchIn(query)) {
+    val hasLuceneSyntax = HAS_LUCENE_SYNTAX.containsMatchIn(query)
+
+    val withNormalizedFields = if (hasLuceneSyntax) {
         query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
     } else {
         query
     }
-    // Always escape special characters and lowercase boolean operators,
-    // even when the query contains Lucene field syntax — the user may
-    // have quoted a phrase but still have stray AND/OR/NOT outside it.
-    return escapeLuceneQuery(lowercased)
+
+    // Always escape Lucene special characters
+    val escaped = escapeLuceneQuery(withNormalizedFields)
+
+    return if (hasLuceneSyntax) {
+        // User is writing explicit Lucene — preserve AND/OR/NOT as operators
+        escaped
+    } else {
+        // Plain text — AND/OR/NOT are likely literal words, lowercase them
+        escaped.replace(AND_OR_NOT) { it.value.lowercase() }
+    }
 }
 
 private fun buildBroadenedQuery(query: String): String {
+    // Single-word input: escape special chars and lowercase stray
+    // boolean operators so they don't break the constructed query.
     val term = escapeLuceneQuery(query)
+        .replace(AND_OR_NOT) { it.value.lowercase() }
     return "recording:\"$term\" OR alias:\"$term\" OR artist:\"$term\""
 }
 

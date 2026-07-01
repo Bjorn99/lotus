@@ -1766,8 +1766,8 @@ class PlayerViewModel(
 
     fun parseM3U(playlistName: String, fileContent: String, m3uDirectory: String?) {
         viewModelScope.launch {
-            val tracks = withContext(Dispatchers.IO) {
-                fileContent.lines()
+            val (tracks, resolvedCount) = withContext(Dispatchers.IO) {
+                val resolvedPaths = fileContent.lines()
                     .filter { it.isNotBlank() && !it.startsWith("#") }
                     .map { line ->
                         when {
@@ -1780,8 +1780,20 @@ class PlayerViewModel(
                         }
                     }
                     .filterNotNull()
-                    .mapNotNull { path -> _trackList.value.fastFirstOrNull { path == it.data } }
+
+                val trackList = _trackList.value
+                val matched = resolvedPaths.mapNotNull { path ->
+                    // Exact filesystem match first
+                    trackList.fastFirstOrNull { path == it.data }
+                        // Fallback: match by filename (for cross-device M3U files)
+                        ?: trackList.fastFirstOrNull { track ->
+                            path.substringAfterLast('/') == track.data.substringAfterLast('/')
+                        }
+                }
+                matched to resolvedPaths.size
             }
+            val matchedCount = tracks.size
+
             val name = playlistName.filter { it.isDigit() || it.isLetter() || it.isWhitespace() }
 
             playlistRepository.insertPlaylist(
@@ -1791,9 +1803,23 @@ class PlayerViewModel(
                 )
             )
 
+            val message = when {
+                resolvedCount == 0 -> R.string.m3u_import_empty
+                matchedCount == 0 -> R.string.m3u_no_tracks_found
+                matchedCount < resolvedCount -> R.string.m3u_imported_partial
+                else -> R.string.imported_successfully
+            }
             SnackbarController.sendEvent(
                 SnackbarEvent(
-                    message = R.string.imported_successfully
+                    message = message,
+                    formatArgs = when {
+                        resolvedCount == 0 -> emptyList()
+                        matchedCount == 0 -> emptyList()
+                        matchedCount < resolvedCount -> listOf(
+                            matchedCount, resolvedCount, resolvedCount - matchedCount
+                        )
+                        else -> listOf(matchedCount)
+                    }
                 )
             )
         }

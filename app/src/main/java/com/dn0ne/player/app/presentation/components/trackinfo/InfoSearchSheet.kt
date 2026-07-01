@@ -471,6 +471,25 @@ fun SearchHintDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
+                    text = context.resources.getString(R.string.recipe_header),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(text = context.resources.getString(R.string.recipe_explain))
+
+                Text(
+                    text = context.resources.getString(R.string.recipe_example),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clip(ShapeDefaults.Small)
+                        .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
                     text = context.resources.getString(R.string.quotes_explain_header),
                     fontWeight = FontWeight.Bold
                 )
@@ -526,6 +545,25 @@ fun SearchHintDialog(
                         .background(color = MaterialTheme.colorScheme.secondaryContainer)
                         .padding(8.dp)
                 )
+
+                Text(
+                    text = context.resources.getString(R.string.field_example_3),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clip(ShapeDefaults.Small)
+                        .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = context.resources.getString(R.string.field_reference_header),
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(text = context.resources.getString(R.string.field_reference_explain))
 
                 Spacer(modifier = Modifier.height(16.dp))
 

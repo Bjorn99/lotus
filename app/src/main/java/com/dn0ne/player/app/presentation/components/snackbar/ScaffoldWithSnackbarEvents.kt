@@ -29,7 +29,11 @@ fun ScaffoldWithSnackbarEvents(
             snackbarHostState.currentSnackbarData?.dismiss()
 
             val result = snackbarHostState.showSnackbar(
-                message = context.resources.getString(event.message),
+                message = if (event.formatArgs.isNotEmpty()) {
+                    context.resources.getString(event.message, *event.formatArgs.toTypedArray())
+                } else {
+                    context.resources.getString(event.message)
+                },
                 actionLabel = event.action?.let { context.resources.getString(it.name) }
             )
 
