@@ -4,6 +4,24 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.8.2
+
+A polish-and-stability release. The tab bar moves smoothly again, lyrics load from the right file, album tiles show the art you tagged, and editing metadata no longer crashes on some devices.
+
+### Fixed
+
+- **Smooth tab bar again.** The header transition was grainy — titles stuttered while resizing, the bar sometimes came back black until you touched the screen, and tabs occasionally rendered cut in half. A regression from the universal-search layout work. The title now scales cleanly as you scroll, stays centered, never collides with the buttons, and shows long names in full when expanded. (#81)
+- **Per-track artwork on album tiles.** With per-track artwork on, the Albums tab now builds its four-up preview from individual tracks instead of falling back to one cover. (#87)
+- **Correct lyrics sidecar file.** On some devices, picking a `.lrc` next to files with non-Latin names loaded the wrong one — the system ignored our filter. Lotus now scans the folder and matches the filename itself. (#100)
+- **No crash on choosing a lyrics folder.** A `.lrc` path resolving to a directory used to crash; directories are now skipped and the error handled. (#101)
+- **Same-timestamp lyric lines all show.** Bilingual `.lrc` files pinning two lines to one timestamp lost all but one. They're now grouped and shown together. (#102)
+- **No crash editing metadata on release builds.** Renaming or saving tags crashed for some users — the optimizer was stripping parts of the tag library a reflective call needed at runtime. That library is now preserved in release builds, and the edit path fails gracefully instead of crashing. (#95, #103)
+
+### Under the hood
+
+- Dropped a leftover debug shortcut that dumped error details to the clipboard on failure; failures are logged properly now.
+- Added tests for the sidecar filename matching and same-timestamp grouping.
+
 ## 1.8.1
 
 ### Collapsing header

@@ -22,6 +22,7 @@ keystore.properties
 *.keystore
 docs/research/
 docs/superpowers/
+.superpowers/
 .worktrees/
 .agents/
 .claude/

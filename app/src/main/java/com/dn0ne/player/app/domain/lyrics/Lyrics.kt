@@ -34,5 +34,18 @@ fun String.toSyncedLyrics(): List<Pair<Int, String>> {
     if (lines.isEmpty()) {
         throw IllegalArgumentException("Synced lines not found.")
     }
+
+    // Merge lines that share a timestamp into a single entry (e.g.
+    // bilingual LRCs where the original and the translation land on
+    // the same cue). Compose Text renders '\n' as a soft break, so
+    // downstream shows these as one paragraph — which is what issue
+    // #102 asked for. groupBy preserves insertion order within each
+    // group, so the source ordering (English first, translation
+    // second — or whatever the file has) is preserved.
     return lines
+        .groupBy { it.first }
+        .map { (timestamp, group) ->
+            timestamp to group.joinToString("\n") { it.second }
+        }
+        .sortedBy { it.first }
 }

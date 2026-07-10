@@ -20,7 +20,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -31,8 +30,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -76,13 +76,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import com.dn0ne.player.app.presentation.components.animatable.rememberAnimatable
 import com.dn0ne.player.app.presentation.components.isSystemInLandscapeOrientation
@@ -101,7 +98,24 @@ fun LazyGridWithCollapsibleTabsTopBar(
     onTabChange: (tab: Tab) -> Unit = {},
     tabTitleTextStyle: TextStyle = MaterialTheme.typography.headlineLarge,
     tabRowTitleTextStyle: TextStyle = MaterialTheme.typography.titleLarge,
-    topBarButtons: @Composable BoxScope.(tab: Tab) -> Unit = {},
+    // Persistent button groups flanking the tab title in Default mode.
+    // Rendered inside a Row(SpaceBetween) that's aligned to BottomCenter
+    // of the top bar box, matching the pre-refactor visual (buttons at
+    // the bottom, title vertically centered above). When the bar is
+    // fully expanded the title takes the full width; when it collapses,
+    // the title's horizontal padding lerps up to the actual button-
+    // group widths so the title fits BETWEEN the elements without
+    // overlapping them — this is the "autocenter between elements"
+    // the reporter asked for in #81, without the per-frame text-
+    // measurement fragility of the old auto-sizing approach.
+    startButtons: @Composable RowScope.(tab: Tab) -> Unit = {},
+    endButtons: @Composable RowScope.(tab: Tab) -> Unit = {},
+    // Full-width overlay content that REPLACES the title row when
+    // topBarContent is Search or Selection. Empty by default.
+    topBarOverlay: @Composable BoxScope.(tab: Tab) -> Unit = {},
+    // Signals whether the title+buttons layout should be shown (Default)
+    // or overridden by topBarOverlay (Search / Selection).
+    topBarContent: TopBarContent = TopBarContent.Default,
     minTopBarHeight: Dp = 60.dp,
     maxTopBarHeight: Dp = 250.dp,
     maxTopBarHeightLandscape: Dp = 150.dp,
@@ -111,12 +125,6 @@ fun LazyGridWithCollapsibleTabsTopBar(
     contentHorizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
     contentVerticalArrangement: Arrangement.Vertical = Arrangement.Top,
     enableScrollbar: Boolean = true,
-    // Horizontal space reserved on each side for icon buttons
-    // (settings, sort, search, etc.) so the centered tab title
-    // never overlaps them. 120dp = two 48dp IconButtons + 24dp
-    // padding.  Callers with wider button groups pass a larger
-    // value.
-    titleSideReserve: Dp = 120.dp,
     modifier: Modifier = Modifier,
     gridCells: (tab: Tab) -> GridCells = { GridCells.Fixed(1) },
     tabContent: LazyGridScope.(tab: Tab) -> Unit
@@ -162,10 +170,18 @@ fun LazyGridWithCollapsibleTabsTopBar(
         }
     }
 
+    // Smoothly interpolate the title font size between titleLarge (collapsed)
+    // and displaySmall (expanded) based on collapse fraction. This is the
+    // upstream animation that makes the title transition feel continuous
+    // instead of a hard font-size step. Cheap — a single TextStyle.copy per
+    // frame; NOT the source of the pre-refactor graininess (that was
+    // textMeasurer.measure() shaping text every frame in the auto-size
+    // block, which is gone now).
     val titleLarge = MaterialTheme.typography.titleLarge
     val displaySmall = MaterialTheme.typography.displaySmall
     val activeTitleTextStyle = remember(topBarHeight.value) {
-        val fraction = (topBarHeight.value - minTopBarHeight) / (maxTopBarHeight - minTopBarHeight)
+        val fraction = (topBarHeight.value - minTopBarHeight) /
+            (maxTopBarHeight - minTopBarHeight)
         titleLarge.copy(
             fontSize = lerp(
                 titleLarge.fontSize,
@@ -346,83 +362,114 @@ fun LazyGridWithCollapsibleTabsTopBar(
                                     )
                                 }
 
-                                BoxWithConstraints(
-                                    modifier = Modifier.fillMaxSize()
+                                // Box overlay: title at Alignment.Center with
+                                // asymmetric dynamic horizontal padding,
+                                // buttons Row at Alignment.BottomCenter
+                                // with SpaceBetween. When expanded the
+                                // padding is 0dp (title has the full width,
+                                // no ellipsis needed — buttons are
+                                // vertically far below). When collapsed
+                                // the padding lerps to the actual button-
+                                // group widths (108dp left for Settings +
+                                // Sort, 156dp right for Grid + GlobalSearch
+                                // + Search) so the title fits BETWEEN the
+                                // button groups without overlapping them.
+                                // This is the "autocenter between elements"
+                                // fix for #81. No BoxWithConstraints, no
+                                // textMeasurer, no per-frame text shaping
+                                // (the source of the pre-refactor graininess).
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable(
+                                            interactionSource = remember {
+                                                MutableInteractionSource()
+                                            },
+                                            indication = null
+                                        ) {
+                                            showTabRow = true
+                                        }
                                 ) {
-                                    // Dynamic side reserve: 24dp when relaxed
-                                    // (title and buttons are far apart — no
-                                    // overlap risk), scaling to the full
-                                    // titleSideReserve when fully collapsed.
-                                    val collapseFraction = if (maxTopBarHeight > minTopBarHeight) {
-                                        ((maxTopBarHeight - topBarHeight.value) /
-                                            (maxTopBarHeight - minTopBarHeight))
-                                            .coerceIn(0f, 1f)
-                                    } else 1f
-                                    val sideReserve = lerp(
-                                        24.dp, titleSideReserve, collapseFraction
-                                    )
-                                    // Guard against transient zero-width
-                                    // constraints during AnimatedContent
-                                    // transitions — ensures short tab names
-                                    // never spuriously ellipsize.
-                                    val titleMaxWidth = (maxWidth - sideReserve * 2)
-                                        .coerceAtLeast(100.dp)
+                                    when (topBarContent) {
+                                        TopBarContent.Default -> {
+                                            // Box overlay: title at Center,
+                                            // buttons at BottomCenter. Title
+                                            // width is dynamically padded
+                                            // based on collapse fraction —
+                                            // 0dp reserve when expanded (full
+                                            // width available, no ellipsis,
+                                            // buttons are vertically far
+                                            // below the title so no
+                                            // horizontal collision), scaling
+                                            // to the actual button-group
+                                            // widths (108dp left, 156dp
+                                            // right) when fully collapsed
+                                            // (buttons share the same
+                                            // vertical strip as the title).
+                                            // Asymmetric because Lotus's
+                                            // left group (Settings + Sort ≈
+                                            // 108dp) is narrower than the
+                                            // right group (Grid +
+                                            // GlobalSearch + Search ≈ 156dp)
+                                            // — this makes the title truly
+                                            // centered BETWEEN the elements
+                                            // when collapsed, not just
+                                            // screen-centered.
+                                            val collapseFraction = if (maxTopBarHeight > minTopBarHeight) {
+                                                ((maxTopBarHeight - topBarHeight.value) /
+                                                    (maxTopBarHeight - minTopBarHeight))
+                                                    .coerceIn(0f, 1f)
+                                            } else 1f
+                                            val startReserve = lerp(0.dp, 108.dp, collapseFraction)
+                                            val endReserve = lerp(0.dp, 156.dp, collapseFraction)
 
-                                    // Auto-size the title font so it fits
-                                    // inside the available width.  Floor at
-                                    // 10sp — below that, TextOverflow.Clip
-                                    // handles the overflow.
-                                    val textMeasurer = rememberTextMeasurer()
-                                    val context = LocalContext.current
-                                    val titleText = context.resources.getString(selectedTab.titleResId)
-                                    val density = LocalDensity.current
-                                    val titleMaxWidthPx = with(density) { titleMaxWidth.toPx() }
+                                            TabTitle(
+                                                selectedTab = selectedTab,
+                                                style = activeTitleTextStyle,
+                                                sharedTransitionScope = this@SharedTransitionLayout,
+                                                animatedVisibilityScope = this@AnimatedContent,
+                                                boundTransformAnimationSpec = boundTransformAnimationSpec,
+                                                modifier = Modifier
+                                                    .align(Alignment.Center)
+                                                    .padding(
+                                                        start = startReserve,
+                                                        end = endReserve
+                                                    )
+                                            )
 
-                                    val measuredWidth = textMeasurer.measure(
-                                        text = AnnotatedString(titleText),
-                                        style = activeTitleTextStyle,
-                                        maxLines = 1,
-                                        softWrap = false
-                                    ).size.width
-
-                                    val adjustedFontSize = if (measuredWidth > 0 &&
-                                        measuredWidth > titleMaxWidthPx
-                                    ) {
-                                        (activeTitleTextStyle.fontSize.value *
-                                            titleMaxWidthPx / measuredWidth)
-                                            .coerceAtLeast(10f)
-                                    } else {
-                                        activeTitleTextStyle.fontSize.value
-                                    }
-
-                                    val adjustedStyle = activeTitleTextStyle.copy(
-                                        fontSize = adjustedFontSize.sp
-                                    )
-
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clickable(
-                                                interactionSource = remember {
-                                                    MutableInteractionSource()
-                                                },
-                                                indication = null
+                                            Row(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .fillMaxWidth()
+                                                    .padding(
+                                                        horizontal = 12.dp,
+                                                        vertical = 4.dp
+                                                    ),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                showTabRow = true
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    startButtons(selectedTab)
+                                                }
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    endButtons(selectedTab)
+                                                }
                                             }
-                                    ) {
-                                        TabTitle(
-                                            selectedTab = selectedTab,
-                                            style = adjustedStyle,
-                                            sharedTransitionScope = this@SharedTransitionLayout,
-                                            animatedVisibilityScope = this@AnimatedContent,
-                                            boundTransformAnimationSpec = boundTransformAnimationSpec,
-                                            modifier = Modifier
-                                                .align(Alignment.Center)
-                                                .widthIn(max = titleMaxWidth)
-                                        )
-
-                                        topBarButtons(selectedTab)
+                                        }
+                                        TopBarContent.Search,
+                                        TopBarContent.Selection -> {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                                            ) {
+                                                topBarOverlay(selectedTab)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -515,9 +562,16 @@ fun TabTitle(
     modifier: Modifier = Modifier
 ) {
     with(sharedTransitionScope) {
+        // No .width(IntrinsicSize.Min) here — that override forced the
+        // Column to full natural text width regardless of parent
+        // constraints, which defeats the dynamic .padding(start = ...,
+        // end = ...) on the caller side and lets long titles run under
+        // the button group. Without it, the padding-reduced constraint
+        // reaches the Text and TextOverflow.Ellipsis kicks in when
+        // natural width would overflow. TabRowTitle keeps
+        // IntrinsicSize.Min — pills there need to size to their own text.
         Column(
             modifier = modifier
-                .width(IntrinsicSize.Min)
         ) {
             val context = LocalContext.current
             Text(
@@ -525,7 +579,7 @@ fun TabTitle(
                 style = style,
                 maxLines = 1,
                 softWrap = false,
-                overflow = TextOverflow.Clip,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .sharedBounds(
                         sharedContentState = rememberSharedContentState(selectedTab),
@@ -575,7 +629,7 @@ fun TabRowTitle(
                     style = style,
                     maxLines = 1,
                     softWrap = false,
-                    overflow = TextOverflow.Clip,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .sharedBounds(

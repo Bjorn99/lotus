@@ -1,10 +1,7 @@
 package com.dn0ne.player.app.data
 
 import android.app.RecoverableSecurityException
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
-import android.content.Context.CLIPBOARD_SERVICE
 import android.content.IntentSender
 import android.media.MediaScannerConnection
 import android.os.Build
@@ -149,58 +146,32 @@ class MetadataWriterImpl(
             return Result.Error(DataError.Local.NoWritePermission)
         } catch (e: CannotWriteException) {
             Log.d(logTag, e.message, e)
-            val clipboardManager =
-                context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip =
-                ClipData.newPlainText(
-                    null,
-                    e.message + "\n" + e.stackTrace.joinToString("\n")
-                )
-            clipboardManager?.setPrimaryClip(clip)
             return Result.Error(DataError.Local.NoWritePermission)
         } catch (e: CannotReadException) {
             Log.d(logTag, e.message, e)
-            val clipboardManager =
-                context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip =
-                ClipData.newPlainText(
-                    null,
-                    e.message + "\n" + e.stackTrace.joinToString("\n")
-                )
-            clipboardManager?.setPrimaryClip(clip)
             return Result.Error(DataError.Local.NoReadPermission)
         } catch (e: NoWritePermissionsException) {
             Log.d(logTag, e.message, e)
-            val clipboardManager =
-                context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip =
-                ClipData.newPlainText(
-                    null,
-                    e.message + "\n" + e.stackTrace.joinToString("\n")
-                )
-            clipboardManager?.setPrimaryClip(clip)
             return Result.Error(DataError.Local.NoWritePermission)
         } catch (e: Exception) {
-            Log.d(logTag, e.message, e)
-            val clipboardManager =
-                context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip =
-                ClipData.newPlainText(
-                    null,
-                    e.message + "\n" + e.stackTrace.joinToString("\n")
-                )
-            clipboardManager?.setPrimaryClip(clip)
-            return Result.Error(DataError.Local.Unknown)
-        } catch (e: java.lang.Exception) {
-            Log.d(logTag, e.message, e)
-            val clipboardManager =
-                context.getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip =
-                ClipData.newPlainText(
-                    null,
-                    e.message + "\n" + e.stackTrace.joinToString("\n")
-                )
-            clipboardManager?.setPrimaryClip(clip)
+            // Catch-all for unexpected failures. The historical instances
+            // of this were jaudiotagger's ID3Tags.copyObject reflectively
+            // looking for a copy constructor that R8 had stripped — the
+            // NoSuchMethodException: "Error finding constructor to create
+            // copy:<obfuscated>" surface behind #95 and #103. That
+            // specific class of failure is fixed by the broadened R8
+            // keep rules in proguard-rules.pro (jaudiotagger.**). This
+            // catch is a defensive net for the residue: corrupt tag
+            // frames, exotic charsets, provider-side I/O quirks, etc.
+            // Logged at WARN (was DEBUG) so future recurrences surface
+            // in logcat.
+            //
+            // Deliberately no clipboard dump. The old code silently
+            // overwrote the user's clipboard with a stack trace on every
+            // failure — user-hostile and effectively hidden. Reporters
+            // who need stack traces can use `adb logcat` or filter by
+            // the "Metadata Writer" tag.
+            Log.w(logTag, "Unexpected failure while editing metadata", e)
             return Result.Error(DataError.Local.Unknown)
         }
     }

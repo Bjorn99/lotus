@@ -80,4 +80,76 @@ class LyricsParserTest {
             input.toSyncedLyrics()
         }
     }
+
+    // ---- Same-timestamp grouping (#102) ----
+
+    // Reporter's exact example: original + Cyrillic translation on the
+    // same time cue. Under the old parser these were two entries at the
+    // same timestamp, which the downstream renderer treated as
+    // sequential lines — the second one erased the first as it scrolled
+    // past.
+    @Test
+    fun consecutive_same_timestamp_lines_merge_into_one_entry() {
+        val input = listOf(
+            "[01:05.99]Sin is broken, You have saved me",
+            "[01:05.99]греха разчупи и спаси ме",
+        ).joinToString("\n")
+
+        val result = input.toSyncedLyrics()
+
+        assertEquals(1, result.size)
+        assertEquals(
+            65_990 to "Sin is broken, You have saved me\nгреха разчупи и спаси ме",
+            result[0],
+        )
+    }
+
+    @Test
+    fun three_same_timestamp_lines_merge_preserving_source_order() {
+        val input = listOf(
+            "[00:10.00]First",
+            "[00:10.00]Second",
+            "[00:10.00]Third",
+        ).joinToString("\n")
+
+        val result = input.toSyncedLyrics()
+
+        assertEquals(1, result.size)
+        assertEquals(10_000 to "First\nSecond\nThird", result[0])
+    }
+
+    @Test
+    fun mixed_same_and_distinct_timestamps_are_grouped_and_sorted() {
+        val input = listOf(
+            "[00:20.00]Line B at 20s",
+            "[00:10.00]Line A at 10s (original)",
+            "[00:10.00]Line A at 10s (translation)",
+            "[00:30.00]Line C at 30s",
+        ).joinToString("\n")
+
+        val result = input.toSyncedLyrics()
+
+        assertEquals(3, result.size)
+        assertEquals(10_000 to "Line A at 10s (original)\nLine A at 10s (translation)", result[0])
+        assertEquals(20_000 to "Line B at 20s", result[1])
+        assertEquals(30_000 to "Line C at 30s", result[2])
+    }
+
+    @Test
+    fun distinct_timestamps_are_unchanged_by_grouping() {
+        // Regression guard: the grouping pass must not corrupt normal
+        // LRC files where every line has its own timestamp.
+        val input = listOf(
+            "[00:10.00]Line A",
+            "[00:20.00]Line B",
+            "[00:30.00]Line C",
+        ).joinToString("\n")
+
+        val result = input.toSyncedLyrics()
+
+        assertEquals(3, result.size)
+        assertEquals(10_000 to "Line A", result[0])
+        assertEquals(20_000 to "Line B", result[1])
+        assertEquals(30_000 to "Line C", result[2])
+    }
 }

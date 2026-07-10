@@ -1192,7 +1192,6 @@ fun MainPlayerScreen(
         gridState = gridState,
         topBarTabs = topBarTabs,
         defaultSelectedTab = defaultTab,
-        titleSideReserve = 156.dp,
         onTabChange = {
             showSearchField = false
             searchFieldValue = ""
@@ -1203,298 +1202,285 @@ fun MainPlayerScreen(
 
             onTabChange(it)
         },
-        topBarButtons = { tab ->
-            AnimatedContent(
-                targetState = topBarContent,
-                label = "top-bar-search-bar-animation",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                    .align(Alignment.BottomCenter)
-            ) { state ->
-                when (state) {
-                    TopBarContent.Default -> {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row {
-                                IconButton(
-                                    onClick = onSettingsClick
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Settings,
-                                        contentDescription = context.resources.getString(
-                                            R.string.settings
-                                        )
-                                    )
-                                }
+        topBarContent = topBarContent,
+        startButtons = { tab ->
+            IconButton(
+                onClick = onSettingsClick
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = context.resources.getString(
+                        R.string.settings
+                    )
+                )
+            }
 
-                                if (tab == Tab.Tracks) {
-                                    TrackSortButton(
-                                        sort = trackSort,
-                                        order = trackSortOrder,
-                                        onSortChange = {
-                                            onTrackSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onTrackSortChange(null, it)
-                                        }
-                                    )
-                                } else if (tab == Tab.Albums) {
-                                    PlaylistSortButton(
-                                        sort = albumSort,
-                                        order = albumSortOrder,
-                                        onSortChange = {
-                                            onAlbumSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onAlbumSortChange(null, it)
-                                        }
-                                    )
-                                } else if (tab == Tab.Artists) {
-                                    PlaylistSortButton(
-                                        sort = artistSort,
-                                        order = artistSortOrder,
-                                        onSortChange = {
-                                            onArtistSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onArtistSortChange(null, it)
-                                        }
-                                    )
-                                } else if (tab == Tab.Genres) {
-                                    PlaylistSortButton(
-                                        sort = genreSort,
-                                        order = genreSortOrder,
-                                        onSortChange = {
-                                            onGenreSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onGenreSortChange(null, it)
-                                        }
-                                    )
-                                } else if (tab == Tab.Folders) {
-                                    PlaylistSortButton(
-                                        sort = folderSort,
-                                        order = folderSortOrder,
-                                        onSortChange = {
-                                            onFolderSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onFolderSortChange(null, it)
-                                        }
-                                    )
-                                } else {
-                                    PlaylistSortButton(
-                                        sort = playlistSort,
-                                        order = playlistSortOrder,
-                                        onSortChange = {
-                                            onPlaylistSortChange(it, null)
-                                        },
-                                        onSortOrderChange = {
-                                            onPlaylistSortChange(null, it)
-                                        }
-                                    )
-                                }
-                            }
+            if (tab == Tab.Tracks) {
+                TrackSortButton(
+                    sort = trackSort,
+                    order = trackSortOrder,
+                    onSortChange = {
+                        onTrackSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onTrackSortChange(null, it)
+                    }
+                )
+            } else if (tab == Tab.Albums) {
+                PlaylistSortButton(
+                    sort = albumSort,
+                    order = albumSortOrder,
+                    onSortChange = {
+                        onAlbumSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onAlbumSortChange(null, it)
+                    }
+                )
+            } else if (tab == Tab.Artists) {
+                PlaylistSortButton(
+                    sort = artistSort,
+                    order = artistSortOrder,
+                    onSortChange = {
+                        onArtistSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onArtistSortChange(null, it)
+                    }
+                )
+            } else if (tab == Tab.Genres) {
+                PlaylistSortButton(
+                    sort = genreSort,
+                    order = genreSortOrder,
+                    onSortChange = {
+                        onGenreSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onGenreSortChange(null, it)
+                    }
+                )
+            } else if (tab == Tab.Folders) {
+                PlaylistSortButton(
+                    sort = folderSort,
+                    order = folderSortOrder,
+                    onSortChange = {
+                        onFolderSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onFolderSortChange(null, it)
+                    }
+                )
+            } else {
+                PlaylistSortButton(
+                    sort = playlistSort,
+                    order = playlistSortOrder,
+                    onSortChange = {
+                        onPlaylistSortChange(it, null)
+                    },
+                    onSortOrderChange = {
+                        onPlaylistSortChange(null, it)
+                    }
+                )
+            }
+        },
+        endButtons = { tab ->
+            if (tab != Tab.Tracks) {
+                IconButton(
+                    onClick = onGridPlaylistsClick
+                ) {
+                    Icon(
+                        imageVector = if (gridPlaylists) {
+                            Icons.Rounded.GridView
+                        } else Icons.AutoMirrored.Rounded.ViewList,
+                        contentDescription = context.resources.getString(
+                            if (gridPlaylists) {
+                                R.string.enable_list_view
+                            } else R.string.enable_grid_view
+                        )
+                    )
+                }
+            }
 
-                            Row {
-                                if (tab != Tab.Tracks) {
-                                    IconButton(
-                                        onClick = onGridPlaylistsClick
-                                    ) {
-                                        Icon(
-                                            imageVector = if (gridPlaylists) {
-                                                Icons.Rounded.GridView
-                                            } else Icons.AutoMirrored.Rounded.ViewList,
-                                            contentDescription = context.resources.getString(
-                                                if (gridPlaylists) {
-                                                    R.string.enable_list_view
-                                                } else R.string.enable_grid_view
-                                            )
-                                        )
-                                    }
-                                }
+            IconButton(
+                onClick = { showGlobalSearch = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.TravelExplore,
+                    contentDescription = context.resources.getString(
+                        R.string.search_library
+                    )
+                )
+            }
 
-                                IconButton(
-                                    onClick = { showGlobalSearch = true }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.TravelExplore,
-                                        contentDescription = context.resources.getString(
-                                            R.string.search_library
-                                        )
-                                    )
-                                }
+            IconButton(
+                onClick = {
+                    showSearchField = true
+                }
+            ) {
+                Icon(
+                    imageVector = if (replaceSearchWithFilter && tab == Tab.Tracks) {
+                        Icons.Rounded.FilterList
+                    } else Icons.Rounded.Search,
+                    contentDescription = context.resources.getString(
+                        R.string.track_search
+                    )
+                )
+            }
+        },
+        topBarOverlay = { tab ->
+            when (topBarContent) {
+                TopBarContent.Search -> {
+                    BackHandler {
+                        showSearchField = false
+                        searchFieldValue = ""
+                    }
+                    val focusRequester = remember {
+                        FocusRequester()
+                    }
+                    SearchField(
+                        value = searchFieldValue,
+                        onValueChange = {
+                            searchFieldValue = it.trimStart()
+                        },
+                        icon = if (replaceSearchWithFilter && tab == Tab.Tracks) {
+                            Icons.Rounded.FilterList
+                        } else Icons.Rounded.Search,
+                        placeholder = if (replaceSearchWithFilter && tab == Tab.Tracks) {
+                            context.resources.getString(R.string.filter)
+                        } else context.resources.getString(R.string.search),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 48.dp)
+                            .align(Alignment.Center)
+                            .focusRequester(focusRequester)
+                    )
 
-                                IconButton(
-                                    onClick = {
-                                        showSearchField = true
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = if (replaceSearchWithFilter && tab == Tab.Tracks) {
-                                            Icons.Rounded.FilterList
-                                        } else Icons.Rounded.Search,
-                                        contentDescription = context.resources.getString(
-                                            R.string.track_search
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                    LaunchedEffect(Unit) {
+                        focusRequester.requestFocus()
                     }
 
-                    TopBarContent.Search -> {
-                        BackHandler {
+                    IconButton(
+                        onClick = {
                             showSearchField = false
                             searchFieldValue = ""
-                        }
-                        Box(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val focusRequester = remember {
-                                FocusRequester()
-                            }
-                            SearchField(
-                                value = searchFieldValue,
-                                onValueChange = {
-                                    searchFieldValue = it.trimStart()
-                                },
-                                icon = if (replaceSearchWithFilter && tab == Tab.Tracks) {
-                                    Icons.Rounded.FilterList
-                                } else Icons.Rounded.Search,
-                                placeholder = if (replaceSearchWithFilter && tab == Tab.Tracks) {
-                                    context.resources.getString(R.string.filter)
-                                } else context.resources.getString(R.string.search),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 48.dp)
-                                    .align(Alignment.Center)
-                                    .focusRequester(focusRequester)
+                        },
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = context.resources.getString(
+                                R.string.close_track_search
                             )
+                        )
+                    }
+                }
 
-                            LaunchedEffect(Unit) {
-                                focusRequester.requestFocus()
+                TopBarContent.Selection -> {
+                    BackHandler {
+                        isInSelectionMode = false
+                        selectedTracks.clear()
+                        selectedPlaylists.clear()
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colorScheme.background)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = {
+                                    isInSelectionMode = false
+                                    selectedTracks.clear()
+                                    selectedPlaylists.clear()
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = context.resources.getString(R.string.back)
+                                )
+                            }
+
+                            Text(
+                                text = (selectedTracks.size + selectedPlaylists.size).toString(),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        Row {
+                            if (tab == Tab.Tracks && selectedTracks.size < trackList.size) {
+                                IconButton(
+                                    onClick = {
+                                        selectedTracks.clear()
+                                        selectedTracks.addAll(trackList)
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.SelectAll,
+                                        contentDescription = context.resources.getString(R.string.select_all)
+                                    )
+                                }
                             }
 
                             IconButton(
                                 onClick = {
-                                    showSearchField = false
-                                    searchFieldValue = ""
-                                },
-                                modifier = Modifier.align(Alignment.CenterEnd)
+                                    if (selectedTracks.isNotEmpty()) {
+                                        onAddToQueueClick(selectedTracks.toList())
+                                    } else if (selectedPlaylists.isNotEmpty()) {
+                                        onAddToQueueClick(
+                                            selectedPlaylists.flatMap {
+                                                it.trackList
+                                            }.distinct()
+                                        )
+                                    }
+                                    isInSelectionMode = false
+                                    selectedTracks.clear()
+                                    selectedPlaylists.clear()
+                                }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Close,
+                                    imageVector = Icons.Rounded.AddToQueue,
+                                    contentDescription = context.resources.getString(R.string.add_to_queue)
+                                )
+                            }
+
+                            if (tab == Tab.Tracks) {
+                                IconButton(
+                                    onClick = {
+                                        onAddToPlaylistClick(selectedTracks.toList())
+                                        isInSelectionMode = false
+                                        selectedTracks.clear()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Rounded.PlaylistAdd,
+                                        contentDescription = context.resources.getString(R.string.add_to_playlist)
+                                    )
+                                }
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    showSearchField = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (replaceSearchWithFilter && tab == Tab.Tracks) {
+                                        Icons.Rounded.FilterList
+                                    } else Icons.Rounded.Search,
                                     contentDescription = context.resources.getString(
-                                        R.string.close_track_search
+                                        R.string.track_search
                                     )
                                 )
                             }
                         }
                     }
+                }
 
-                    TopBarContent.Selection -> {
-                        BackHandler {
-                            isInSelectionMode = false
-                            selectedTracks.clear()
-                            selectedPlaylists.clear()
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
-                                    onClick = {
-                                        isInSelectionMode = false
-                                        selectedTracks.clear()
-                                        selectedPlaylists.clear()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Close,
-                                        contentDescription = context.resources.getString(R.string.back)
-                                    )
-                                }
-
-                                Text(
-                                    text = (selectedTracks.size + selectedPlaylists.size).toString(),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-
-                            Row {
-                                if (tab == Tab.Tracks && selectedTracks.size < trackList.size) {
-                                    IconButton(
-                                        onClick = {
-                                            selectedTracks.clear()
-                                            selectedTracks.addAll(trackList)
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.SelectAll,
-                                            contentDescription = context.resources.getString(R.string.select_all)
-                                        )
-                                    }
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        if (selectedTracks.isNotEmpty()) {
-                                            onAddToQueueClick(selectedTracks.toList())
-                                        } else if (selectedPlaylists.isNotEmpty()) {
-                                            onAddToQueueClick(
-                                                selectedPlaylists.flatMap {
-                                                    it.trackList
-                                                }.distinct()
-                                            )
-                                        }
-                                        isInSelectionMode = false
-                                        selectedTracks.clear()
-                                        selectedPlaylists.clear()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.AddToQueue,
-                                        contentDescription = context.resources.getString(R.string.add_to_queue)
-                                    )
-                                }
-
-                                if (tab == Tab.Tracks) {
-                                    IconButton(
-                                        onClick = {
-                                            onAddToPlaylistClick(selectedTracks.toList())
-                                            isInSelectionMode = false
-                                            selectedTracks.clear()
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Rounded.PlaylistAdd,
-                                            contentDescription = context.resources.getString(R.string.add_to_playlist)
-                                        )
-                                    }
-                                }
-
-                                IconButton(
-                                    onClick = {
-                                        showSearchField = true
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = if (replaceSearchWithFilter && tab == Tab.Tracks) {
-                                            Icons.Rounded.FilterList
-                                        } else Icons.Rounded.Search,
-                                        contentDescription = context.resources.getString(
-                                            R.string.track_search
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
+                TopBarContent.Default -> {
+                    // Composable never invokes this branch — startButtons /
+                    // endButtons are shown for Default mode.
                 }
             }
         },
@@ -1696,7 +1682,14 @@ fun MainPlayerScreen(
                     playlistSort = albumSort,
                     playlistSortOrder = albumSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_album),
-                    showSinglePreview = true,
+                    // Traditional single-artwork tile when per-track artwork is
+                    // off (album covers are typically one image per album).
+                    // When per-track artwork is on, switch to the 2x2 preview
+                    // so the tile can show the variety of embedded artworks
+                    // across the album's tracks — otherwise the single-preview
+                    // path is stuck rendering the first track's cover only
+                    // (uhrfra's #87 report).
+                    showSinglePreview = !perTrackArtwork,
                     onPlaylistClick = onAlbumPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
                     selectedPlaylists = selectedPlaylists,

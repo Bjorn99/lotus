@@ -20,13 +20,29 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.jaudiotagger.audio.AudioFileIO { *; }
--keep class org.jaudiotagger.tag.FieldKey { *; }
--keep class org.jaudiotagger.tag.Tag { *; }
--keep class org.jaudiotagger.tag.images.AndroidArtwork { *; }
--keepclassmembers class org.jaudiotagger.tag.id3.** { public *; }
--keepclassmembers class org.jaudiotagger.tag.flac.** { public *; }
--keepclassmembers class org.jaudiotagger.tag.vorbiscomment.** { public *; }
+# jaudiotagger — broad keep is required.
+#
+# jaudiotagger uses reflection extensively to instantiate ID3 frame body
+# classes (FrameBodyTXXX, FrameBodyPOPM, FrameBodyPairs, etc.) and to
+# invoke their copy constructors during AudioFileIO.read() via
+# ID3Tags.copyObject(). R8 cannot see these reflection sites and by
+# default strips the reflectively-invoked constructors and sometimes the
+# whole class, which surfaces at runtime as:
+#
+#   NoSuchMethodException: Error finding constructor to create copy:<obfuscated>
+#
+# (Issues #95 and #103.) The previous narrow rules used
+# `-keepclassmembers ... { public *; }`, but `public *` in ProGuard
+# member syntax only matches methods and fields — not constructors,
+# which have no return type — so copy constructors were being removed
+# even though the rules looked broad.
+#
+# Broadening to `-keep class org.jaudiotagger.** { *; }` preserves every
+# class, method, field and constructor across the library. APK size
+# grows by ~1–2 MB (jaudiotagger's compiled size) but the whole class
+# of reflection-vs-R8 crashes goes away. Do not narrow this without
+# verifying every ID3 frame body class survives.
+-keep class org.jaudiotagger.** { *; }
 
 -dontwarn java.awt.Graphics2D
 -dontwarn java.awt.Image
