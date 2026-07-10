@@ -1,0 +1,8 @@
+• Smooth tab bar again — no grainy transitions, black-on-resume, or half-drawn tabs
+• Album tiles show per-track artwork
+• Lyrics load the correct .lrc even with Cyrillic filenames
+• No crash when choosing a lyrics folder
+• Bilingual lyrics sharing a timestamp all display
+• Metadata editing no longer crashes on release builds
+
+Thanks to uhrfra for on-device testing.
