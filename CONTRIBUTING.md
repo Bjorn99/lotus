@@ -29,9 +29,31 @@ This project has a high bar for code quality and consistency. It's normal for a 
 
 If you're fixing a bug, include a test that reproduces it. If you're adding a feature, include a test that covers the happy path. The test suite runs with `./gradlew testDebugUnitTest`.
 
+## Translations
+
+Translations are always welcome and are one of the easiest ways to help.
+
+Lotus is translated through Android string resources. All translatable text lives in `app/src/main/res/values/strings.xml` (English — the source of truth). A translation is a parallel file at `app/src/main/res/values-<lang>/strings.xml`, for example `values-es` for Spanish or `values-ru` for Russian.
+
+To add or update a translation:
+
+- Copy `values/strings.xml` to `values-<lang>/strings.xml` and translate the text **between** the tags. Leave every `name="..."` key exactly as it is — the app looks strings up by key, so a changed key breaks that string.
+- Keep placeholders (`%1$s`, `%1$d`, `%%`), line breaks (`\n`), and any `<b>`/`<i>` tags unchanged. Escape a literal apostrophe as `\'` and a literal quote as `\"`.
+- The `<plurals>` block needs the quantity forms your language uses (English and Spanish use `one` and `other`; some languages need more).
+- Don't translate the app name or the URL strings — they're marked `translatable="false"` and stay as-is.
+- **Partial is fine.** Anything you don't translate falls back to English automatically, so you don't have to finish every string to open a useful PR.
+
+Send it as a pull request (preferred). If you'd rather not use git, attach the file to an issue and it'll be committed with credit to you. If copying the file yourself is a hassle, ask the maintainer for a ready-to-fill scaffold of the current strings.
+
 ## Attribution
 
-If the maintainer re-implements your PR, credit goes in the commit message itself (e.g., "Based on a patch by @username").
+If the maintainer re-implements your PR, credit goes in the commit message itself (e.g., "Based on a patch by @username"), in the release changelog, and in the Contributors list below.
+
+## Contributors
+
+Thanks to everyone who has helped improve this fork:
+
+- **[@uhrfra](https://github.com/uhrfra)** — relative-path support in M3U playlist import (based on [#73](https://github.com/Bjorn99/lotus/pull/73), shipped in v1.8.0); on-device testing of the v1.8.2 fixes.
 
 ## Legal
 
