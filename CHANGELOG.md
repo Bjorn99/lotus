@@ -11,7 +11,7 @@ A polish-and-stability release. The tab bar moves smoothly again, lyrics load fr
 ### Fixed
 
 - **Smooth tab bar again.** The header transition was grainy — titles stuttered while resizing, the bar sometimes came back black until you touched the screen, and tabs occasionally rendered cut in half. A regression from the universal-search layout work. The title now scales cleanly as you scroll, stays centered, never collides with the buttons, and shows long names in full when expanded. (#81)
-- **Per-track artwork on album tiles.** With per-track artwork on, the Albums tab now builds its four-up preview from individual tracks instead of falling back to one cover. (#87)
+- **Per-track artwork on album tiles.** With per-track artwork on, the Albums tab now builds its four-up preview from individual tracks instead of falling back to one cover. Thanks to uhrfra for testing this on-device. (#87)
 - **Correct lyrics sidecar file.** On some devices, picking a `.lrc` next to files with non-Latin names loaded the wrong one — the system ignored our filter. Lotus now scans the folder and matches the filename itself. (#100)
 - **No crash on choosing a lyrics folder.** A `.lrc` path resolving to a directory used to crash; directories are now skipped and the error handled. (#101)
 - **Same-timestamp lyric lines all show.** Bilingual `.lrc` files pinning two lines to one timestamp lost all but one. They're now grouped and shown together. (#102)
