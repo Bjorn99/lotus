@@ -30,6 +30,7 @@ import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.domain.lyrics.Lyrics
 import com.dn0ne.player.app.domain.lyrics.LyricsFetcher
+import com.dn0ne.player.app.domain.lyrics.resolveLyrics
 import com.dn0ne.player.app.domain.playlist.PlaylistEditor
 import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
@@ -1710,49 +1711,28 @@ class PlayerViewModel(
                     )
                 }
 
-                // 1. Cache
-                var lyrics: Lyrics? = lyricsRepository.getLyricsByUri(
-                    currentTrack.uri.toString()
+                // Resolution order lives in resolveLyrics() so the precedence
+                // can be unit-tested. Local sources (sidecar, embedded) are
+                // read FRESH and never cached; only a remote hit is cached, by
+                // fetchFromRemote itself. See LyricsResolver for the rationale.
+                val sidecarEnabled = settings.sidecarLyricsEnabled &&
+                    settings.sidecarFolderUri != null
+
+                val lyrics = resolveLyrics(
+                    sidecarEnabled = sidecarEnabled,
+                    sidecar = {
+                        withContext(Dispatchers.IO) { loadSidecarLyrics(currentTrack) }
+                    },
+                    cache = {
+                        lyricsRepository.getLyricsByUri(currentTrack.uri.toString())
+                    },
+                    embedded = {
+                        withContext(Dispatchers.IO) { lyricsFetcher.readFromTag(currentTrack) }
+                    },
+                    remote = {
+                        lyricsFetcher.fetchFromRemote(currentTrack, forceRemote = true)
+                    },
                 )
-
-                // 2. Embedded tag
-                if (lyrics == null) {
-                    lyrics = lyricsFetcher.readFromTag(currentTrack)
-                        ?.also { lyricsRepository.insertLyrics(it) }
-                }
-
-                // 3. Sidecar .lrc
-                if (lyrics == null) {
-                    val treeUri = settings.sidecarFolderUri?.let { Uri.parse(it) }
-                    lyrics = lyricsSidecarReader.readSidecarLyrics(
-                        currentTrack.data, treeUri
-                    )?.let { lrcText ->
-                        try {
-                            val synced = lrcText.toSyncedLyrics()
-                            Lyrics(
-                                uri = currentTrack.uri.toString(),
-                                synced = synced,
-                                plain = synced.map { it.second },
-                                areFromRemote = false
-                            ).also { lyricsRepository.insertLyrics(it) }
-                        } catch (_: IllegalArgumentException) {
-                            Lyrics(
-                                uri = currentTrack.uri.toString(),
-                                plain = lrcText.split('\n'),
-                                areFromRemote = false
-                            ).also { lyricsRepository.insertLyrics(it) }
-                        }
-                    }
-                }
-
-                // 4. LRCLIB (forceRemote = true skips cache since we already
-                //    checked it in step 1)
-                if (lyrics == null) {
-                    lyrics = lyricsFetcher.fetchFromRemote(
-                        currentTrack,
-                        forceRemote = true
-                    )
-                }
 
                 _playbackState.update {
                     it.copy(
@@ -1761,6 +1741,36 @@ class PlayerViewModel(
                     )
                 }
             }
+        }
+    }
+
+    // Reads and parses the sidecar .lrc for [track] fresh from the picked
+    // folder. Returns null when no folder is set or no matching file exists.
+    // Deliberately does NOT cache: the folder is the source of truth and is
+    // read every open so renames/edits reflect immediately (#106). The SAF
+    // scan + file read is blocking, so callers must invoke this off the main
+    // thread.
+    private fun loadSidecarLyrics(track: Track): Lyrics? {
+        val treeUri = settings.sidecarFolderUri?.let { Uri.parse(it) } ?: return null
+        val lrcText = lyricsSidecarReader.readSidecarLyrics(
+            audioFilePath = track.data,
+            treeUri = treeUri,
+            title = track.title,
+        ) ?: return null
+        return try {
+            val synced = lrcText.toSyncedLyrics()
+            Lyrics(
+                uri = track.uri.toString(),
+                synced = synced,
+                plain = synced.map { it.second },
+                areFromRemote = false
+            )
+        } catch (_: IllegalArgumentException) {
+            Lyrics(
+                uri = track.uri.toString(),
+                plain = lrcText.split('\n'),
+                areFromRemote = false
+            )
         }
     }
 

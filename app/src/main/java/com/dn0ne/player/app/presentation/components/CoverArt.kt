@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import coil3.toBitmap
 
 @Composable
@@ -27,6 +28,7 @@ fun CoverArt(
     modifier: Modifier = Modifier,
     trackUri: Uri? = null,
     perTrackArtwork: Boolean = false,
+    crossfade: Boolean = true,
 ) {
     Box(
         modifier = modifier
@@ -51,6 +53,7 @@ fun CoverArt(
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(model)
+                .crossfade(crossfade)
                 .build(),
             onSuccess = {
                 onCoverArtLoaded(it.result.image.toBitmap().asImageBitmap())

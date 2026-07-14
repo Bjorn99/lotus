@@ -296,6 +296,8 @@
     <string name="lyrics_folder">Lyrics folder</string>
     <string name="lyrics_folder_supporting_text">Pick a folder that contains .lrc files matching your audio files. The app looks for &lt;basename>.lrc when lyrics are needed.</string>
     <string name="pick_lyrics_folder">Pick lyrics folder</string>
+    <string name="use_lyrics_folder">Use lyrics folder</string>
+    <string name="use_lyrics_folder_explain">Look for .lrc files in the picked folder. When off, only embedded and downloaded lyrics are used.</string>
     <string name="playback">Playback</string>
     <string name="playback_supporting_text">Audio focus, equalizer</string>
     <string name="about_app">About app</string>

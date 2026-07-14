@@ -110,6 +110,7 @@ fun PlaylistRow(
                         uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
                         trackUri = trackUris.firstOrNull(),
                         perTrackArtwork = perTrackArtwork,
+                        crossfade = false,
                         onCoverArtLoaded = { bitmap ->
                             bitmap?.let {
                                 coroutineScope.launch {

@@ -4,6 +4,44 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.8.3
+
+A lyrics overhaul with a clear resolution order, plus fixes for the playlist header, the last lyric line, and album art flashing during scroll.
+
+### Lyrics chain
+
+Lotus now resolves lyrics in a fixed order, and each source behaves predictably. The chosen lyrics folder is the source of truth — when a folder is configured and the toggle is on, the matching `.lrc` inside it wins over everything else. Sidecar and embedded reads are fresh every time (no stale caching), while remote downloads are cached for offline use. Network access remains opt-in and last.
+
+**When "Use lyrics folder" is on:**
+1. Search the picked lyrics folder for a matching `.lrc` file, read fresh each time
+2. Check the cache for previously downloaded or manually attached lyrics
+3. Read the embedded tag from the audio file itself
+4. Ask LRCLIB — only if you've turned network lookups on
+
+**When "Use lyrics folder" is off:**
+1. Lyrics folder is skipped entirely
+2. Check the cache for previously downloaded or manually attached lyrics
+3. Read the embedded tag from the audio file
+4. Ask LRCLIB — gated as above
+
+- **Lyrics folder now wins over embedded tags.** In earlier versions, a cached embedded tag could permanently shadow a `.lrc` file you placed in the folder. The folder is now consulted first and read fresh on every open, so renaming or editing a `.lrc` reflects immediately. (#106)
+- **Lyrics folder matching also tries the track title.** If your `.lrc` is named after the song title rather than the audio filename — common after editing a track's tags — Lotus now finds it. Filename matching is still tried first. Name comparison is robust against Unicode composition differences, stray whitespace, and letter case, which could previously cause a visually identical filename to miss. (#100)
+- **Added a "Use lyrics folder" toggle in Lyrics settings.** Lets you turn folder lookup on or off without clearing the picked folder. (#107)
+- **The last line of synced lyrics now animates like the rest.** The gradient highlight sweep was stuck at the top for the final line; it now advances smoothly over the remainder of the track. (#105)
+
+### Playlist header
+
+- **Fixed the playlist title overlapping the buttons.** Imported and editable playlists (the ones with the rename pencil and delete button) had a three-button right cluster that the title text didn't reserve enough room for. The title now stays between the button groups at every scroll position, and the collapse transition is smooth with no size jumps. (#81)
+
+### Album art
+
+- **No more flash of the wrong artwork during fast scroll.** List and grid thumbnails now show the correct art immediately instead of fading through the previous row's image.
+
+### Under the hood
+
+- Extracted the lyrics resolution order into a pure function with unit tests covering every precedence rule, short-circuiting, and the invariant that the network is always tried last.
+- Added tests for the sidecar filename matching covering Unicode normalization, whitespace trimming, and title-fallback matching.
+
 ## 1.8.2
 
 A polish-and-stability release. The tab bar moves smoothly again, lyrics load from the right file, album tiles show the art you tagged, and editing metadata no longer crashes on some devices.

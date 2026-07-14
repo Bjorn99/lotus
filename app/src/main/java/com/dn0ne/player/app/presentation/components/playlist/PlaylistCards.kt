@@ -116,6 +116,7 @@ fun PlaylistCard(
                     uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
                     trackUri = trackUris.firstOrNull(),
                     perTrackArtwork = perTrackArtwork,
+                    crossfade = false,
                     onCoverArtLoaded = { bitmap ->
                         bitmap?.let {
                             coroutineScope.launch {
@@ -188,6 +189,7 @@ fun FourArtsPreview(
                     uri = it,
                     trackUri = trackUris.getOrNull(0),
                     perTrackArtwork = perTrackArtwork,
+                    crossfade = false,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -201,6 +203,7 @@ fun FourArtsPreview(
                     uri = it,
                     trackUri = trackUris.getOrNull(1),
                     perTrackArtwork = perTrackArtwork,
+                    crossfade = false,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -216,6 +219,7 @@ fun FourArtsPreview(
                     uri = it,
                     trackUri = trackUris.getOrNull(2),
                     perTrackArtwork = perTrackArtwork,
+                    crossfade = false,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
@@ -229,6 +233,7 @@ fun FourArtsPreview(
                     uri = it,
                     trackUri = trackUris.getOrNull(3),
                     perTrackArtwork = perTrackArtwork,
+                    crossfade = false,
                     modifier = Modifier
                         .weight(1f)
                         .clip(artShape)
