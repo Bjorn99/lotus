@@ -73,3 +73,16 @@
 
 # Koin DI
 -keep class com.dn0ne.player.app.di.** { *; }
+
+# Strip verbose/debug/info logging from RELEASE builds. Lotus is
+# zero-telemetry; shipping logcat output that can contain user library
+# metadata or search queries (e.g. the MusicBrainz provider logs track
+# title/artist at Log.d) is a privacy leak. R8 treats these calls as
+# side-effect-free and removes them — and the evaluation of their
+# arguments — in release. warn/error are kept so genuine failures still
+# surface in logcat.
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+    public static *** i(...);
+}

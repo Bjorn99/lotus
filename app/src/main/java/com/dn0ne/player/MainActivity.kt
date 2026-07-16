@@ -60,9 +60,11 @@ import com.dn0ne.player.setup.presentation.SetupScreen
 import com.dn0ne.player.setup.presentation.SetupViewModel
 import com.dn0ne.player.ui.theme.MusicPlayerTheme
 import com.google.common.util.concurrent.MoreExecutors
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
@@ -120,14 +122,20 @@ class MainActivity : ComponentActivity() {
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
                 trackToMetadataPair?.let {
                     val metadataWriter: MetadataWriter = get()
+                    lifecycleScope.launch {
+                        // The after-consent retry does the same full file copy +
+                        // jaudiotagger read/write; keep it off the main thread
+                        // too, or granting write permission ANRs on large files.
+                        val result = withContext(Dispatchers.IO) {
+                            metadataWriter.writeMetadata(
+                                track = it.first,
+                                metadata = it.second,
+                                onSecurityError = {}
+                            )
+                        }
 
-                    val result = metadataWriter.writeMetadata(
-                        track = it.first,
-                        metadata = it.second,
-                        onSecurityError = { println("SECURITY EXCEPTION OCCURRED") }
-                    )
-
-                    checkMetadataWriteResult(result)
+                        checkMetadataWriteResult(result)
+                    }
                 }
             }
 
@@ -333,18 +341,30 @@ class MainActivity : ComponentActivity() {
                                     trackToMetadataPair = track to metadata
 
                                     val metadataWriter: MetadataWriter = get()
-                                    val result = metadataWriter.writeMetadata(
-                                        track = track,
-                                        metadata = metadata,
-                                        onSecurityError = { intentSender ->
-                                            requestOneTimeWritePermissionLauncher.launch(
-                                                IntentSenderRequest.Builder(intentSender).build()
+                                    coroutineScope.launch {
+                                        // writeMetadata copies the whole audio
+                                        // file and runs jaudiotagger read/write;
+                                        // keep it off the main thread to avoid an
+                                        // ANR on large files. The consent
+                                        // launcher must fire on the UI thread, so
+                                        // onSecurityError re-dispatches to it.
+                                        val result = withContext(Dispatchers.IO) {
+                                            metadataWriter.writeMetadata(
+                                                track = track,
+                                                metadata = metadata,
+                                                onSecurityError = { intentSender ->
+                                                    coroutineScope.launch {
+                                                        requestOneTimeWritePermissionLauncher.launch(
+                                                            IntentSenderRequest.Builder(intentSender).build()
+                                                        )
+                                                    }
+                                                }
                                             )
                                         }
-                                    )
 
-                                    checkMetadataWriteResult(result)
-                                    pendingWrite.onComplete(result)
+                                        checkMetadataWriteResult(result)
+                                        pendingWrite.onComplete(result)
+                                    }
                                 } else {
                                     if (!isWritePermissionGranted) {
                                         requestWritePermissionLauncher.launch(
@@ -366,14 +386,18 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                     val metadataWriter: MetadataWriter = get()
-                                    val result = metadataWriter.writeMetadata(
-                                        track = track,
-                                        metadata = metadata,
-                                        onSecurityError = {}
-                                    )
+                                    coroutineScope.launch {
+                                        val result = withContext(Dispatchers.IO) {
+                                            metadataWriter.writeMetadata(
+                                                track = track,
+                                                metadata = metadata,
+                                                onSecurityError = {}
+                                            )
+                                        }
 
-                                    checkMetadataWriteResult(result)
-                                    pendingWrite.onComplete(result)
+                                        checkMetadataWriteResult(result)
+                                        pendingWrite.onComplete(result)
+                                    }
                                 }
                             }
 

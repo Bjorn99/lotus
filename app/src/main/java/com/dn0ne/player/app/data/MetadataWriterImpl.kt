@@ -44,8 +44,8 @@ class MetadataWriterImpl(
         metadata: Metadata,
         onSecurityError: (IntentSender) -> Unit
     ): Result<Unit, DataError.Local> {
+        var file: File? = null
         try {
-            var file: File? = null
             context.contentResolver.openInputStream(track.uri)?.use { input ->
                 val temp = File.createTempFile("temp_audio", ".${track.format}", context.cacheDir)
                 FileOutputStream(temp).use { output ->
@@ -127,7 +127,6 @@ class MetadataWriterImpl(
                     }
                 }
 
-                file?.delete()
                 return Result.Success(Unit)
             } catch (e: SecurityException) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -173,6 +172,12 @@ class MetadataWriterImpl(
             // the "Metadata Writer" tag.
             Log.w(logTag, "Unexpected failure while editing metadata", e)
             return Result.Error(DataError.Local.Unknown)
+        } finally {
+            // The temp copy is a full duplicate of the audio file. Clean it up
+            // on every exit — success, early return, the security-consent path,
+            // and every catch — not just the success path, or scoped-storage
+            // consent flows and write failures leak a full-size file per edit.
+            file?.delete()
         }
     }
 }
