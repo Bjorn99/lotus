@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.dn0ne.player.app.di.MIGRATION_1_2
 import com.dn0ne.player.app.di.MIGRATION_2_3
+import com.dn0ne.player.app.di.MIGRATION_4_5
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -97,6 +98,28 @@ class LotusDatabaseMigrationTest {
         assertEquals(6, statsCursor.columnCount)
         statsCursor.close()
 
+        migrated.close()
+    }
+
+    @Test
+    fun migrate_4_to_5_creates_cover_art_colors_table() {
+        val db = helper.createDatabase(LotusDatabase.NAME, 4)
+        db.close()
+
+        val migrated = helper.runMigrationsAndValidate(
+            LotusDatabase.NAME,
+            5,
+            true,
+            MIGRATION_4_5,
+        )
+
+        val cursor = migrated.query(
+            "SELECT cover_art_uri, dominant_color FROM cover_art_colors"
+        )
+        assertEquals(2, cursor.columnCount)
+        assertEquals("cover_art_uri", cursor.getColumnName(0))
+        assertEquals("dominant_color", cursor.getColumnName(1))
+        cursor.close()
         migrated.close()
     }
 }

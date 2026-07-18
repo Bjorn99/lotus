@@ -28,9 +28,13 @@ import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.sortedBy
 import com.dn0ne.player.app.domain.track.Playlist
+import com.dn0ne.player.app.data.CoverArtColorExtractor
 import com.dn0ne.player.app.presentation.components.CoverArt
+import com.dn0ne.player.app.presentation.components.LocalDominantColorCache
 import com.dn0ne.player.app.presentation.components.playlist.FourArtsPreview
 import com.dn0ne.player.app.presentation.components.playlist.TrackCountBubble
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.kmpalette.rememberDominantColorState
 import kotlinx.coroutines.launch
 
@@ -43,6 +47,7 @@ fun LazyGridScope.selectionCards(
     onCardClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
     perTrackArtwork: Boolean = false,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
 ) {
     items(
         items = playlists.sortedBy(sort, sortOrder),
@@ -60,6 +65,7 @@ fun LazyGridScope.selectionCards(
                 .map { it.uri },
             perTrackArtwork = perTrackArtwork,
             isSelected = playlist in selectedPlaylists,
+            onDominantColorExtracted = onDominantColorExtracted,
             modifier = Modifier
                 .clip(ShapeDefaults.Large)
                 .clickable {
@@ -78,6 +84,7 @@ fun SelectionCard(
     trackUris: List<Uri> = emptyList(),
     perTrackArtwork: Boolean = false,
     isSelected: Boolean,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -88,6 +95,9 @@ fun SelectionCard(
             if (coverArtPreviewUris.size <= 1) {
                 val dominantColorState = rememberDominantColorState()
                 val coroutineScope = rememberCoroutineScope()
+                val dominantColorCache = LocalDominantColorCache.current
+                val cachedColor = coverArtPreviewUris.firstOrNull()?.toString()
+                    ?.let { dominantColorCache[it] }
                 CoverArt(
                     uri = coverArtPreviewUris.firstOrNull() ?: Uri.EMPTY,
                     trackUri = trackUris.firstOrNull(),
@@ -96,6 +106,13 @@ fun SelectionCard(
                         bitmap?.let {
                             coroutineScope.launch {
                                 dominantColorState.updateFrom(it)
+                                val uri = coverArtPreviewUris.firstOrNull()?.toString()
+                                if (uri != null) {
+                                    val color = dominantColorState.result?.paletteOrNull
+                                        ?.let { CoverArtColorExtractor.selectDominantColor(it) }
+                                        ?: dominantColorState.color
+                                    onDominantColorExtracted(uri, color.toArgb())
+                                }
                             }
                         }
                     },
@@ -104,10 +121,15 @@ fun SelectionCard(
                         .clip(ShapeDefaults.Large)
                 )
 
+                val containerColor = cachedColor?.let { Color(it) }
+                    ?: dominantColorState.color
+                val contentColor = cachedColor?.let { CoverArtColorExtractor.selectOnColor(it) }
+                    ?: dominantColorState.onColor
+
                 TrackCountBubble(
                     trackCount = trackCount,
-                    contentColor = dominantColorState.onColor,
-                    containerColor = dominantColorState.color,
+                    contentColor = contentColor,
+                    containerColor = containerColor,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .offset(y = (-4).dp)

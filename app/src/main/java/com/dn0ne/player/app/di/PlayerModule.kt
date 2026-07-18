@@ -11,6 +11,7 @@ import com.dn0ne.player.app.data.MetadataWriter
 import com.dn0ne.player.app.data.MetadataWriterImpl
 import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.backup.BackupManager
+import com.dn0ne.player.app.data.db.CoverArtColorDao
 import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
@@ -26,6 +27,7 @@ import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
 import com.dn0ne.player.core.util.RateLimiter
+import com.dn0ne.player.app.data.repository.CoverArtColorRepository
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
@@ -110,6 +112,17 @@ internal val MIGRATION_3_4 = object : Migration(3, 4) {
                 "`mb_release_group_id` TEXT, " +
                 "`mb_album_artist_id` TEXT, " +
                 "PRIMARY KEY(`track_data`))"
+        )
+    }
+}
+
+internal val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `cover_art_colors` (" +
+                "`cover_art_uri` TEXT NOT NULL, " +
+                "`dominant_color` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`cover_art_uri`))"
         )
     }
 }
@@ -222,7 +235,7 @@ val playerModule = module {
             LotusDatabase::class.java,
             LotusDatabase.NAME,
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
     }
     single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
@@ -230,6 +243,7 @@ val playerModule = module {
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
     single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
     single<TrackMetadataDao> { get<LotusDatabase>().trackMetadataDao() }
+    single<CoverArtColorDao> { get<LotusDatabase>().coverArtColorDao() }
 
     single {
         LyricsRepository(dao = get())
@@ -245,6 +259,10 @@ val playerModule = module {
 
     single {
         TrackStatsRepository(dao = get())
+    }
+
+    single {
+        CoverArtColorRepository(dao = get())
     }
 
     single<BackupManager> {
@@ -295,6 +313,7 @@ val playerModule = module {
             playlistRepository = get(),
             lovedTracksRepository = get(),
             trackStatsRepository = get(),
+            coverArtColorRepository = get(),
             backupManager = get(),
             unsupportedWriteFormats = get<MetadataWriter>().unsupportedWriteFormats,
             unsupportedCoverArtFormats = (get<MetadataWriter>() as MetadataWriterImpl).unsupportedCoverArtFormats,

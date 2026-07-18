@@ -13,7 +13,8 @@ val appModule = module {
     single<MusicScanner> {
         MusicScanner(
             context = androidContext(),
-            settings = get()
+            settings = get(),
+            coverArtColorRepository = get()
         )
     }
 }

@@ -23,6 +23,7 @@ import com.dn0ne.player.app.data.backup.ExportResult
 import com.dn0ne.player.app.data.backup.ImportResult
 import com.dn0ne.player.app.data.remote.lyrics.LyricsProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
+import com.dn0ne.player.app.data.repository.CoverArtColorRepository
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
@@ -81,6 +82,7 @@ class PlayerViewModel(
     private val playlistRepository: PlaylistRepository,
     private val lovedTracksRepository: LovedTracksRepository,
     private val trackStatsRepository: TrackStatsRepository,
+    private val coverArtColorRepository: CoverArtColorRepository,
     private val backupManager: BackupManager,
     private val unsupportedWriteFormats: List<String>,
     private val unsupportedCoverArtFormats: List<String>,
@@ -237,6 +239,20 @@ class PlayerViewModel(
         }
     }
 
+    private val _dominantColorCache = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val dominantColorCache = _dominantColorCache.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = emptyMap()
+    )
+
+    fun cacheDominantColor(coverArtUri: String, color: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            coverArtColorRepository.cacheDominantColor(coverArtUri, color)
+            _dominantColorCache.update { it + (coverArtUri to color) }
+        }
+    }
+
     private val _trackList = MutableStateFlow(emptyList<Track>())
     val trackList = _trackList.stateIn(
         scope = viewModelScope,
@@ -369,6 +385,10 @@ class PlayerViewModel(
     private val _pendingTrackUris = Channel<Uri>()
 
     init {
+        viewModelScope.launch(Dispatchers.IO) {
+            _dominantColorCache.value = coverArtColorRepository.getAllDominantColors()
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 val tracks = trackRepository.getTracks()
