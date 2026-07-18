@@ -390,4 +390,11 @@ class ShuffleEngineTest {
         val result = engine.generateOrder(5, PlaybackMode.RepeatOne)
         assertArrayEquals(intArrayOf(0, 1, 2, 3, 4), result)
     }
+
+    @Test
+    fun `no repeat mode returns sequential order`() {
+        val engine = ShuffleEngine(Random(42))
+        val result = engine.generateOrder(5, PlaybackMode.NoRepeat)
+        assertArrayEquals(intArrayOf(0, 1, 2, 3, 4), result)
+    }
 }

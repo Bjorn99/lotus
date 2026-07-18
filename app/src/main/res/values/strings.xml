@@ -117,6 +117,8 @@
     <string name="playback_mode_toggle">Toggle playback mode</string>
     <string name="playback_mode_repeat">Repeat all</string>
     <string name="playback_mode_repeat_one">Repeat one</string>
+    <string name="playback_mode_no_repeat">Play once</string>
+    <string name="no_repeat_activated">Play once — no repeat</string>
     <string name="playback_mode_shuffle">Shuffle</string>
     <string name="playback_mode_smart_shuffle">Smart shuffle</string>
     <string name="shuffle_mode_pure_activated">Pure shuffle — truly random order</string>

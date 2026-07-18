@@ -441,6 +441,15 @@ class PlayerViewModel(
 
             player?.addListener(
                 object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            _playbackState.update {
+                                it.copy(isPlaying = false)
+                            }
+                            positionUpdateJob?.cancel()
+                        }
+                    }
+
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         _playbackState.update {
                             it.copy(
@@ -650,6 +659,7 @@ class PlayerViewModel(
                     }
                     savedPlayerState.playbackMode = mode
                     val snackbarMessage = when (mode) {
+                        PlaybackMode.NoRepeat -> R.string.no_repeat_activated
                         PlaybackMode.Shuffle -> R.string.shuffle_mode_pure_activated
                         PlaybackMode.SmartShuffle -> R.string.shuffle_mode_smart_activated
                         else -> null
@@ -1638,6 +1648,12 @@ class PlayerViewModel(
 
             PlaybackMode.RepeatOne -> {
                 player?.repeatMode = Player.REPEAT_MODE_ONE
+                player?.shuffleModeEnabled = false
+                currentShuffleOrder = null
+            }
+
+            PlaybackMode.NoRepeat -> {
+                player?.repeatMode = Player.REPEAT_MODE_OFF
                 player?.shuffleModeEnabled = false
                 currentShuffleOrder = null
             }

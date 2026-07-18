@@ -78,6 +78,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -555,18 +557,21 @@ private fun ExpandedPlayerActions(
 
             IconButton(onClick = onPlaybackModeClick) {
                 Icon(
-                    imageVector = when (playbackMode) {
-                        PlaybackMode.Repeat -> Icons.Rounded.Repeat
-                        PlaybackMode.RepeatOne -> Icons.Rounded.RepeatOne
-                        PlaybackMode.Shuffle -> Icons.Rounded.Shuffle
-                        PlaybackMode.SmartShuffle -> Icons.Rounded.AutoAwesome
+                    painter = when (playbackMode) {
+                        PlaybackMode.NoRepeat -> painterResource(R.drawable.autostop_24px)
+                        PlaybackMode.Repeat -> rememberVectorPainter(Icons.Rounded.Repeat)
+                        PlaybackMode.RepeatOne -> rememberVectorPainter(Icons.Rounded.RepeatOne)
+                        PlaybackMode.Shuffle -> rememberVectorPainter(Icons.Rounded.Shuffle)
+                        PlaybackMode.SmartShuffle -> rememberVectorPainter(Icons.Rounded.AutoAwesome)
                     },
                     contentDescription = when (playbackMode) {
                         PlaybackMode.Repeat -> context.resources.getString(R.string.playback_mode_repeat)
                         PlaybackMode.RepeatOne -> context.resources.getString(R.string.playback_mode_repeat_one)
+                        PlaybackMode.NoRepeat -> context.resources.getString(R.string.playback_mode_no_repeat)
                         PlaybackMode.Shuffle -> context.resources.getString(R.string.playback_mode_shuffle)
                         PlaybackMode.SmartShuffle -> context.resources.getString(R.string.playback_mode_smart_shuffle)
                     },
+
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
