@@ -1,5 +1,6 @@
 package com.dn0ne.player.app.presentation
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -92,6 +93,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dn0ne.player.R
+import com.dn0ne.player.app.data.CoverArtColorExtractor
 import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.TrackSort
@@ -102,6 +104,7 @@ import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.filterPlaylists
 import com.dn0ne.player.app.domain.track.filterTracks
 import com.dn0ne.player.app.presentation.components.GlobalSearchSheet
+import com.dn0ne.player.app.presentation.components.LocalDominantColorCache
 import com.dn0ne.player.app.presentation.components.PlaylistSortButton
 import com.dn0ne.player.app.presentation.components.TrackSortButton
 import com.dn0ne.player.app.presentation.components.playback.PlayerSheet
@@ -124,6 +127,7 @@ import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
 import com.dn0ne.player.app.presentation.components.trackList
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
 import com.dn0ne.player.app.presentation.components.trackinfo.TrackInfoSheet
+import androidx.compose.ui.graphics.toArgb
 import com.kmpalette.color
 import com.kmpalette.rememberDominantColorState
 import com.materialkolor.DynamicMaterialTheme
@@ -145,37 +149,55 @@ fun PlayerScreen(
 ) {
     val useDynamicColor by viewModel.settings.useDynamicColor.collectAsState()
     val useAlbumArtColor by viewModel.settings.useAlbumArtColor.collectAsState()
+    val dominantColorCache by viewModel.dominantColorCache.collectAsState()
+    val playbackState by viewModel.playbackState.collectAsState()
+    val currentTrack by remember {
+        derivedStateOf { playbackState.currentTrack }
+    }
     val dominantColorState = rememberDominantColorState()
     var coverArtBitmap by remember {
         mutableStateOf<ImageBitmap?>(null)
     }
-    val colorToApply by remember(coverArtBitmap, useAlbumArtColor, useDynamicColor) {
+    var coverArtBitmapTrackUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val cachedColor = currentTrack?.let { dominantColorCache[it.coverArtUri.toString()] }
+    val bitmapIsFresh = currentTrack?.uri == coverArtBitmapTrackUri
+    val colorToApply by remember(cachedColor, coverArtBitmap, coverArtBitmapTrackUri, useAlbumArtColor, useDynamicColor) {
         derivedStateOf {
-            if (useAlbumArtColor && coverArtBitmap != null) {
+            if (useAlbumArtColor && cachedColor != null) {
+                Color(cachedColor)
+            } else if (useAlbumArtColor && coverArtBitmap != null && bitmapIsFresh) {
                 dominantColorState.result
                     ?.paletteOrNull
-                    ?.swatches
-                    ?.sortedByDescending { it.population }
-                    ?.let { swatches ->
-                        val firstSwatch = swatches.first()
-                        val firstSwatchColorHct = firstSwatch.color.toHct()
-                        val firstSwatchPopulation = firstSwatch.population
-                        val moreChromatic = swatches.fastFirstOrNull {
-                            it.color.toHct().chroma - firstSwatchColorHct.chroma >= 30 &&
-                                    it.population.toFloat() / firstSwatchPopulation >= .1f
-                        }
-                        moreChromatic?.color ?: firstSwatch.color
-                    } ?: dominantColorState.color
+                    ?.let { CoverArtColorExtractor.selectDominantColor(it) }
+                    ?: dominantColorState.color
             } else dominantColorState.color
         }
     }
 
-    LaunchedEffect(useAlbumArtColor, useDynamicColor) {
-        if (useAlbumArtColor) {
-            coverArtBitmap?.let {
-                dominantColorState.updateFrom(it)
+    LaunchedEffect(useAlbumArtColor, useDynamicColor, coverArtBitmap, coverArtBitmapTrackUri) {
+        val bitmap = coverArtBitmap
+        if (useAlbumArtColor && bitmap != null && coverArtBitmapTrackUri == currentTrack?.uri) {
+            dominantColorState.updateFrom(bitmap)
+            val computedColor = dominantColorState.result
+                ?.paletteOrNull
+                ?.let { CoverArtColorExtractor.selectDominantColor(it) }
+                ?: dominantColorState.color
+            currentTrack?.let { track ->
+                viewModel.cacheDominantColor(track.coverArtUri.toString(), computedColor.toArgb())
             }
-        } else dominantColorState.reset()
+        } else {
+            dominantColorState.reset()
+        }
+    }
+
+    LaunchedEffect(currentTrack) {
+        if (currentTrack == null) {
+            coverArtBitmap = null
+            coverArtBitmapTrackUri = null
+            dominantColorState.reset()
+        }
     }
 
     val appearance by viewModel.settings.appearance.collectAsState()
@@ -214,7 +236,8 @@ fun PlayerScreen(
         CompositionLocalProvider(
             LocalIndication provides ripple,
             LocalRippleConfiguration provides rippleConfiguration,
-            LocalContentColor provides MaterialTheme.colorScheme.onSurface
+            LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+            LocalDominantColorCache provides dominantColorCache,
         ) {
 
             Box(
@@ -222,20 +245,6 @@ fun PlayerScreen(
                     .background(color = MaterialTheme.colorScheme.background)
             ) {
                 val context = LocalContext.current
-                val playbackState by viewModel.playbackState.collectAsState()
-                val currentTrack by remember {
-                    derivedStateOf {
-                        playbackState.currentTrack
-                    }
-                }
-
-                LaunchedEffect(currentTrack) {
-                    if (currentTrack == null) {
-                        coverArtBitmap = null
-                        dominantColorState.reset()
-                    }
-                }
-
                 val perTrackArtwork = viewModel.settings.perTrackArtwork
                 val trackSort by viewModel.trackSort.collectAsState()
                 val trackSortOrder by viewModel.trackSortOrder.collectAsState()
@@ -539,6 +548,9 @@ fun PlayerScreen(
                                 )
                             },
                             perTrackArtwork = perTrackArtwork,
+                            onDominantColorExtracted = { uri, color ->
+                                viewModel.cacheDominantColor(uri, color)
+                            },
                         )
                     }
 
@@ -867,6 +879,7 @@ fun PlayerScreen(
                                 },
                                 onCoverArtLoaded = {
                                     coverArtBitmap = it
+                                    coverArtBitmapTrackUri = currentTrack?.uri
                                 },
                                 onPlayNextClick = {
                                     viewModel.onEvent(PlayerScreenEvent.OnPlayNextClick(it))
@@ -1047,6 +1060,7 @@ private fun LazyGridScope.TabContent(
     onEnterSelectionMode: (Playlist) -> Unit,
     onToggleSelection: (Playlist) -> Unit,
     perTrackArtwork: Boolean = false,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
 ) {
     if (gridPlaylists) {
         if (!isInSelectionMode) {
@@ -1058,7 +1072,8 @@ private fun LazyGridScope.TabContent(
                 showSinglePreview = showSinglePreview,
                 perTrackArtwork = perTrackArtwork,
                 onCardClick = onPlaylistClick,
-                onLongClick = { onEnterSelectionMode(it) }
+                onLongClick = { onEnterSelectionMode(it) },
+                onDominantColorExtracted = onDominantColorExtracted,
             )
         } else {
             selectionCards(
@@ -1069,7 +1084,8 @@ private fun LazyGridScope.TabContent(
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
                 perTrackArtwork = perTrackArtwork,
-                onCardClick = { onToggleSelection(it) }
+                onCardClick = { onToggleSelection(it) },
+                onDominantColorExtracted = onDominantColorExtracted,
             )
         }
     } else {
@@ -1082,7 +1098,8 @@ private fun LazyGridScope.TabContent(
                 showSinglePreview = showSinglePreview,
                 perTrackArtwork = perTrackArtwork,
                 onRowClick = onPlaylistClick,
-                onLongClick = { onEnterSelectionMode(it) }
+                onLongClick = { onEnterSelectionMode(it) },
+                onDominantColorExtracted = onDominantColorExtracted,
             )
         } else {
             selectionRows(
@@ -1093,7 +1110,8 @@ private fun LazyGridScope.TabContent(
                 fallbackPlaylistTitle = fallbackPlaylistTitle,
                 showSinglePreview = showSinglePreview,
                 perTrackArtwork = perTrackArtwork,
-                onRowClick = { onToggleSelection(it) }
+                onRowClick = { onToggleSelection(it) },
+                onDominantColorExtracted = onDominantColorExtracted,
             )
         }
     }
@@ -1149,6 +1167,7 @@ fun MainPlayerScreen(
     gridPlaylists: Boolean,
     onGridPlaylistsClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
     perTrackArtwork: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -1704,7 +1723,8 @@ fun MainPlayerScreen(
                         if (selectedPlaylists.isEmpty()) {
                             isInSelectionMode = false
                         }
-                    }
+                    },
+                    onDominantColorExtracted = onDominantColorExtracted,
                 )
             }
 
@@ -1730,7 +1750,8 @@ fun MainPlayerScreen(
                         if (selectedPlaylists.isEmpty()) {
                             isInSelectionMode = false
                         }
-                    }
+                    },
+                    onDominantColorExtracted = onDominantColorExtracted,
                 )
             }
 
@@ -1756,7 +1777,8 @@ fun MainPlayerScreen(
                         if (selectedPlaylists.isEmpty()) {
                             isInSelectionMode = false
                         }
-                    }
+                    },
+                    onDominantColorExtracted = onDominantColorExtracted,
                 )
             }
 
@@ -1782,7 +1804,8 @@ fun MainPlayerScreen(
                         if (selectedPlaylists.isEmpty()) {
                             isInSelectionMode = false
                         }
-                    }
+                    },
+                    onDominantColorExtracted = onDominantColorExtracted,
                 )
             }
         }

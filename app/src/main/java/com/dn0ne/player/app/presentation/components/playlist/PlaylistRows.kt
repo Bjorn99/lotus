@@ -27,8 +27,12 @@ import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.sortedBy
 import com.dn0ne.player.app.domain.track.Playlist
+import com.dn0ne.player.app.data.CoverArtColorExtractor
 import com.dn0ne.player.app.presentation.components.CoverArt
+import com.dn0ne.player.app.presentation.components.LocalDominantColorCache
 import com.dn0ne.player.app.presentation.components.NothingYet
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.kmpalette.rememberDominantColorState
 import kotlinx.coroutines.launch
 
@@ -42,6 +46,7 @@ fun LazyGridScope.playlistRows(
     onLongClick: (Playlist) -> Unit,
     showSinglePreview: Boolean = false,
     perTrackArtwork: Boolean = false,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
 ) {
     if (playlists.isEmpty()) {
         item(
@@ -68,6 +73,7 @@ fun LazyGridScope.playlistRows(
                 .take(if (showSinglePreview) 1 else 4)
                 .map { it.uri },
             perTrackArtwork = perTrackArtwork,
+            onDominantColorExtracted = onDominantColorExtracted,
             modifier = Modifier
                 .clip(ShapeDefaults.Medium)
                 .combinedClickable(
@@ -89,6 +95,7 @@ fun PlaylistRow(
     coverArtPreviewUris: List<Uri>,
     trackUris: List<Uri> = emptyList(),
     perTrackArtwork: Boolean = false,
+    onDominantColorExtracted: (String, Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -98,6 +105,9 @@ fun PlaylistRow(
     ) {
         val dominantColorState = rememberDominantColorState()
         val coroutineScope = rememberCoroutineScope()
+        val dominantColorCache = LocalDominantColorCache.current
+        val cachedColor = coverArtPreviewUris.firstOrNull()?.toString()
+            ?.let { dominantColorCache[it] }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -115,6 +125,13 @@ fun PlaylistRow(
                             bitmap?.let {
                                 coroutineScope.launch {
                                     dominantColorState.updateFrom(it)
+                                    val uri = coverArtPreviewUris.firstOrNull()?.toString()
+                                    if (uri != null) {
+                                        val color = dominantColorState.result?.paletteOrNull
+                                            ?.let { CoverArtColorExtractor.selectDominantColor(it) }
+                                            ?: dominantColorState.color
+                                        onDominantColorExtracted(uri, color.toArgb())
+                                    }
                                 }
                             }
                         },
@@ -145,10 +162,15 @@ fun PlaylistRow(
             )
         }
 
+        val containerColor = cachedColor?.let { Color(it) }
+            ?: dominantColorState.color
+        val contentColor = cachedColor?.let { CoverArtColorExtractor.selectOnColor(it) }
+            ?: dominantColorState.onColor
+
         TrackCountBubble(
             trackCount = trackCount,
-            contentColor = dominantColorState.onColor,
-            containerColor = dominantColorState.color
+            contentColor = contentColor,
+            containerColor = containerColor
         )
     }
 }

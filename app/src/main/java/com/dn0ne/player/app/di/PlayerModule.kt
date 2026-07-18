@@ -11,6 +11,7 @@ import com.dn0ne.player.app.data.MetadataWriter
 import com.dn0ne.player.app.data.MetadataWriterImpl
 import com.dn0ne.player.app.data.SavedPlayerState
 import com.dn0ne.player.app.data.backup.BackupManager
+import com.dn0ne.player.app.data.db.CoverArtColorDao
 import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
@@ -26,6 +27,7 @@ import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
 import com.dn0ne.player.core.util.RateLimiter
+import com.dn0ne.player.app.data.repository.CoverArtColorRepository
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
 import com.dn0ne.player.app.data.repository.PlaylistRepository
@@ -230,6 +232,7 @@ val playerModule = module {
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
     single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
     single<TrackMetadataDao> { get<LotusDatabase>().trackMetadataDao() }
+    single<CoverArtColorDao> { get<LotusDatabase>().coverArtColorDao() }
 
     single {
         LyricsRepository(dao = get())
@@ -245,6 +248,10 @@ val playerModule = module {
 
     single {
         TrackStatsRepository(dao = get())
+    }
+
+    single {
+        CoverArtColorRepository(dao = get())
     }
 
     single<BackupManager> {
@@ -295,6 +302,7 @@ val playerModule = module {
             playlistRepository = get(),
             lovedTracksRepository = get(),
             trackStatsRepository = get(),
+            coverArtColorRepository = get(),
             backupManager = get(),
             unsupportedWriteFormats = get<MetadataWriter>().unsupportedWriteFormats,
             unsupportedCoverArtFormats = (get<MetadataWriter>() as MetadataWriterImpl).unsupportedCoverArtFormats,

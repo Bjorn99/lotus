@@ -1,5 +1,6 @@
 package com.dn0ne.player.app.data.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
@@ -10,8 +11,12 @@ import androidx.room.RoomDatabase
         LovedTrackEntity::class,
         TrackStatsEntity::class,
         TrackMetadataEntity::class,
+        CoverArtColorEntity::class,
     ],
-    version = 4,
+    version = 5,
+    autoMigrations = [
+        AutoMigration(from = 4, to = 5),
+    ],
     exportSchema = true,
 )
 abstract class LotusDatabase : RoomDatabase() {
@@ -20,6 +25,7 @@ abstract class LotusDatabase : RoomDatabase() {
     abstract fun lovedTrackDao(): LovedTrackDao
     abstract fun trackStatsDao(): TrackStatsDao
     abstract fun trackMetadataDao(): TrackMetadataDao
+    abstract fun coverArtColorDao(): CoverArtColorDao
 
     companion object {
         const val NAME = "lotus.db"
