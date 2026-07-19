@@ -191,6 +191,7 @@ dependencies {
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
+    implementation(libs.media3.ffmpeg.decoder)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.navigation.compose)

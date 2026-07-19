@@ -7,15 +7,28 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.audiofx.Equalizer
 import android.os.CountDownTimer
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.ui.util.fastForEach
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.decoder.ffmpeg.FfmpegAudioRenderer
+import androidx.media3.decoder.ffmpeg.FfmpegLibrary
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.RenderersFactory
+import androidx.media3.exoplayer.audio.AudioRendererEventListener
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.metadata.MetadataOutput
+import androidx.media3.exoplayer.text.TextOutput
+import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
@@ -216,6 +229,36 @@ class EqualizerController(context: Context) {
     }
 }
 
+@OptIn(UnstableApi::class)
+private class FfmpegRenderersFactory(context: Context) : RenderersFactory {
+    private val delegate = DefaultRenderersFactory(context)
+
+    override fun createRenderers(
+        handler: Handler,
+        videoListener: VideoRendererEventListener,
+        audioListener: AudioRendererEventListener,
+        textOutput: TextOutput,
+        metadataOutput: MetadataOutput,
+    ): Array<Renderer> {
+        val renderers = delegate.createRenderers(
+            handler,
+            videoListener,
+            audioListener,
+            textOutput,
+            metadataOutput,
+        ).toMutableList()
+
+        if (FfmpegLibrary.isAvailable()) {
+            renderers.add(
+                0,
+                FfmpegAudioRenderer(handler, audioListener, DefaultAudioSink.Builder().build()),
+            )
+        }
+
+        return renderers.toTypedArray()
+    }
+}
+
 class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private val equalizerController = get<EqualizerController>()
@@ -238,7 +281,7 @@ class PlaybackService : MediaSessionService() {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
 
-        val player = ExoPlayer.Builder(this)
+        val player = ExoPlayer.Builder(this, FfmpegRenderersFactory(this))
             .setAudioAttributes(audioAttributes, shouldHandleAudioFocus)
             .setHandleAudioBecomingNoisy(true)
             .build()
