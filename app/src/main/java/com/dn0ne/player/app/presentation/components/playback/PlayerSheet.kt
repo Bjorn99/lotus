@@ -25,6 +25,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -81,6 +82,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -703,6 +705,22 @@ fun ExpandedPlayer(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(ShapeDefaults.Large)
+                                .pointerInput(Unit) {
+                                    var totalDrag = 0f
+                                    detectHorizontalDragGestures(
+                                        onDragStart = { totalDrag = 0f },
+                                        onHorizontalDrag = { _, dragAmount ->
+                                            totalDrag += dragAmount
+                                        },
+                                        onDragEnd = {
+                                            if (totalDrag > 50) {
+                                                onSeekToPreviousClick()
+                                            } else if (totalDrag < -50) {
+                                                onSeekToNextClick()
+                                            }
+                                        }
+                                    )
+                                }
                         )
                     }
 
@@ -714,12 +732,29 @@ fun ExpandedPlayer(
                         transitionSpec = {
                             fadeIn() togetherWith fadeOut()
                         },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { track ->
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .pointerInput(Unit) {
+                                        var totalDrag = 0f
+                                        detectHorizontalDragGestures(
+                                            onDragStart = { totalDrag = 0f },
+                                            onHorizontalDrag = { _, dragAmount ->
+                                                totalDrag += dragAmount
+                                            },
+                                            onDragEnd = {
+                                                if (totalDrag > 50) {
+                                                    onSeekToPreviousClick()
+                                                } else if (totalDrag < -50) {
+                                                    onSeekToNextClick()
+                                                }
+                                            }
+                                        )
+                                    }
+                            ) { track ->
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
                             val context = LocalContext.current
                             Text(
                                 text = track.title
@@ -780,6 +815,22 @@ fun ExpandedPlayer(
                                 .padding(start = 28.dp)
                                 .padding(vertical = 28.dp)
                                 .clip(ShapeDefaults.ExtraLarge)
+                                .pointerInput(Unit) {
+                                    var totalDrag = 0f
+                                    detectHorizontalDragGestures(
+                                        onDragStart = { totalDrag = 0f },
+                                        onHorizontalDrag = { _, dragAmount ->
+                                            totalDrag += dragAmount
+                                        },
+                                        onDragEnd = {
+                                            if (totalDrag > 50) {
+                                                onSeekToPreviousClick()
+                                            } else if (totalDrag < -50) {
+                                                onSeekToNextClick()
+                                            }
+                                        }
+                                    )
+                                }
                         )
                     }
 
