@@ -25,6 +25,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -81,6 +82,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -99,6 +101,7 @@ import com.dn0ne.player.core.data.Settings
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -110,6 +113,8 @@ fun PlayerSheet(
     onPauseClick: () -> Unit,
     onSeekToNextClick: () -> Unit,
     onSeekToPreviousClick: () -> Unit,
+    onSwipeToNext: () -> Unit,
+    onSwipeToPrevious: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onReset: () -> Unit,
     onPlaybackModeClick: () -> Unit,
@@ -264,6 +269,8 @@ fun PlayerSheet(
                     onPlayClick = onPlayClick,
                     onSeekToNextClick = onSeekToNextClick,
                     onSeekToPreviousClick = onSeekToPreviousClick,
+                    onSwipeToNext = onSwipeToNext,
+                    onSwipeToPrevious = onSwipeToPrevious,
                     onHideClick = {
                         onPlayerExpandedChange(false)
                         translationY.updateBounds(
@@ -597,6 +604,8 @@ fun ExpandedPlayer(
     onPauseClick: () -> Unit,
     onSeekToNextClick: () -> Unit,
     onSeekToPreviousClick: () -> Unit,
+    onSwipeToNext: () -> Unit,
+    onSwipeToPrevious: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onHideClick: () -> Unit,
     onPlaybackModeClick: () -> Unit,
@@ -626,6 +635,7 @@ fun ExpandedPlayer(
     }
 
     val playbackState by playbackStateFlow.collectAsState()
+    val layoutDirection = LocalLayoutDirection.current
     val showLyricsSheet by remember {
         derivedStateOf {
             playbackState.isLyricsSheetExpanded
@@ -706,6 +716,11 @@ fun ExpandedPlayer(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(ShapeDefaults.Large)
+                                .swipeToSeek(
+                                    onSeekToNext = onSwipeToNext,
+                                    onSeekToPrevious = onSwipeToPrevious,
+                                    layoutDirection = layoutDirection,
+                                )
                         )
                     }
 
@@ -783,6 +798,11 @@ fun ExpandedPlayer(
                                 .padding(start = 28.dp)
                                 .padding(vertical = 28.dp)
                                 .clip(ShapeDefaults.ExtraLarge)
+                                .swipeToSeek(
+                                    onSeekToNext = onSwipeToNext,
+                                    onSeekToPrevious = onSwipeToPrevious,
+                                    layoutDirection = layoutDirection,
+                                )
                         )
                     }
 
@@ -1057,4 +1077,42 @@ fun PlaybackControl(
             }
         }
     }
+}
+
+internal enum class SeekDirection { Previous, Next, None }
+
+internal fun seekDirectionForDrag(
+    totalDrag: Float,
+    thresholdPx: Float,
+    layoutDirection: LayoutDirection,
+): SeekDirection {
+    if (totalDrag.absoluteValue < thresholdPx) return SeekDirection.None
+    val direction = if (layoutDirection == LayoutDirection.Rtl) -1f else 1f
+    return when ((totalDrag * direction).sign) {
+        1f -> SeekDirection.Previous
+        -1f -> SeekDirection.Next
+        else -> SeekDirection.None
+    }
+}
+
+private fun Modifier.swipeToSeek(
+    onSeekToNext: () -> Unit,
+    onSeekToPrevious: () -> Unit,
+    layoutDirection: LayoutDirection,
+): Modifier = this.pointerInput(layoutDirection) {
+    val thresholdPx = 50.dp.toPx()
+    var totalDrag = 0f
+    detectHorizontalDragGestures(
+        onDragStart = { totalDrag = 0f },
+        onHorizontalDrag = { _, dragAmount ->
+            totalDrag += dragAmount
+        },
+        onDragEnd = {
+            when (seekDirectionForDrag(totalDrag, thresholdPx, layoutDirection)) {
+                SeekDirection.Next -> onSeekToNext()
+                SeekDirection.Previous -> onSeekToPrevious()
+                SeekDirection.None -> Unit
+            }
+        }
+    )
 }
