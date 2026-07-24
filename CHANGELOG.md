@@ -6,7 +6,7 @@ Each release page is built from the matching section below, so the wording is ai
 
 ## 1.8.3
 
-A lyrics overhaul with a clear resolution order, plus fixes for the playlist header, the last lyric line, and album art flashing during scroll.
+Lyrics get a clearer, more predictable resolution order, plus a crash fix, a fix for editing tags on large files, and a handful of smaller playback and interface fixes.
 
 ### Lyrics chain
 
@@ -24,23 +24,32 @@ Lotus now resolves lyrics in a fixed order, and each source behaves predictably.
 3. Read the embedded tag from the audio file
 4. Ask LRCLIB — gated as above
 
-- **Lyrics folder now wins over embedded tags.** In earlier versions, a cached embedded tag could permanently shadow a `.lrc` file you placed in the folder. The folder is now consulted first and read fresh on every open, so renaming or editing a `.lrc` reflects immediately. (#106)
-- **Lyrics folder matching also tries the track title.** If your `.lrc` is named after the song title rather than the audio filename — common after editing a track's tags — Lotus now finds it. Filename matching is still tried first. Name comparison is robust against Unicode composition differences, stray whitespace, and letter case, which could previously cause a visually identical filename to miss. (#100)
+- **Lyrics folder now wins over embedded tags.** In earlier versions, a cached embedded tag could permanently shadow a `.lrc` file you placed in the folder. The folder is now consulted first and read fresh on every open, so renaming or editing a `.lrc` reflects immediately. A folder match now also takes precedence over lyrics you attached manually for the same track. (#106)
+- **Lyrics folder matching also tries the track title.** If your `.lrc` is named after the song title rather than the audio filename — common after editing a track's tags — Lotus now finds it. Filename matching is still tried first. Name comparison is robust against Unicode composition differences, stray whitespace, and letter case, which could previously cause a visually identical filename to miss.
 - **Added a "Use lyrics folder" toggle in Lyrics settings.** Lets you turn folder lookup on or off without clearing the picked folder. (#107)
 - **The last line of synced lyrics now animates like the rest.** The gradient highlight sweep was stuck at the top for the final line; it now advances smoothly over the remainder of the track. (#105)
 
 ### Playlist header
 
-- **Fixed the playlist title overlapping the buttons.** Imported and editable playlists (the ones with the rename pencil and delete button) had a three-button right cluster that the title text didn't reserve enough room for. The title now stays between the button groups at every scroll position, and the collapse transition is smooth with no size jumps. (#81)
+- **Fixed the playlist title overlapping the buttons.** Imported and editable playlists (the ones with the rename pencil and delete button) had a three-button right cluster that the title text didn't reserve enough room for. The title now stays between the button groups at every scroll position, and the collapse transition is smooth with no size jumps.
 
 ### Album art
 
-- **No more flash of the wrong artwork during fast scroll.** List and grid thumbnails now show the correct art immediately instead of fading through the previous row's image.
+- **No more flash of the wrong artwork during fast scroll.** List and grid thumbnails now show the correct art immediately instead of fading through the previous row's image. (#110)
+- **The Albums tab shows one cover per album.** With per-track artwork on, the four-up preview could show four identical thumbnails for albums that have no per-track images. The Albums tab now uses a single album cover; the other tabs keep their per-track mosaics. (#87)
+
+### Stability and privacy
+
+- **Fixed a crash when changing tracks with the equalizer enabled.** The equalizer was being rebuilt on every track change, which could crash on some devices. It's now built once and reused, and failures degrade to equalizer-off instead of taking the app down. (#113)
+- **Editing tags no longer freezes the app on large files.** Tag writes now run off the main thread, so saving metadata on a big file doesn't lock the interface.
+- **Corrupt saved playback state recovers instead of crashing.** If a saved setting from an older version can't be read, Lotus now resets that one value to its default rather than failing to open the player.
+- **Release builds no longer keep debug logs.** Debug logging is stripped from release builds, so your library metadata and search queries stay out of the system log.
 
 ### Under the hood
 
 - Extracted the lyrics resolution order into a pure function with unit tests covering every precedence rule, short-circuiting, and the invariant that the network is always tried last.
 - Added tests for the sidecar filename matching covering Unicode normalization, whitespace trimming, and title-fallback matching.
+- Fixed a temporary-file leak in the metadata writer — the working file is now cleaned up on every exit path, not just on success.
 
 ## 1.8.2
 
