@@ -1,6 +1,7 @@
 package com.dn0ne.player.app.data
 
 import android.content.Context
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.dn0ne.player.app.domain.lyrics.Lyrics
 import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
@@ -8,8 +9,7 @@ import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.format
-import org.jaudiotagger.audio.AudioFileIO
-import org.jaudiotagger.tag.FieldKey
+import com.kyant.taglib.TagLib
 import java.io.File
 import java.io.FileOutputStream
 
@@ -25,12 +25,16 @@ class LyricsReaderImpl(private val context: Context) : LyricsReader {
                 }
             } ?: return Result.Error(DataError.Local.NoReadPermission)
 
-            val audioFile = AudioFileIO.read(temp)
-                ?: return Result.Error(DataError.Local.FailedToRead)
-            val tag = audioFile.tagAndConvertOrCreateAndSetDefault
-                ?: return Result.Error(DataError.Local.FailedToRead)
+            val lyricsText = ParcelFileDescriptor.open(temp!!, ParcelFileDescriptor.MODE_READ_ONLY)
+                .use { pfd ->
+                    val lyricsValues = TagLib.getMetadataPropertyValues(
+                        pfd.dup().detachFd(), "LYRICS"
+                    )
+                    if (lyricsValues != null && lyricsValues.isNotEmpty()) {
+                        lyricsValues[0]
+                    } else null
+                }
 
-            val lyricsText = tag.getFirst(FieldKey.LYRICS)
             if (lyricsText?.isNotBlank() != true) {
                 return Result.Error(DataError.Local.NoLyricsFound)
             }
@@ -53,9 +57,6 @@ class LyricsReaderImpl(private val context: Context) : LyricsReader {
 
             Result.Success(lyrics)
         } catch (t: Throwable) {
-            // jaudiotagger throws a wide variety of checked exceptions for
-            // unsupported/malformed files; treat any failure as "couldn't read"
-            // rather than crashing the app.
             Log.w(LOG_TAG, "Failed to read lyrics from tag for ${track.uri}", t)
             Result.Error(DataError.Local.FailedToRead)
         } finally {

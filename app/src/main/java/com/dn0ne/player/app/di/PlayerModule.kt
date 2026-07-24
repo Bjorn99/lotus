@@ -297,7 +297,6 @@ val playerModule = module {
             trackStatsRepository = get(),
             backupManager = get(),
             unsupportedWriteFormats = get<MetadataWriter>().unsupportedWriteFormats,
-            unsupportedCoverArtFormats = (get<MetadataWriter>() as MetadataWriterImpl).unsupportedCoverArtFormats,
 
             settings = get(),
             musicScanner = get(),

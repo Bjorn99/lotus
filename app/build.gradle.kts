@@ -198,7 +198,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.kmpalette.core)
     implementation(libs.materialkolor)
-    implementation(libs.jaudiotagger)
+    implementation(libs.taglib)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)

@@ -84,7 +84,6 @@ class PlayerViewModel(
     private val trackStatsRepository: TrackStatsRepository,
     private val backupManager: BackupManager,
     private val unsupportedWriteFormats: List<String>,
-    private val unsupportedCoverArtFormats: List<String>,
     val settings: Settings,
     private val musicScanner: MusicScanner,
     private val equalizerController: EqualizerController
@@ -872,7 +871,7 @@ class PlayerViewModel(
                     it.copy(
                         isShown = true,
                         track = event.track,
-                        isCoverArtEditable = event.track.format !in unsupportedCoverArtFormats,
+                        isCoverArtEditable = true,
                         isMetadataWritable = event.track.format !in unsupportedWriteFormats,
                     )
                 }
