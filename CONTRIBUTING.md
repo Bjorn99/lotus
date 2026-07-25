@@ -1,12 +1,18 @@
 # Contributing to Lotus
 
-Thanks for thinking about contributing. This is a community fork maintained by one person, so a few things work differently from larger projects.
+Thanks for thinking about contributing. This is a community fork, so a few things work differently from larger projects.
 
 ## What kind of contributions are welcome
 
 **Leaf-level changes** — bug fixes, small features, UI polish, import/export improvements. Things at the edges of the codebase that don't change core data structures or build tooling.
 
-**Before opening a PR** for anything larger than a bug fix, open an issue and let's talk first. That avoids you spending time on something that may not fit.
+## A few practical things
+
+This is a small project — a little rhythm goes a long way:
+
+- **One focused PR at a time.** Please don't open a stack of PRs across different parts of the app at once — a large pile is hard to review well, and the ones that need discussion end up blocking the ones that don't.
+- **An issue before code** for anything beyond a small bug fix or a translation. It's the cheapest way to find out whether something fits before you spend time on it.
+- **Reviews take time.** A PR may sit for a while, come back with questions, or be re-implemented and merged under your name. None of that means it wasn't worth opening.
 
 ## What needs discussion first
 
