@@ -15,6 +15,15 @@ jobs:
     name: Analyze (kotlin)
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # CodeQL's bundled Kotlin extractor lags new Kotlin releases. Without this
+    # flag it aborts the run with "kotlin-version-too-new" whenever the project
+    # moves past the extractor's supported ceiling (e.g. the 2.4.0 -> 2.4.10
+    # bump). Allowing unsupported versions lets the extractor analyze anyway.
+    # Worst case is slightly reduced extractor precision on the newest language
+    # features — never a build or security regression — and it keeps the job
+    # green across future Kotlin upgrades instead of one-off pinning.
+    env:
+      CODEQL_EXTRACTOR_KOTLIN_ALLOW_UNSUPPORTED: "true"
     permissions:
       actions: read
       contents: read
