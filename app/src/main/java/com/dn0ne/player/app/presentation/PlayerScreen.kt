@@ -1676,20 +1676,21 @@ fun MainPlayerScreen(
 
             Tab.Albums -> {
                 TabContent(
-                    perTrackArtwork = perTrackArtwork,
+                    // The Albums tab always shows one large album cover per
+                    // tile, regardless of the global per-track-artwork setting.
+                    // A per-track 2x2 mosaic makes no sense for a single album:
+                    // an album with no per-track embedded art collapses into
+                    // four identical folder.jpg thumbnails (uhrfra's #87
+                    // follow-up), and the per-track option text itself promises
+                    // album art as the fallback. Playlists and the Tracks tab
+                    // keep per-track artwork.
+                    perTrackArtwork = false,
                     playlists = albumPlaylists.filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = albumSort,
                     playlistSortOrder = albumSortOrder,
                     fallbackPlaylistTitle = context.resources.getString(R.string.unknown_album),
-                    // Traditional single-artwork tile when per-track artwork is
-                    // off (album covers are typically one image per album).
-                    // When per-track artwork is on, switch to the 2x2 preview
-                    // so the tile can show the variety of embedded artworks
-                    // across the album's tracks — otherwise the single-preview
-                    // path is stuck rendering the first track's cover only
-                    // (uhrfra's #87 report).
-                    showSinglePreview = !perTrackArtwork,
+                    showSinglePreview = true,
                     onPlaylistClick = onAlbumPlaylistSelection,
                     isInSelectionMode = isInSelectionMode,
                     selectedPlaylists = selectedPlaylists,

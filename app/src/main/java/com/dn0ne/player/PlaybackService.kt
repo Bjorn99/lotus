@@ -136,20 +136,28 @@ class EqualizerController(context: Context) {
 
     fun updateEqualizer(audioSessionId: Int) {
         equalizer?.release()
+        equalizer = null
 
         _audioSessionId = audioSessionId
 
         if (!_settings.isEnabled) return
 
-        equalizer = Equalizer(Int.MAX_VALUE, audioSessionId).apply {
-            enabled = true
+        // Attaching a native audio effect can throw (e.g. RuntimeException
+        // "AudioEffect: set/get parameter error") when the output session is in
+        // a transitional state — notably on a track change while routed to a
+        // Bluetooth A2DP device (#113). Degrade to no-EQ instead of crashing
+        // the playback service. Priority 0 matches firstLaunchInit's probe.
+        try {
+            equalizer = Equalizer(0, audioSessionId).apply {
+                enabled = true
 
-            (0 until numberOfBands).forEach {
-                println("BAND FREQ RANGE: ${getBandFreqRange(it.toShort()).joinToString("..")}")
+                _settings.bandLevels?.forEachIndexed { band, level ->
+                    setBandLevel(band.toShort(), level)
+                }
             }
-            _settings.bandLevels?.forEachIndexed { band, level ->
-                setBandLevel(band.toShort(), level)
-            }
+        } catch (e: RuntimeException) {
+            Log.e("EqualizerController", "Failed to attach equalizer to session $audioSessionId", e)
+            equalizer = null
         }
     }
 
@@ -244,11 +252,22 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         player.addListener(object : Player.Listener {
+            // ExoPlayer's audio session id is stable for the life of the
+            // player, so the equalizer only needs to be (re)attached when it
+            // actually changes — not on every buffering/ready transition. This
+            // stops the per-track-change native-effect rebuild that surfaced as
+            // #113 (crash on skip while on Bluetooth). Enable/band-level changes
+            // re-apply through EqualizerController's own calls.
+            private var lastAudioSessionId = C.AUDIO_SESSION_ID_UNSET
+
             @OptIn(UnstableApi::class)
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY || playbackState == Player.STATE_BUFFERING) {
                     val audioSessionId = player.audioSessionId
-                    if (audioSessionId != C.AUDIO_SESSION_ID_UNSET) {
+                    if (audioSessionId != C.AUDIO_SESSION_ID_UNSET &&
+                        audioSessionId != lastAudioSessionId
+                    ) {
+                        lastAudioSessionId = audioSessionId
                         equalizerController.updateEqualizer(audioSessionId)
                     }
                 }

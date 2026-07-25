@@ -123,6 +123,21 @@ fun LyricsSettings(
             modifier = Modifier.fillMaxWidth()
         )
 
+        var sidecarLyricsEnabled by remember {
+            mutableStateOf(settings.sidecarLyricsEnabled)
+        }
+        SettingSwitch(
+            title = context.resources.getString(R.string.use_lyrics_folder),
+            supportingText = context.resources.getString(R.string.use_lyrics_folder_explain),
+            icon = Icons.Rounded.Folder,
+            isChecked = sidecarLyricsEnabled,
+            onCheckedChange = {
+                settings.sidecarLyricsEnabled = it
+                sidecarLyricsEnabled = it
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         var lyricsFontSize by remember {
             mutableStateOf(settings.lyricsFontSize)
         }

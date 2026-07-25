@@ -166,14 +166,15 @@ fun MutablePlaylist(
                         fraction = collapseFraction
                     ),
                 ),
-                softWrap = collapseFraction > .2f,
-                overflow = if (collapseFraction > .2f) {
-                    TextOverflow.Clip
-                } else TextOverflow.Ellipsis,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = if (collapseFraction > .2f) 28.dp else 108.dp)
+                    .padding(
+                        start = lerp(108.dp, 28.dp, collapseFraction),
+                        end = lerp(156.dp, 28.dp, collapseFraction)
+                    )
             )
 
             AnimatedContent(
@@ -187,6 +188,7 @@ fun MutablePlaylist(
                 when (state) {
                     TopBarContent.Default -> {
                         Row(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Row(
@@ -324,7 +326,9 @@ fun MutablePlaylist(
 
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(color = MaterialTheme.colorScheme.background)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(

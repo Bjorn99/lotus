@@ -1,0 +1,13 @@
+Lotus 1.8.3
+
+Lyrics now follow a clear, predictable order: your chosen lyrics
+folder wins and is read fresh every time, so edited or renamed
+.lrc files show up immediately. New "Use lyrics folder" toggle.
+
+Also fixed:
+- Crash when changing tracks with the equalizer enabled
+- Tag editing freezing the app on large files
+- Last synced lyric line not highlighting
+- Wrong-artwork flash while scrolling
+- Albums tab now shows one cover per album
+- Release builds no longer retain debug logs

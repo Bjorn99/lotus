@@ -14,8 +14,19 @@ class SavedPlayerState(context: Context) {
     private val playbackModeKey = "playback-mode"
     private val trackKey = "track"
 
+    // Getters are defensive: a corrupt or version-incompatible saved value
+    // (e.g. a Track wire-format change failing TrackSerializer's require(), or
+    // a playback-mode ordinal out of range) would otherwise throw out of the
+    // restore coroutine and crash on entry to the player, with no recovery. On
+    // a decode failure we clear the bad key and fall back to the "nothing
+    // saved" default so playback just starts fresh.
     var playlist: Playlist?
-        get() = sharedPreferences.getString(playlistKey, null)?.let { Json.decodeFromString(it) }
+        get() = runCatching {
+            sharedPreferences.getString(playlistKey, null)?.let { Json.decodeFromString<Playlist>(it) }
+        }.getOrElse {
+            sharedPreferences.edit().remove(playlistKey).apply()
+            null
+        }
         set(value) {
             with(sharedPreferences.edit()) {
                 putString(playlistKey, Json.encodeToString(value))
@@ -24,7 +35,12 @@ class SavedPlayerState(context: Context) {
         }
 
     var playbackMode: PlaybackMode
-        get() = PlaybackMode.entries[sharedPreferences.getInt(playbackModeKey, 0)]
+        get() = runCatching {
+            PlaybackMode.entries[sharedPreferences.getInt(playbackModeKey, 0)]
+        }.getOrElse {
+            sharedPreferences.edit().remove(playbackModeKey).apply()
+            PlaybackMode.entries[0]
+        }
         set(value) {
             with(sharedPreferences.edit()) {
                 putInt(playbackModeKey, value.ordinal)
@@ -33,7 +49,12 @@ class SavedPlayerState(context: Context) {
         }
 
     var track: Track?
-        get() = sharedPreferences.getString(trackKey, null)?.let { Json.decodeFromString(it) }
+        get() = runCatching {
+            sharedPreferences.getString(trackKey, null)?.let { Json.decodeFromString<Track>(it) }
+        }.getOrElse {
+            sharedPreferences.edit().remove(trackKey).apply()
+            null
+        }
         set(value) {
             with(sharedPreferences.edit()) {
                 putString(trackKey, Json.encodeToString(value))

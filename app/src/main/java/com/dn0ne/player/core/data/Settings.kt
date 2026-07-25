@@ -32,6 +32,7 @@ class Settings(context: Context) {
     private val lyricsLetterSpacingKey = "lyrics-letter-spacing"
     private val lyricsAlignmentKey = "lyrics-alignment"
     private val sidecarFolderUriKey = "sidecar-folder-uri"
+    private val sidecarLyricsEnabledKey = "sidecar-lyrics-enabled"
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
     private val networkLookupsEnabledKey = "network-lookups-enabled"
     private val trackPlayStatsKey = "track-play-stats"
@@ -228,6 +229,18 @@ class Settings(context: Context) {
         set(value) {
             with(sharedPreferences.edit()) {
                 putString(sidecarFolderUriKey, value)
+                apply()
+            }
+        }
+
+    // #107: lets the user turn the sidecar-folder lyrics source on/off
+    // without clearing the picked folder. Default true so an existing
+    // configured folder keeps working after upgrade.
+    var sidecarLyricsEnabled: Boolean
+        get() = sharedPreferences.getBoolean(sidecarLyricsEnabledKey, true)
+        set(value) {
+            with(sharedPreferences.edit()) {
+                putBoolean(sidecarLyricsEnabledKey, value)
                 apply()
             }
         }

@@ -319,6 +319,7 @@ private fun CompactTrackRow(track: Track, perTrackArtwork: Boolean = false, onCl
             uri = track.coverArtUri,
             trackUri = track.uri,
             perTrackArtwork = perTrackArtwork,
+            crossfade = false,
             modifier = Modifier
                 .size(44.dp)
                 .clip(ShapeDefaults.Small)

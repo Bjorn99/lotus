@@ -52,6 +52,7 @@ fun SelectionListItem(
                 uri = track.coverArtUri,
                 trackUri = track.uri,
                 perTrackArtwork = perTrackArtwork,
+                crossfade = false,
                 modifier = Modifier
                     .size(60.dp)
                     .clip(ShapeDefaults.Small)

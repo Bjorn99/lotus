@@ -255,7 +255,9 @@ fun LyricsSheet(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 val nextTime = remember {
-                                    synced.getOrNull(index + 1)?.first ?: Int.MAX_VALUE
+                                    synced.getOrNull(index + 1)?.first
+                                        ?: playbackState.currentTrack?.duration
+                                        ?: Int.MAX_VALUE
                                 }
 
                                 if (line.isNotBlank()) {

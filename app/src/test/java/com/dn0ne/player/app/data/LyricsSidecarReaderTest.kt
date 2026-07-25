@@ -2,9 +2,11 @@ package com.dn0ne.player.app.data
 
 import android.provider.DocumentsContract
 import com.dn0ne.player.app.data.LyricsSidecarReader.Companion.findMatchingDocumentId
+import com.dn0ne.player.app.data.LyricsSidecarReader.Companion.sidecarTargets
 import com.dn0ne.player.app.data.LyricsSidecarReader.DocumentRow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 // The regressions this test suite pins:
@@ -154,5 +156,62 @@ class LyricsSidecarReaderTest {
         val result = findMatchingDocumentId(rows, "target.lrc")
 
         assertNull(result)
+    }
+
+    // A .lrc renamed in another app can land in NFD (decomposed) while the
+    // audio filename is NFC (composed), or vice versa. Visually identical
+    // names must still match after normalization.
+    @Test
+    fun nfc_and_nfd_forms_of_the_same_name_match() {
+        val composed = "caf" + "\u00E9" + ".lrc"      // NFC: precomposed e-acute U+00E9
+        val decomposed = "cafe" + "\u0301" + ".lrc"   // NFD: e + combining acute U+0301
+        val rows = sequenceOf(
+            DocumentRow("doc-1", decomposed, fileMime),
+        )
+
+        val result = findMatchingDocumentId(rows, composed)
+
+        assertEquals("doc-1", result)
+    }
+
+    @Test
+    fun surrounding_whitespace_is_ignored() {
+        val rows = sequenceOf(
+            DocumentRow("doc-1", "  song.lrc  ", fileMime),
+        )
+
+        val result = findMatchingDocumentId(rows, "song.lrc")
+
+        assertEquals("doc-1", result)
+    }
+
+    // The reported sidecar-rename case: the audio file keeps its original
+    // name, but the user names the .lrc after the (edited) song title — a
+    // title edit does NOT rename the file. The title candidate must match
+    // even though the filename candidate doesn't.
+    @Test
+    fun title_candidate_matches_when_filename_does_not() {
+        val targets = sidecarTargets("/music/01 - track.mp3", "Actual Title")
+        val rows = sequenceOf(
+            DocumentRow("doc-1", "Actual Title.lrc", fileMime),
+        )
+
+        val result = findMatchingDocumentId(rows, targets)
+
+        assertEquals("doc-1", result)
+    }
+
+    @Test
+    fun sidecar_targets_include_filename_and_title_candidates() {
+        val targets = sidecarTargets("/music/01 - track.mp3", "Actual Title")
+
+        assertTrue(targets.contains("01 - track.lrc"))
+        assertTrue(targets.contains("actual title.lrc"))
+    }
+
+    @Test
+    fun sidecar_targets_omit_blank_title() {
+        assertEquals(setOf("song.lrc"), sidecarTargets("/music/song.mp3", null))
+        assertEquals(setOf("song.lrc"), sidecarTargets("/music/song.mp3", "   "))
     }
 }
