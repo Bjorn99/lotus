@@ -74,6 +74,14 @@ fun GlobalSearchSheet(
     onAlbumPlaylistClick: (Playlist) -> Unit,
     onArtistPlaylistClick: (Playlist) -> Unit,
     onGenrePlaylistClick: (Playlist) -> Unit,
+    lovedUris: Set<String> = emptySet(),
+    onToggleLovedClick: (Track) -> Unit = {},
+    onPlayNextClick: (Track) -> Unit = {},
+    onAddToQueueClick: (List<Track>) -> Unit = {},
+    onAddToPlaylistClick: (List<Track>) -> Unit = {},
+    onViewTrackInfoClick: (Track) -> Unit = {},
+    onGoToAlbumClick: (Track) -> Unit = {},
+    onGoToArtistClick: (Track) -> Unit = {},
     perTrackArtwork: Boolean = false,
 ) {
     if (!isVisible) return
@@ -157,15 +165,23 @@ fun GlobalSearchSheet(
                             }
                             items(tracks.take(TRACK_LIMIT), key = { "t-" + it.uri }) { track ->
                                 CompactTrackRow(
-                                    track,
+                                    track = track,
                                     perTrackArtwork = perTrackArtwork,
+                                    isLoved = track.uri.toString() in lovedUris,
                                     onClick = {
                                         onTrackClick(
                                             track,
                                             Playlist(name = null, trackList = tracks)
                                         )
                                         onDismiss()
-                                    }
+                                    },
+                                    onToggleLovedClick = { onToggleLovedClick(track) },
+                                    onPlayNextClick = { onPlayNextClick(track) },
+                                    onAddToQueueClick = { onAddToQueueClick(listOf(track)) },
+                                    onAddToPlaylistClick = { onAddToPlaylistClick(listOf(track)) },
+                                    onViewTrackInfoClick = { onViewTrackInfoClick(track) },
+                                    onGoToAlbumClick = { onGoToAlbumClick(track) },
+                                    onGoToArtistClick = { onGoToArtistClick(track) },
                                 )
                             }
                         }
@@ -305,7 +321,19 @@ private fun EmptyState(icon: ImageVector, text: String) {
 }
 
 @Composable
-private fun CompactTrackRow(track: Track, perTrackArtwork: Boolean = false, onClick: () -> Unit) {
+private fun CompactTrackRow(
+    track: Track,
+    perTrackArtwork: Boolean = false,
+    isLoved: Boolean = false,
+    onClick: () -> Unit,
+    onToggleLovedClick: () -> Unit = {},
+    onPlayNextClick: () -> Unit = {},
+    onAddToQueueClick: () -> Unit = {},
+    onAddToPlaylistClick: () -> Unit = {},
+    onViewTrackInfoClick: () -> Unit = {},
+    onGoToAlbumClick: () -> Unit = {},
+    onGoToArtistClick: () -> Unit = {},
+) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
@@ -339,6 +367,18 @@ private fun CompactTrackRow(track: Track, perTrackArtwork: Boolean = false, onCl
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        TrackMenuButton(
+            isLoved = isLoved,
+            onToggleLovedClick = onToggleLovedClick,
+            onPlayNextClick = onPlayNextClick,
+            onAddToQueueClick = onAddToQueueClick,
+            onAddToPlaylistClick = onAddToPlaylistClick,
+            onViewTrackInfoClick = onViewTrackInfoClick,
+            onGoToAlbumClick = onGoToAlbumClick,
+            onGoToArtistClick = onGoToArtistClick,
+            onShareClick = { shareTrack(context, track) },
+        )
     }
 }
 
