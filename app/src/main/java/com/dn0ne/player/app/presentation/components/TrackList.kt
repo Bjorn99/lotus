@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dn0ne.player.app.domain.track.Track
@@ -33,10 +33,11 @@ fun LazyListScope.trackList(
         }
     }
 
-    items(
+    val itemKeys = trackList.trackItemKeys()
+    itemsIndexed(
         items = trackList,
-        key = { it.uri }
-    ) { track ->
+        key = { index, _ -> itemKeys[index] }
+    ) { _, track ->
         TrackListItem(
             track = track,
             isCurrent = currentTrack == track,
@@ -82,10 +83,11 @@ fun LazyGridScope.trackList(
         }
     }
 
-    items(
+    val itemKeys = trackList.trackItemKeys()
+    itemsIndexed(
         items = trackList,
-        key = { it.uri }
-    ) { track ->
+        key = { index, _ -> itemKeys[index] }
+    ) { _, track ->
         TrackListItem(
             track = track,
             isCurrent = currentTrack == track,

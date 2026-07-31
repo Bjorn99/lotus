@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
@@ -69,6 +69,7 @@ import com.dn0ne.player.app.presentation.components.topbar.LazyColumnWithCollaps
 import com.dn0ne.player.app.presentation.components.TrackListItem
 import com.dn0ne.player.app.presentation.components.selection.selectionList
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
+import com.dn0ne.player.app.presentation.components.trackItemKeys
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
 import kotlinx.coroutines.FlowPreview
 import sh.calvin.reorderable.ReorderableItem
@@ -438,13 +439,15 @@ fun MutablePlaylist(
                 }
             }
 
-            items(
-                items = trackList.filterTracks(searchFieldValue),
-                key = { "${it.uri}" }
-            ) { track ->
+            val visibleTracks = trackList.filterTracks(searchFieldValue)
+            val itemKeys = visibleTracks.trackItemKeys()
+            itemsIndexed(
+                items = visibleTracks,
+                key = { index, _ -> itemKeys[index] }
+            ) { index, track ->
                 ReorderableItem(
                     state = reorderableListState,
-                    key = "${track.uri}",
+                    key = itemKeys[index],
                     animateItemModifier = Modifier.animateItem(fadeInSpec = null),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) { isDragging ->
