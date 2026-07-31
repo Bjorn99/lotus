@@ -460,4 +460,7 @@
     </plurals>
     <string name="per_track_artwork">Per-track artwork</string>
     <string name="per_track_artwork_explain">When enabled, displays artwork embedded in each audio file instead of the album cover. Falls back to album art for tracks without embedded images.</string>
+    <string name="playback_error_unsupported_format">This format can\'t be played on this device</string>
+    <string name="playback_error_file_unreadable">This file couldn\'t be read — it may be corrupt or inaccessible</string>
+    <string name="playback_error_unknown">An unknown playback error occurred</string>
 </resources>

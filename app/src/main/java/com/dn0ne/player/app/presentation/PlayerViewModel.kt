@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.io.File
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder
@@ -36,6 +37,8 @@ import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.playback.PlaybackMode
 import com.dn0ne.player.app.domain.playback.ShuffleEngine
+import com.dn0ne.player.app.domain.playback.playbackErrorKind
+import com.dn0ne.player.app.domain.playback.PlaybackErrorKind
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.sort.sortedBy
@@ -481,6 +484,19 @@ class PlayerViewModel(
 
                         positionUpdateJob?.cancel()
                         positionUpdateJob = startPositionUpdate()
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        val messageRes = when (playbackErrorKind(error.errorCode)) {
+                            PlaybackErrorKind.UnsupportedFormat -> R.string.playback_error_unsupported_format
+                            PlaybackErrorKind.FileUnreadable -> R.string.playback_error_file_unreadable
+                            PlaybackErrorKind.Unknown -> R.string.playback_error_unknown
+                        }
+                        viewModelScope.launch {
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(message = messageRes)
+                            )
+                        }
                     }
                 }
             )
