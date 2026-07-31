@@ -25,7 +25,30 @@ import java.util.zip.CRC32
  */
 internal object OpusTagEditor {
 
+    // VorbisComment has no single standard lyrics field. LYRICS is what the write
+    // path below emits; UNSYNCEDLYRICS is what several other taggers produce.
+    private val lyricsFieldNames = listOf("LYRICS", "UNSYNCEDLYRICS")
+
     // ---- public API ----
+
+    /**
+     * Reads embedded lyrics from the OpusTags packet.
+     *
+     * The write path goes through this editor because jaudiotagger cannot open
+     * .opus files at all; reading needs the same treatment, or lyrics embedded in
+     * an opus file stay invisible to the app.
+     *
+     * Returns null when the file has no tags page or carries no lyrics field.
+     */
+    fun readLyrics(file: File): String? {
+        val pages = readOggPages(file)
+        if (pages.size < 2) return null
+
+        val fields = parseOpusTagsFields(pages[1])
+        return lyricsFieldNames.firstNotNullOfOrNull { name ->
+            fields[name]?.takeIf { it.isNotBlank() }
+        }
+    }
 
     fun update(file: File, metadata: com.dn0ne.player.app.domain.metadata.Metadata) {
         val pages = readOggPages(file)
