@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/stale@v10
+      - uses: actions/stale@v11
         with:
           # Issues
           days-before-issue-stale: 30
