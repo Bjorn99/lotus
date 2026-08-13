@@ -53,6 +53,13 @@ import com.dn0ne.player.app.domain.track.filterTracks
 import com.dn0ne.player.app.presentation.components.TrackSortButton
 import com.dn0ne.player.app.presentation.components.selection.selectionList
 import com.dn0ne.player.app.presentation.components.topbar.LazyColumnWithCollapsibleTopBar
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import com.dn0ne.player.app.presentation.components.topbar.TOP_BAR_ICON_ROW_HEIGHT
+import com.dn0ne.player.app.presentation.components.topbar.TOP_BAR_TITLE_RELAXED_PADDING
+import com.dn0ne.player.app.presentation.components.topbar.iconClusterWidth
+import com.dn0ne.player.app.presentation.components.topbar.titleClearanceFraction
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
 import com.dn0ne.player.app.presentation.components.trackList
 import com.dn0ne.player.app.presentation.components.trackinfo.SearchField
@@ -113,9 +120,27 @@ fun Playlist(
         }
     }
 
+    // Measured rather than derived from collapseFraction — see
+    // TopBarTitleClearance / #139.
+    var barHeightPx by remember { mutableFloatStateOf(0f) }
+    var titleHeightPx by remember { mutableFloatStateOf(0f) }
+    val iconRowHeightPx = with(LocalDensity.current) { TOP_BAR_ICON_ROW_HEIGHT.toPx() }
+
     LazyColumnWithCollapsibleTopBar(
         listState = listState,
         topBarContent = {
+            Spacer(
+                modifier = Modifier
+                    .matchParentSize()
+                    .onSizeChanged { barHeightPx = it.height.toFloat() }
+            )
+
+            val clearance = titleClearanceFraction(
+                barHeightPx = barHeightPx,
+                titleHeightPx = titleHeightPx,
+                iconRowHeightPx = iconRowHeightPx,
+            )
+
             Text(
                 text = playlist.name
                     ?: context.resources.getString(R.string.unknown),
@@ -131,7 +156,13 @@ fun Playlist(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = lerp(108.dp, 28.dp, collapseFraction))
+                    .onSizeChanged { titleHeightPx = it.height.toFloat() }
+                    // back + sort on the left, export + search on the right.
+                    .padding(
+                        horizontal = lerp(
+                            TOP_BAR_TITLE_RELAXED_PADDING, iconClusterWidth(2), clearance
+                        )
+                    )
             )
 
             AnimatedContent(

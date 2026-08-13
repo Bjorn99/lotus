@@ -66,6 +66,12 @@ import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.filterTracks
 import com.dn0ne.player.app.presentation.components.NothingYet
 import com.dn0ne.player.app.presentation.components.topbar.LazyColumnWithCollapsibleTopBar
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import com.dn0ne.player.app.presentation.components.topbar.TOP_BAR_ICON_ROW_HEIGHT
+import com.dn0ne.player.app.presentation.components.topbar.TOP_BAR_TITLE_RELAXED_PADDING
+import com.dn0ne.player.app.presentation.components.topbar.iconClusterWidth
+import com.dn0ne.player.app.presentation.components.topbar.titleClearanceFraction
 import com.dn0ne.player.app.presentation.components.TrackListItem
 import com.dn0ne.player.app.presentation.components.selection.selectionList
 import com.dn0ne.player.app.presentation.components.topbar.TopBarContent
@@ -154,9 +160,29 @@ fun MutablePlaylist(
         } else wasTriggered = true
     }
 
+    // Measured rather than derived from collapseFraction: the title only has to
+    // clear the icons while it is still level with them, and how long that
+    // lasts depends on the title's own height, which grows with the user's font
+    // scale. See TopBarTitleClearance / #139.
+    var barHeightPx by remember { mutableFloatStateOf(0f) }
+    var titleHeightPx by remember { mutableFloatStateOf(0f) }
+    val iconRowHeightPx = with(LocalDensity.current) { TOP_BAR_ICON_ROW_HEIGHT.toPx() }
+
     LazyColumnWithCollapsibleTopBar(
         listState = listState,
         topBarContent = {
+            Spacer(
+                modifier = Modifier
+                    .matchParentSize()
+                    .onSizeChanged { barHeightPx = it.height.toFloat() }
+            )
+
+            val clearance = titleClearanceFraction(
+                barHeightPx = barHeightPx,
+                titleHeightPx = titleHeightPx,
+                iconRowHeightPx = iconRowHeightPx,
+            )
+
             Text(
                 text = playlist.name
                     ?: context.resources.getString(R.string.unknown),
@@ -172,9 +198,16 @@ fun MutablePlaylist(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .align(Alignment.Center)
+                    .onSizeChanged { titleHeightPx = it.height.toFloat() }
                     .padding(
-                        start = lerp(108.dp, 28.dp, collapseFraction),
-                        end = lerp(156.dp, 28.dp, collapseFraction)
+                        // back + delete on the left, edit + export + search on
+                        // the right.
+                        start = lerp(
+                            TOP_BAR_TITLE_RELAXED_PADDING, iconClusterWidth(2), clearance
+                        ),
+                        end = lerp(
+                            TOP_BAR_TITLE_RELAXED_PADDING, iconClusterWidth(3), clearance
+                        ),
                     )
             )
 
