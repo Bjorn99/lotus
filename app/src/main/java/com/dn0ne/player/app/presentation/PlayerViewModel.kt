@@ -1120,7 +1120,16 @@ class PlayerViewModel(
                             albumArtist = event.searchResult.albumArtist,
                             genre = event.searchResult.genres?.joinToString(" / "),
                             year = event.searchResult.year,
-                            trackNumber = event.searchResult.trackNumber
+                            trackNumber = event.searchResult.trackNumber,
+                            // MetadataWriterImpl has always been wired to
+                            // persist these — to the MusicBrainz tag fields and
+                            // to the track_metadata row — but nothing on the
+                            // pick path ever set them, so that write path was
+                            // unreachable from the UI. Carrying the ids the
+                            // search result already holds turns it back on.
+                            mbAlbumId = event.searchResult.albumId,
+                            mbReleaseGroupId = event.searchResult.releaseGroupId,
+                            mbAlbumArtistId = event.searchResult.albumArtistId,
                         ),
                         isArtFromGallery = false
                     )

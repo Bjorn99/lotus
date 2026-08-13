@@ -32,6 +32,25 @@ import javax.net.ssl.SSLException
 import com.dn0ne.player.R
 import com.dn0ne.player.core.util.getAppVersionName
 
+// CoverArtArchive path prefixes. Named so the two lookups can't be mistyped
+// into each other at the call site.
+internal const val RELEASE_PATH = "release"
+internal const val RELEASE_GROUP_PATH = "release-group"
+
+// Whether a failed release-level cover-art lookup is worth retrying against
+// the release-group.
+//
+// ONLY a 404 qualifies. A 404 means "this pressing has no uploaded art", which
+// a sibling release in the same album may well have. Every other failure —
+// timeout, no internet, 503, a parse failure on the body — says nothing about
+// the group's art and would just spend a second request to fail the same way,
+// so those propagate unchanged. Kept pure and separate from the Ktor call so
+// the branch can be tested without an HTTP engine.
+internal fun shouldRetryWithReleaseGroup(
+    error: DataError,
+    releaseGroupId: String?,
+): Boolean = error == DataError.Network.NotFound && !releaseGroupId.isNullOrBlank()
+
 internal val MBID_REGEX =
     Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 internal val LUCENE_SPECIAL =
@@ -312,16 +331,52 @@ class MusicBrainzMetadataProvider(
         }
     }
 
+    // Cover art, with a release-group fallback.
+    //
+    // CoverArtArchive coverage is per-RELEASE, but a library holds one
+    // particular pressing. Asking only for `release/{id}/front` therefore 404s
+    // constantly on regional pressings and remasters whose album plainly does
+    // have art uploaded against a sibling release. `release-group/{id}/front`
+    // returns the group's representative front image and succeeds whenever ANY
+    // release in the album has one, so it is a far larger hit set.
+    //
+    // Order matters: the release-specific image is tried FIRST because it is
+    // the art for the exact pressing the user holds; the group image is only a
+    // fallback for when that doesn't exist.
     override suspend fun getCoverArtBytes(searchResult: MetadataSearchResult): Result<ByteArray, DataError> {
+        val fromRelease = fetchCoverArtFront(RELEASE_PATH, searchResult.albumId)
+        if (fromRelease is Result.Success) return fromRelease
+
+        val releaseGroupId = searchResult.releaseGroupId
+        if (fromRelease is Result.Error &&
+            releaseGroupId != null &&
+            shouldRetryWithReleaseGroup(fromRelease.error, releaseGroupId)
+        ) {
+            Log.d(logTag, "no cover art for release; trying release-group")
+            return fetchCoverArtFront(RELEASE_GROUP_PATH, releaseGroupId)
+        }
+
+        return fromRelease
+    }
+
+    // A single CoverArtArchive "front image" request. Both the release and the
+    // release-group lookups go through here so they cannot drift apart: same
+    // redirect handling, same status mapping, same user agent. The group
+    // endpoint 307s to archive.org exactly as the release endpoint does, so
+    // the existing validated-redirect path covers it unchanged — no new host,
+    // no relaxation of the allow-list.
+    private suspend fun fetchCoverArtFront(
+        entity: String,
+        id: String,
+    ): Result<ByteArray, DataError> {
+        // Acquired per request rather than per call, so the fallback is rate
+        // limited too instead of riding in free behind the first request.
         rateLimiter.acquire()
+
         val response = try {
             client.get(coverArtArchiveEndpoint) {
                 url {
-                    appendPathSegments(
-                        "release",
-                        searchResult.albumId,
-                        "front"
-                    )
+                    appendPathSegments(entity, id, "front")
                 }
                 headers {
                     append(HttpHeaders.UserAgent, userAgent)
@@ -333,16 +388,15 @@ class MusicBrainzMetadataProvider(
             return Result.Error(e.toNetworkError())
         }
 
-        when (response.status) {
+        return when (response.status) {
             HttpStatusCode.OK -> {
                 try {
-                    val bytes = response.body<ByteArray>()
-                    return Result.Success(bytes)
+                    Result.Success(response.body<ByteArray>())
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Throwable) {
                     Log.w(logTag, "Failed to read cover-art body", e)
-                    return Result.Error(DataError.Network.ParseError)
+                    Result.Error(DataError.Network.ParseError)
                 }
             }
 
@@ -352,22 +406,13 @@ class MusicBrainzMetadataProvider(
                 // followRedirects = false as a defence-in-depth measure, so
                 // we follow this one redirect ourselves with explicit checks
                 // on the destination URL.
-                return followCoverArtRedirect(response)
+                followCoverArtRedirect(response)
             }
 
-            HttpStatusCode.BadRequest -> {
-                return Result.Error(DataError.Network.BadRequest)
-            }
-
-            HttpStatusCode.NotFound -> {
-                return Result.Error(DataError.Network.NotFound)
-            }
-
-            HttpStatusCode.ServiceUnavailable -> {
-                return Result.Error(DataError.Network.ServiceUnavailable)
-            }
-
-            else -> return Result.Error(DataError.Network.Unknown)
+            HttpStatusCode.BadRequest -> Result.Error(DataError.Network.BadRequest)
+            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
+            HttpStatusCode.ServiceUnavailable -> Result.Error(DataError.Network.ServiceUnavailable)
+            else -> Result.Error(DataError.Network.Unknown)
         }
     }
 
