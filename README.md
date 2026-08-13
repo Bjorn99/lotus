@@ -67,15 +67,24 @@ prior work are theirs. Application ID:
 
 True randomness clusters — flip a coin enough times and you'll get runs of heads. A pure shuffle does the same thing with artists, and three songs by the same artist in a row feels like the app is broken even though the math is working fine.
 
-Rather than draw an order and hope, Smart Shuffle builds one. It deals the tracks out like cards: the artist with the most tracks goes first, one into every other slot, wrapping onto the slots it skipped once the first pass runs out. Handing out the most crowded artist first is what forces its tracks furthest apart, and the result is a guarantee rather than an average — **whenever an order with no artist repeats exists at all, Smart Shuffle finds one.** The only queues it cannot solve are the ones nobody could: if a single artist holds more than half the tracks, some repeats are unavoidable, and it lands within one of the provable minimum.
+Rather than draw an order and hope, Smart Shuffle builds one. It deals the tracks out like cards: the artist with the most tracks goes first, one into every other slot, wrapping onto the slots it skipped once the first pass runs out. Handing out the most crowded artist first is what forces its tracks furthest apart, and that step is a construction rather than a gamble — whenever an order with no artist repeats exists, the deal produces one. The only queues it cannot solve are the ones nobody could: if a single artist holds more than half the tracks, some repeats are unavoidable, and the deal reaches the provable minimum.
 
 A deal on its own is too tidy — with three artists it produces a metronomic `A B C A B C`. So a short second pass makes random swaps, keeping any that don't make the order worse. That breaks up the regularity, and it also picks up the two things the deal ignores: tracks from a compilation where one album spans several artists, and the tracks you just heard, which are pushed away from the front of the next queue. Each proposed swap is scored by what it changes rather than by rescoring the queue, and the number of swaps is capped, so the work stays bounded however long the queue is.
 
 An order is scored on three criteria: same-artist adjacency (weight 10), same-album adjacency (weight 3, and only when the artists differ), and tracks carried over from the previous pass (weight 5, halving every quarter of the queue). Everything runs on-device, with no listening history and no network.
 
-Measured against the previous approach — five random draws, keep the best — on a 60-track queue drawn from six artists: five draws left about six same-artist back-to-backs on average, and twenty-five on a two-artist queue. The current implementation leaves none in both cases.
+One caveat worth stating plainly: the polish judges a swap on that total score rather than on artist adjacency alone, so it can occasionally trade a single artist repeat for several album improvements. Probing randomised compilation-shaped libraries — a handful of albums spread across many artists, which is the only shape where the album term is strong enough to matter — this happened in under 1% of queues and never cost more than one repeat. Where albums are distinct, it does not happen at all. So the deal's property is exact; the finished order is not quite the same promise.
 
-Playlist sequencing as constrained optimisation is well-trodden ground: Pauws, Verhaegh and Vossen model it that way and solve it with an adapted simulated annealing algorithm [1]. Lotus keeps the idea of a weighted cost to minimise but reaches the answer by construction instead of by search, which is what makes the guarantee possible. One neighbouring line of work is worth naming precisely because it turned out *not* to fit: bioinformatics has a long history of sequence shuffling, such as Altschul and Erickson's Eulerian-walk permutation method and later tools like uShuffle [2]. Those solve the opposite problem — they sample permutations that *preserve* local statistics like dinucleotide and k-let counts, to build a null model for significance testing. Smart Shuffle exists to break up the adjacencies a plain shuffle leaves behind. Worth reading, not worth copying.
+Counting same-artist back-to-backs against a pure shuffle, 500 queues per row:
+
+| Queue | Pure shuffle | Smart Shuffle |
+|---|---|---|
+| 60 tracks, 6 artists | 8.9 | 0.0 |
+| 60 tracks, 3 artists | 19.0 | 0.0 |
+| 60 tracks, 2 artists | 28.9 | 0.0 |
+| 200 tracks, 12 artists | 15.7 | 0.0 |
+
+Playlist sequencing as constrained optimisation is well-trodden ground: Pauws, Verhaegh and Vossen model it that way and solve it with an adapted simulated annealing algorithm [1]. Lotus keeps the idea of a weighted cost to minimise but reaches the answer by construction instead of by search, which is what lets it land on a good order immediately rather than converging on one while the user waits. One neighbouring line of work is worth naming precisely because it turned out *not* to fit: bioinformatics has a long history of sequence shuffling, such as Altschul and Erickson's Eulerian-walk permutation method and later tools like uShuffle [2]. Those solve the opposite problem — they sample permutations that *preserve* local statistics like dinucleotide and k-let counts, to build a null model for significance testing. Smart Shuffle exists to break up the adjacencies a plain shuffle leaves behind. Worth reading, not worth copying.
 
 ### References
 
