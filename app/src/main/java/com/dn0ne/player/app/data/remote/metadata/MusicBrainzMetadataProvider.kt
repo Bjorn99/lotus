@@ -55,6 +55,15 @@ internal val MBID_REGEX =
     Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 internal val LUCENE_SPECIAL =
     Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^\"~*?:\\\\/])")
+// The same set minus ':' and '"'. A structured query is built out of exactly
+// those two characters, so escaping them is what silently broke field search:
+// `artist:"Chevelle"` went out as `artist\:\"Chevelle\"`, which is not a field
+// query at all but the literal words `artist` and `Chevelle`. That both loses
+// the field restriction and drags in every recording containing the word
+// "artist". Everything else is still escaped, so a stray brace or tilde can't
+// reach the parser.
+internal val LUCENE_SPECIAL_STRUCTURED =
+    Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^~*?\\\\/])")
 // Lucene word-level boolean operators — uppercase only, must be
 // standalone tokens (word-boundary delimited). Lowercasing them
 // preserves the user's intent while preventing Lucene from
@@ -68,32 +77,42 @@ internal fun escapeLuceneQuery(query: String): String {
     return query.replace(LUCENE_SPECIAL, "\\\\$1")
 }
 
+// Escapes everything [escapeLuceneQuery] does except the two characters that
+// carry structure. Only ever applied to a query that passed
+// [hasStructuredSyntax].
+internal fun escapeStructuredQuery(query: String): String {
+    return query.replace(LUCENE_SPECIAL_STRUCTURED, "\\\\$1")
+}
+
+// Whether the user is writing a structured query rather than plain text.
+//
+// A double quote is the signal, but only a BALANCED pair can be parsed. An odd
+// count means a stray quote — someone typing an inch mark or a smart-quote
+// mismatch — and handing that to Lucene unescaped earns a 400 and a "query was
+// corrupted" snackbar. Those fall back to the plain-text path, where the quote
+// is escaped and the search still works.
+internal fun hasStructuredSyntax(query: String): Boolean {
+    val quotes = query.count { it == '"' }
+    return quotes >= 2 && quotes % 2 == 0
+}
+
 // Normalizes a user query for MusicBrainz Lucene search.
 //
 // Two paths:
-// 1. Plain text (no quotes, no field: syntax) — escape special chars
-//    AND lowercase AND/OR/NOT.  "Roses AND Thorns" → literal "and".
-// 2. Lucene syntax (quotes present) — the user is writing a structured
-//    query.  Lowercase field names (Artist: → artist:) and escape
-//    special chars, but preserve AND/OR/NOT as boolean operators.
-private fun normalizeQuery(query: String): String {
-    val hasLuceneSyntax = HAS_LUCENE_SYNTAX.containsMatchIn(query)
-
-    val withNormalizedFields = if (hasLuceneSyntax) {
-        query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
-    } else {
-        query
-    }
-
-    // Always escape Lucene special characters
-    val escaped = escapeLuceneQuery(withNormalizedFields)
-
-    return if (hasLuceneSyntax) {
-        // User is writing explicit Lucene — preserve AND/OR/NOT as operators
-        escaped
+// 1. Plain text (no balanced quotes) — escape every special char AND lowercase
+//    AND/OR/NOT.  "Roses AND Thorns" → literal "and".
+// 2. Structured (balanced quotes present) — the user is writing Lucene.
+//    Lowercase field names (Artist: → artist:) so capitalisation doesn't
+//    matter, keep ':' and '"' intact so the query stays a query, and preserve
+//    AND/OR/NOT as boolean operators.
+internal fun normalizeQuery(query: String): String {
+    return if (hasStructuredSyntax(query)) {
+        escapeStructuredQuery(
+            query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
+        )
     } else {
         // Plain text — AND/OR/NOT are likely literal words, lowercase them
-        escaped.replace(AND_OR_NOT) { it.value.lowercase() }
+        escapeLuceneQuery(query).replace(AND_OR_NOT) { it.value.lowercase() }
     }
 }
 
