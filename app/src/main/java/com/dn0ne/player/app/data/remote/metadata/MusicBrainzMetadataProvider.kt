@@ -23,6 +23,7 @@ import com.dn0ne.player.core.util.RateLimiter
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonPrimitive
 import java.io.IOException
 import java.net.SocketException
 import java.net.UnknownHostException
@@ -263,7 +264,16 @@ class MusicBrainzMetadataProvider(
                 url {
                     appendPathSegments("recording", mbid)
                     parameters.append("fmt", "json")
-                    parameters.append("inc", "artist-credits releases media")
+                    // "release-groups" is NOT implied by "releases": on the
+                    // lookup endpoint each linked entity needs its own inc
+                    // token. Without it every release comes back with a null
+                    // release-group, which would silently disable both the
+                    // de-dup below and the cover-art group fallback for any
+                    // track matched by MBID. Same request, no extra call.
+                    parameters.append(
+                        "inc",
+                        "artist-credits releases release-groups media"
+                    )
                 }
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -469,37 +479,141 @@ internal data class SearchResultDto(
     val recordings: List<Recording>
 )
 
+// Flattens the search response into pickable rows, then ranks and collapses
+// them.
+//
+// The previous version emitted one row per (recording × release) in whatever
+// order MusicBrainz returned. A popular song has dozens of releases — regional
+// pressings, remasters, compilations — so the canonical album ended up buried
+// mid-list and the same album appeared many times over.
+//
+// Every signal used to fix that (score, status, date, release-group) already
+// arrives in the response we were parsing, so ranking costs no extra network
+// call; we were simply discarding it.
 internal fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
-    var results = mutableListOf<MetadataSearchResult>()
+    val rows = mutableListOf<RankedRow>()
     recordings.fastForEach { recording ->
         val artist = recording.artistCredit.ifEmpty { null }?.map {
             it.name + (it.joinphrase ?: "")
         }?.joinToString(separator = "") ?: ""
         val genres = recording.tags?.map { it.name }
+        val score = recording.score.asIntOrNull()
 
         recording.releases?.forEach { release ->
             val albumArtist = release.artistCredit?.map {
                 it.name + (it.joinphrase ?: "")
             }?.joinToString(separator = "") ?: artist
             val trackNumber = release.media?.firstOrNull()?.track?.firstOrNull()?.number
-            results += MetadataSearchResult(
-                id = recording.id,
-                title = recording.title,
-                artist = artist,
-                albumId = release.id,
-                album = release.title,
-                albumArtist = albumArtist,
-                trackNumber = trackNumber,
-                year = recording.firstReleaseDate,
-                genres = genres,
-                description = recording.disambiguation,
-                albumDescription = release.disambiguation
+            rows += RankedRow(
+                result = MetadataSearchResult(
+                    id = recording.id,
+                    title = recording.title,
+                    artist = artist,
+                    albumId = release.id,
+                    album = release.title,
+                    albumArtist = albumArtist,
+                    trackNumber = trackNumber,
+                    // Deliberately the RECORDING's first-release date, as
+                    // before — this is the value written to the year tag and
+                    // changing it is not this patch's business. The release's
+                    // own date is used for ranking only, just below.
+                    year = recording.firstReleaseDate,
+                    genres = genres,
+                    description = recording.disambiguation,
+                    albumDescription = release.disambiguation,
+                    releaseGroupId = release.releaseGroup?.id,
+                    albumArtistId = release.artistCredit?.firstOrNull()?.id,
+                ),
+                score = score,
+                statusRank = statusRank(release.status),
+                typeRank = releaseTypeRank(
+                    primaryType = release.releaseGroup?.primaryType,
+                    secondaryTypes = release.releaseGroup?.secondaryTypes,
+                ),
+                year = releaseYear(release.date),
+                ordinal = rows.size,
             )
         }
     }
 
-    return results
+    return rows
+        .sortedWith(RANKED_ROW_ORDER)
+        .map { it.result }
+        // One row per album. Sorting first means the survivor of each group is
+        // its best-ranked pressing. Releases with no group id can't be grouped,
+        // so they fall back to their own release id and are always kept.
+        .distinctBy { it.releaseGroupId ?: it.albumId }
 }
+
+// A row plus its precomputed sort keys. The keys are computed once, up front,
+// so the comparator is a pure function of stored values — a comparator that
+// recomputed or randomised anything would risk violating transitivity and
+// blowing up inside sort.
+internal data class RankedRow(
+    val result: MetadataSearchResult,
+    val score: Int?,
+    val statusRank: Int,
+    val typeRank: Int,
+    val year: Int?,
+    val ordinal: Int,
+)
+
+// Desirability order, most desirable first. Every criterion is total and
+// deterministic, and `ordinal` at the end keeps the original API order as the
+// final tiebreak so the result never depends on sort implementation details.
+internal val RANKED_ROW_ORDER: Comparator<RankedRow> =
+    compareByDescending<RankedRow> { it.score ?: Int.MIN_VALUE }
+        .thenBy { it.statusRank }
+        .thenBy { it.typeRank }
+        .thenBy { it.year ?: Int.MAX_VALUE }
+        .thenBy { it.ordinal }
+
+// MusicBrainz sends `score` as a search-relevance percentage. It has been
+// serialised both as a bare number and as a quoted string over the years, and
+// the app's Json is type-strict (`ignoreUnknownKeys` only, no `isLenient`), so
+// pinning the field to one of those shapes risks a parse failure that would
+// take the WHOLE response down — one odd value, zero search results. Holding
+// the raw primitive accepts either shape, and anything unexpected degrades to
+// a null score (that row simply ranks last) instead of an error.
+internal fun JsonPrimitive?.asIntOrNull(): Int? = this?.content?.toIntOrNull()
+
+// Official pressings first, bootlegs last. Unknown/absent status sits in the
+// middle: plenty of legitimate releases carry no status, so an unrecognised
+// value must not be treated as worse than a known-bad one.
+internal fun statusRank(status: String?): Int = when (status?.lowercase()) {
+    "official" -> 0
+    null -> 1
+    "promotion" -> 2
+    "bootleg" -> 3
+    "pseudo-release" -> 4
+    else -> 1
+}
+
+// Prefers the album a track actually belongs to over the ways it was later
+// repackaged. Primary type orders the main kinds; any secondary type
+// (Compilation, Live, Remix, Soundtrack…) demotes the release within its
+// primary tier, which is what pushes greatest-hits collections below the
+// original album they borrow from.
+internal fun releaseTypeRank(
+    primaryType: String?,
+    secondaryTypes: List<String>? = null,
+): Int {
+    val primary = when (primaryType?.lowercase()) {
+        "album" -> 0
+        "ep" -> 1
+        "single" -> 2
+        "broadcast" -> 3
+        else -> 4
+    }
+    val repackaged = if (secondaryTypes.isNullOrEmpty()) 0 else 1
+    return primary * 2 + repackaged
+}
+
+// Year from an ISO-8601 MusicBrainz date, which may be "2016-08-26", "2016-08"
+// or just "2016". Earliest wins, so an original pressing outranks its
+// remasters. Anything unparseable returns null and sorts last.
+internal fun releaseYear(date: String?): Int? =
+    date?.take(4)?.takeIf { it.length == 4 }?.toIntOrNull()
 
 @Serializable
 internal data class Recording(
@@ -511,7 +625,12 @@ internal data class Recording(
     @SerialName("first-release-date")
     val firstReleaseDate: String? = null,
     val releases: List<Release>? = null,
-    val tags: List<Tag>? = null
+    val tags: List<Tag>? = null,
+    // Search relevance, 0-100. Present on search hits only — the lookup-by-MBID
+    // endpoint returns a single exact match and sends no score, so this is
+    // null on that path and ranking falls through to the criteria below it.
+    // Held as a raw primitive rather than an Int; see asIntOrNull().
+    val score: JsonPrimitive? = null,
 )
 
 @Serializable
@@ -528,7 +647,24 @@ internal data class Release(
     @SerialName("artist-credit")
     val artistCredit: List<Artist>? = null,
     val media: List<Media>? = null,
-    val disambiguation: String? = null
+    val disambiguation: String? = null,
+    // Ranking signals. All of these already arrive in the search response;
+    // they were being parsed away before, which is why results came out
+    // unordered. (`country` is deliberately NOT parsed: it arrives too, but
+    // nothing ranks by it and an unused field is just clutter.)
+    val status: String? = null,
+    val date: String? = null,
+    @SerialName("release-group")
+    val releaseGroup: ReleaseGroup? = null,
+)
+
+@Serializable
+internal data class ReleaseGroup(
+    val id: String,
+    @SerialName("primary-type")
+    val primaryType: String? = null,
+    @SerialName("secondary-types")
+    val secondaryTypes: List<String>? = null,
 )
 
 @Serializable
