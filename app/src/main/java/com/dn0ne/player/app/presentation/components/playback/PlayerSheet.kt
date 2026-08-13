@@ -47,8 +47,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Lyrics
 import androidx.compose.material.icons.rounded.Pause
@@ -130,6 +130,7 @@ fun PlayerSheet(
     modifier: Modifier = Modifier
 ) {
     val playbackState by playbackStateFlow.collectAsState()
+    val reduceLyricsAnimation by settings.reduceLyricsAnimation.collectAsState()
     val isExpanded by remember {
         derivedStateOf {
             playbackState.isPlayerExpanded
@@ -281,6 +282,7 @@ fun PlayerSheet(
                     onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
                     onLyricsClick = onLyricsClick,
                     perTrackArtwork = settings.perTrackArtwork,
+                    reduceLyricsAnimation = reduceLyricsAnimation,
                     lyricsTextStyle = MaterialTheme.typography.headlineMedium
                         .copy(
                             fontSize = settings.lyricsFontSize,
@@ -616,6 +618,7 @@ fun ExpandedPlayer(
     lovedUris: Set<String>,
     onToggleLovedClick: (Track) -> Unit,
     perTrackArtwork: Boolean = false,
+    reduceLyricsAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -893,6 +896,7 @@ fun ExpandedPlayer(
                 containerColor = lyricsContainerColor,
                 contentColor = lyricsContentColor,
                 onSeekTo = onSeekTo,
+                reduceLyricsAnimation = reduceLyricsAnimation,
                 modifier = Modifier.fillMaxSize()
             )
         }

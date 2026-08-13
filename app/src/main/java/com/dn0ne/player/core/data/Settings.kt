@@ -58,6 +58,8 @@ class Settings(context: Context) {
 
     private val isScanModeInclusiveKey = "is-scan-mode-inclusive"
     private val ignoreShortTracksKey = "exclude-short-tracks"
+    private val ignoreSingleTrackAlbumsKey = "ignore-single-track-albums"
+    private val reduceLyricsAnimationKey = "reduce-lyrics-animation"
     private val scanMusicFolderKey = "scan-music-in-music"
     private val extraScanFoldersKey = "extra-scan-folders"
     private val excludedScanFoldersKey = "excluded-scan-folders"
@@ -425,6 +427,33 @@ class Settings(context: Context) {
         _isScanModeInclusive.update { value }
         with(sharedPreferences.edit()) {
             putBoolean(isScanModeInclusiveKey, value)
+            apply()
+        }
+    }
+
+    // Both settings below are exposed as flows rather than plain getters
+    // because they change what is already on screen - the Albums grid and the
+    // lyrics sheet have to react the moment the switch is flipped.
+    private val _ignoreSingleTrackAlbums = MutableStateFlow(
+        sharedPreferences.getBoolean(ignoreSingleTrackAlbumsKey, false)
+    )
+    val ignoreSingleTrackAlbums = _ignoreSingleTrackAlbums.asStateFlow()
+    fun updateIgnoreSingleTrackAlbums(value: Boolean) {
+        _ignoreSingleTrackAlbums.update { value }
+        with(sharedPreferences.edit()) {
+            putBoolean(ignoreSingleTrackAlbumsKey, value)
+            apply()
+        }
+    }
+
+    private val _reduceLyricsAnimation = MutableStateFlow(
+        sharedPreferences.getBoolean(reduceLyricsAnimationKey, false)
+    )
+    val reduceLyricsAnimation = _reduceLyricsAnimation.asStateFlow()
+    fun updateReduceLyricsAnimation(value: Boolean) {
+        _reduceLyricsAnimation.update { value }
+        with(sharedPreferences.edit()) {
+            putBoolean(reduceLyricsAnimationKey, value)
             apply()
         }
     }

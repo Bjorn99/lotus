@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Autorenew
 import androidx.compose.material.icons.rounded.Folder
@@ -162,6 +163,19 @@ fun MusicScanSettingsContent(
             onCheckedChange = {
                 ignoreShortTracks = it
                 settings.ignoreShortTracks = it
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        val ignoreSingleTrackAlbums by settings.ignoreSingleTrackAlbums.collectAsState()
+        SettingSwitch(
+            title = context.resources.getString(R.string.ignore_single_track_albums),
+            supportingText = context.resources
+                .getString(R.string.ignore_single_track_albums_explain),
+            icon = Icons.Rounded.Album,
+            isChecked = ignoreSingleTrackAlbums,
+            onCheckedChange = {
+                settings.updateIgnoreSingleTrackAlbums(it)
             },
             modifier = Modifier.fillMaxWidth()
         )

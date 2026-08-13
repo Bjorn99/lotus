@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 
 import androidx.compose.material.icons.rounded.DarkMode
@@ -134,6 +135,19 @@ fun LyricsSettings(
             onCheckedChange = {
                 settings.sidecarLyricsEnabled = it
                 sidecarLyricsEnabled = it
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        val reduceLyricsAnimation by settings.reduceLyricsAnimation.collectAsState()
+        SettingSwitch(
+            title = context.resources.getString(R.string.reduce_lyrics_animation),
+            supportingText = context.resources
+                .getString(R.string.reduce_lyrics_animation_explain),
+            icon = Icons.Rounded.Animation,
+            isChecked = reduceLyricsAnimation,
+            onCheckedChange = {
+                settings.updateReduceLyricsAnimation(it)
             },
             modifier = Modifier.fillMaxWidth()
         )

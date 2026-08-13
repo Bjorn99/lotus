@@ -95,6 +95,7 @@ fun LyricsSheet(
     contentColor: Color,
     onBackClick: () -> Unit,
     onSeekTo: (Long) -> Unit,
+    reduceLyricsAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -288,6 +289,7 @@ fun LyricsSheet(
                                                 }
                                             }
                                         },
+                                        reduceAnimation = reduceLyricsAnimation,
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 } else {
@@ -467,6 +469,7 @@ fun SyncedLyricsLine(
     style: TextStyle,
     onClick: () -> Unit,
     onBecomeCurrent: (textHeight: Float) -> Unit,
+    reduceAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val position by positionFlow.collectAsState(0)
@@ -508,27 +511,37 @@ fun SyncedLyricsLine(
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isCurrentLine) 1.05f else 1f,
+        targetValue = if (isCurrentLine && !reduceAnimation) 1.05f else 1f,
         label = "current-line-scale-animation"
     )
 
+    // Reduced mode keeps only the colour change: the current line brightens and
+    // the rest stay dimmed. The sweeping gradient, the glow and the 1.05x pulse
+    // are all drawn effects, so dropping them changes how the line looks without
+    // changing the space it takes - line positions and spacing are identical
+    // either way.
+    val lineStyle = if (reduceAnimation) {
+        style
+    } else {
+        style.copy(
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    color,
+                    color.copy(alpha = color.alpha / 2)
+                ),
+                startY = gradientOrigin - 10f,
+                endY = gradientOrigin + 10f
+            ),
+            shadow = Shadow(
+                color = localContentColor.copy(alpha = .5f),
+                blurRadius = if (isCurrentLine) progressFraction * 20f else 0f
+            )
+        )
+    }
+
     Text(
         text = line,
-        style = style
-            .copy(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        color,
-                        color.copy(alpha = color.alpha / 2)
-                    ),
-                    startY = gradientOrigin - 10f,
-                    endY = gradientOrigin + 10f
-                ),
-                shadow = Shadow(
-                    color = localContentColor.copy(alpha = .5f),
-                    blurRadius = if (isCurrentLine) progressFraction * 20f else 0f
-                )
-            ),
+        style = lineStyle,
         color = color,
         modifier = modifier
             .onGloballyPositioned {

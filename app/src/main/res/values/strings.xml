@@ -458,6 +458,10 @@
         <item quantity="one">%1$d play</item>
         <item quantity="other">%1$d plays</item>
     </plurals>
+    <string name="ignore_single_track_albums">Ignore single-track albums</string>
+    <string name="ignore_single_track_albums_explain">Hides albums that contain only one track from the Albums tab. The tracks stay in your library and remain searchable.</string>
+    <string name="reduce_lyrics_animation">Reduce lyrics animation</string>
+    <string name="reduce_lyrics_animation_explain">Turns off the sweep, glow, and zoom on the line being sung. It still brightens as it plays.</string>
     <string name="per_track_artwork">Per-track artwork</string>
     <string name="per_track_artwork_explain">When enabled, displays artwork embedded in each audio file instead of the album cover. Falls back to album art for tracks without embedded images.</string>
     <string name="playback_error_unsupported_format">This format can\'t be played on this device</string>
