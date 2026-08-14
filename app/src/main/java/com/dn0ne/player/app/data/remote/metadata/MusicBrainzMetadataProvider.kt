@@ -37,6 +37,65 @@ import com.dn0ne.player.core.util.getAppVersionName
 internal const val RELEASE_PATH = "release"
 internal const val RELEASE_GROUP_PATH = "release-group"
 
+// CoverArtArchive currently takes two hops to reach the image bytes
+// (coverartarchive.org -> archive.org -> a numbered archive.org CDN node).
+// Four leaves room for the chain to grow a hop without falling over, while
+// still ending a redirect loop quickly.
+internal const val MAX_COVER_ART_HOPS = 4
+
+// Every hop must land inside archive.org. This is the whole reason the app
+// follows redirects by hand instead of letting Ktor do it: Ktor would follow
+// wherever it was pointed, including off-site.
+internal val coverArtAllowedHosts = listOf("archive.org")
+
+/** What to do with a response while walking the cover-art redirect chain. */
+internal sealed interface CoverArtStep {
+    /** Terminal success — this response carries the image bytes. */
+    data object Read : CoverArtStep
+
+    /** Another validated hop to fetch. */
+    data class Follow(val url: String) : CoverArtStep
+
+    /** Terminal failure. */
+    data class Fail(val error: DataError.Network) : CoverArtStep
+}
+
+/**
+ * Decides the next move from one response in the cover-art chain.
+ *
+ * Pure, so the redirect policy — which statuses are hops, how many are
+ * allowed, and that *every* hop is host-checked rather than only the first —
+ * is testable without an HTTP engine. The bug this replaced was invisible to
+ * unit tests precisely because the policy lived inside the network call.
+ */
+internal fun nextCoverArtStep(
+    status: Int,
+    location: String?,
+    hopsUsed: Int,
+    maxHops: Int,
+    allowedHosts: List<String>,
+): CoverArtStep = when (status) {
+    200 -> CoverArtStep.Read
+
+    // 303 and 307/308 all appear in this chain depending on which archive.org
+    // tier answers; treat the whole redirect family alike.
+    301, 302, 303, 307, 308 -> {
+        if (hopsUsed >= maxHops) {
+            CoverArtStep.Fail(DataError.Network.Unknown)
+        } else {
+            when (val validated = validateCoverArtRedirect(location, allowedHosts)) {
+                is Result.Success -> CoverArtStep.Follow(validated.data)
+                is Result.Error -> CoverArtStep.Fail(validated.error)
+            }
+        }
+    }
+
+    400 -> CoverArtStep.Fail(DataError.Network.BadRequest)
+    404 -> CoverArtStep.Fail(DataError.Network.NotFound)
+    503 -> CoverArtStep.Fail(DataError.Network.ServiceUnavailable)
+    else -> CoverArtStep.Fail(DataError.Network.Unknown)
+}
+
 // Whether a failed release-level cover-art lookup is worth retrying against
 // the release-group.
 //
@@ -378,38 +437,66 @@ class MusicBrainzMetadataProvider(
         return fromRelease
     }
 
-    // A single CoverArtArchive "front image" request. Both the release and the
-    // release-group lookups go through here so they cannot drift apart: same
-    // redirect handling, same status mapping, same user agent. The group
-    // endpoint 307s to archive.org exactly as the release endpoint does, so
-    // the existing validated-redirect path covers it unchanged — no new host,
-    // no relaxation of the allow-list.
+    // A single CoverArtArchive "front image" request, followed to wherever the
+    // image actually lives. Both the release and the release-group lookups go
+    // through here so they cannot drift apart: same redirect handling, same
+    // status mapping, same user agent.
+    //
+    // Reaching the bytes takes more than one hop, which is what this used to
+    // get wrong:
+    //   coverartarchive.org/release/{id}/front -> 307 archive.org/download/...
+    //   archive.org/download/...               -> 302 dn######.ca.archive.org/...
+    //   dn######.ca.archive.org/...            -> 200 image
+    // Following only the first hop meant the second 302 fell through to
+    // "unknown error", so cover art never loaded at all — and the
+    // release-group fallback above it was equally unreachable.
     private suspend fun fetchCoverArtFront(
         entity: String,
         id: String,
     ): Result<ByteArray, DataError> {
-        // Acquired per request rather than per call, so the fallback is rate
-        // limited too instead of riding in free behind the first request.
+        // Acquired per request rather than per hop: the redirects go to
+        // archive.org, which is not what the MusicBrainz rate limit governs.
         rateLimiter.acquire()
 
-        val response = try {
-            client.get(coverArtArchiveEndpoint) {
-                url {
-                    appendPathSegments(entity, id, "front")
-                }
-                headers {
-                    append(HttpHeaders.UserAgent, userAgent)
-                }
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
-        }
+        // null means "the initial CoverArtArchive request"; every later pass
+        // carries an already-validated absolute URL.
+        var location: String? = null
+        var hopsUsed = 0
 
-        return when (response.status) {
-            HttpStatusCode.OK -> {
-                try {
+        while (true) {
+            val response = try {
+                if (location == null) {
+                    client.get(coverArtArchiveEndpoint) {
+                        url {
+                            appendPathSegments(entity, id, "front")
+                        }
+                        headers {
+                            append(HttpHeaders.UserAgent, userAgent)
+                        }
+                    }
+                } else {
+                    client.get(location) {
+                        headers {
+                            append(HttpHeaders.UserAgent, userAgent)
+                        }
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                return Result.Error(e.toNetworkError())
+            }
+
+            val step = nextCoverArtStep(
+                status = response.status.value,
+                location = response.headers[HttpHeaders.Location],
+                hopsUsed = hopsUsed,
+                maxHops = MAX_COVER_ART_HOPS,
+                allowedHosts = coverArtAllowedHosts,
+            )
+
+            when (step) {
+                is CoverArtStep.Read -> return try {
                     Result.Success(response.body<ByteArray>())
                 } catch (e: CancellationException) {
                     throw e
@@ -417,66 +504,19 @@ class MusicBrainzMetadataProvider(
                     Log.w(logTag, "Failed to read cover-art body", e)
                     Result.Error(DataError.Network.ParseError)
                 }
-            }
 
-            HttpStatusCode.TemporaryRedirect, HttpStatusCode.PermanentRedirect -> {
-                // CoverArtArchive 30x-redirects to its CDN (archive.org / S3)
-                // for the actual image bytes. The shared HttpClient has
-                // followRedirects = false as a defence-in-depth measure, so
-                // we follow this one redirect ourselves with explicit checks
-                // on the destination URL.
-                followCoverArtRedirect(response)
-            }
+                is CoverArtStep.Follow -> {
+                    location = step.url
+                    hopsUsed++
+                }
 
-            HttpStatusCode.BadRequest -> Result.Error(DataError.Network.BadRequest)
-            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
-            HttpStatusCode.ServiceUnavailable -> Result.Error(DataError.Network.ServiceUnavailable)
-            else -> Result.Error(DataError.Network.Unknown)
-        }
-    }
-
-    // Follows a single 30x from CoverArtArchive after validating the
-    // destination. Delegates to validateCoverArtRedirect for the allow-list
-    // check, then fetches the image from the validated URL.
-    // This is the only place in the app that follows a redirect — everywhere
-    // else uses the strict client default.
-    private suspend fun followCoverArtRedirect(
-        response: io.ktor.client.statement.HttpResponse,
-    ): Result<ByteArray, DataError> {
-        val validation = validateCoverArtRedirect(
-            location = response.headers[HttpHeaders.Location],
-            allowedHosts = listOf("archive.org"),
-        )
-        if (validation is Result.Error) {
-            Log.w(logTag, "CoverArtArchive redirect validation failed: ${validation.error}")
-            return Result.Error(validation.error)
-        }
-
-        val location = (validation as Result.Success).data
-
-        val final = try {
-            client.get(location) {
-                headers { append(HttpHeaders.UserAgent, userAgent) }
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
-        }
-
-        return when (final.status) {
-            HttpStatusCode.OK -> {
-                try {
-                    Result.Success(final.body<ByteArray>())
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Throwable) {
-                    Log.w(logTag, "Failed to read cover-art body after redirect", e)
-                    Result.Error(DataError.Network.ParseError)
+                is CoverArtStep.Fail -> {
+                    if (step.error == DataError.Network.Unknown) {
+                        Log.w(logTag, "cover-art hop $hopsUsed rejected: ${response.status}")
+                    }
+                    return Result.Error(step.error)
                 }
             }
-            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
-            else -> Result.Error(DataError.Network.Unknown)
         }
     }
 
@@ -514,13 +554,15 @@ class MusicBrainzMetadataProvider(
     }
 }
 
-// Extracted from followCoverArtRedirect so the allow-list logic can be
-// unit-tested without a Ktor engine. Validates the Location header of a
-// 30x response before we follow it — this is the only redirect path in
-// the app, so the validation must be strict.
+// Validates the Location header of a 30x response before we follow it, and is
+// kept separate from the network call so the allow-list logic can be unit
+// tested without a Ktor engine. Called from nextCoverArtStep on every hop, not
+// just the first — this is the only redirect path in the app, so the
+// validation must be strict.
 //
-// The IA node hostnames (ia800–ia905) are all subdomains of archive.org,
-// so the single "archive.org" entry covers them via the endsWith check.
+// The IA node hostnames (ia800–ia905, dn######.ca and friends) are all
+// subdomains of archive.org, so the single "archive.org" entry covers them via
+// the endsWith check.
 internal fun validateCoverArtRedirect(
     location: String?,
     allowedHosts: List<String>,
