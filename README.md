@@ -7,13 +7,9 @@
   
 </div>
 
-Lotus is a clean, offline-first music player with Material You design.
-This is a community continuation of [dn0ne's original app](https://github.com/dn0ne/lotus).
-I fell in love with Lotus because of what dn0ne built — the design, the
-feel, the attention to detail. When upstream development paused, I chose
-to maintain it so the app could keep going. All design, branding, and
-prior work are theirs. Application ID:
-`com.dn0ne.lotus.community`.
+Lotus is a clean, offline-first music player with Material You design. This is a community continuation of [dn0ne's original app](https://github.com/dn0ne/lotus).
+
+I fell in love with Lotus because of what dn0ne built — the design, the feel, the attention to detail. When upstream development paused, I chose to maintain it so the app could keep going. All design, branding, and prior work are theirs. Application ID: `com.dn0ne.lotus.community`.
 
 ## Screenshots
 
@@ -47,6 +43,7 @@ prior work are theirs. Application ID:
 - **Share track** — send any audio file via the Android share sheet
 - **Listening stats** — top played, top listened, recently played, per-artist breakdowns
 - Material You dynamic color palettes
+- **Available in English, Spanish, Simplified Chinese, Russian, and Ukrainian**
 - **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
 
 ## What sets this fork apart
@@ -91,24 +88,21 @@ Playlist sequencing as constrained optimisation is well-trodden ground: Pauws, V
 1. Pauws, Verhaegh & Vossen, "Music playlist generation by adapted simulated annealing" (2008), *Information Sciences* 178(3):647–662. [doi:10.1016/j.ins.2007.08.019](https://doi.org/10.1016/j.ins.2007.08.019)
 2. Altschul & Erickson, "Significance of nucleotide sequence alignments: a method for random sequence permutation that preserves dinucleotide and codon usage" (1985), *Mol Biol Evol* 2(6):526–538. [doi:10.1093/oxfordjournals.molbev.a040370](https://doi.org/10.1093/oxfordjournals.molbev.a040370) — Jiang, Anderson, Gillespie & Mayne, "uShuffle: a useful tool for shuffling biological sequences while preserving the k-let counts" (2008), *BMC Bioinformatics* 9:192. [doi:10.1186/1471-2105-9-192](https://doi.org/10.1186/1471-2105-9-192)
 
-Full version history in [CHANGELOG.md](CHANGELOG.md).
-
 ## Download
 
 [<img src="https://f-droid.org/badge/get-it-on.png"
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/com.dn0ne.lotus.community/)
 
-F-Droid is the recommended channel — auto-updates, signature verification, and no manual APK sideloading.
+F-Droid is the recommended channel — auto-updates, signature verification, and no manual APK sideloading. Tagged releases are also on the [releases page](https://github.com/Bjorn99/lotus/releases); if you sideload, take `universal` unless you know your device's architecture, and check the download against `SHA256SUMS.txt`.
 
-The original upstream build (different application ID) is also on
-[F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) — that is not produced by this fork.
+The original upstream build (different application ID) is also on [F-Droid](https://f-droid.org/packages/com.dn0ne.lotus) — that one is not produced by this fork.
+
+Full version history is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Support the original author
 
-This fork exists because of [dn0ne](https://github.com/dn0ne)'s work. If
-Lotus has been useful to you, consider thanking them on
-[Liberapay](https://en.liberapay.com/dn0ne/donate).
+This fork exists because of [dn0ne](https://github.com/dn0ne)'s work. If Lotus has been useful to you, consider thanking them on [Liberapay](https://en.liberapay.com/dn0ne/donate).
 
 ## Build
 
@@ -119,18 +113,28 @@ Lotus has been useful to you, consider thanking them on
 2. Open the project in Android Studio.
 3. Wait for Gradle sync, then click **Run** or press `Shift + F10`.
 
-Release builds are automated via CI — see [docs/RELEASING.md](docs/RELEASING.md)
-for the full process.
+Release builds are automated via CI — see [docs/RELEASING.md](docs/RELEASING.md) for the full process.
+
+## Contributors
+
+Lotus is kept going by people who file good bug reports, translate it, and send patches. Thank you.
+
+- **[@uhrfra](https://github.com/uhrfra)** — relative-path support in M3U playlist import, based on their [#73](https://github.com/Bjorn99/lotus/pull/73) and shipped in v1.8.0; on-device testing of the v1.8.2 fixes
+- **[@bxdxnn](https://github.com/bxdxnn)** — media notification icon ([#118](https://github.com/Bjorn99/lotus/pull/118)) and the track menu in global search ([#131](https://github.com/Bjorn99/lotus/pull/131))
+- **[@LunaticWolfOk-py](https://github.com/LunaticWolfOk-py)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
+- **[@MCfool](https://github.com/MCfool)** — Simplified Chinese translation ([#143](https://github.com/Bjorn99/lotus/issues/143))
+
+Translations are especially welcome, and you don't need Android tooling to write one — see [CONTRIBUTING.md](CONTRIBUTING.md#translations).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on bug reports, feature proposals, and pull requests.
+Bug reports, feature proposals, and pull requests are all welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow and what makes a report easy to act on.
 
 ## Credits
 
-Some UI elements inspired by [Vanilla](https://github.com/vanilla-music/vanilla).
+Lotus was created by [dn0ne](https://github.com/dn0ne). This fork carries their design and branding forward.
 
-Lyrics UI inspired by [Beautiful Lyrics](https://github.com/surfbryce/beautiful-lyrics).
+Some UI elements inspired by [Vanilla](https://github.com/vanilla-music/vanilla). Lyrics UI inspired by [Beautiful Lyrics](https://github.com/surfbryce/beautiful-lyrics).
 
 Libraries: [MaterialKolor](https://github.com/jordond/materialkolor), [kmpalette](https://github.com/jordond/kmpalette), [Reorderable](https://github.com/Calvin-LL/Reorderable), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger/src/master/).
 

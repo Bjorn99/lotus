@@ -4,6 +4,57 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.9.0
+
+Fetching artwork from MusicBrainz works again after being quietly broken since 1.5.0, `.opus` files can finally carry cover art without being damaged, shuffle has been rebuilt, and Lotus now speaks Spanish and Simplified Chinese.
+
+### Cover art and metadata
+
+The metadata search lives at a track's **⋮ menu → Track info → the pencil icon → Look for metadata**. It needs **Settings → Privacy → "Allow network lookups"** turned on, which is off by default.
+
+- **Cover art from a metadata search downloads again.** The artwork archive redirects twice before handing over the image, and since 1.5.0 Lotus followed only the first hop — so every attempt ended in a generic error. It broke as a side effect of the network hardening in that release, which turned off automatic redirects for good reasons; the hand-written replacement was simply one hop short. Redirects stay off, and every hop is still checked against an allow-list.
+- **Artwork falls back to the album when a specific pressing has none.** Not every individual release in the archive has an uploaded cover; Lotus now asks the album it belongs to before giving up.
+- **Search results are ranked and de-duplicated.** Official releases sort above bootlegs and compilations, and the same album no longer appears half a dozen times because it was pressed in six countries.
+- **Field searches actually work.** `artist:"Alter Bridge" AND recording:"Slip to the Void"` was being escaped into a literal string, so it matched nothing useful. The in-app search tips were also wrong on two counts and have been corrected — the quotes are what make `AND` work, and field names are not case-sensitive.
+- **MusicBrainz IDs are now saved.** When you apply a search result, its release, release-group and album-artist IDs are written to the file's tags. The code to do this already existed but nothing ever handed it the IDs.
+
+### OPUS files
+
+- **Cover art can now be saved to `.opus` files.** Lotus always offered artwork editing on them, but nothing behind the button could write it.
+- **Editing a tag on an `.opus` file no longer discards its artwork.** Tags in these files can span several pages, and Lotus only ever read the first one — so saving a title change rewrote the file without whatever came after that boundary, artwork included.
+- **Repeated tags survive a save.** Two artists credited on one track, or a front and back cover, used to collapse into one on every edit.
+- **The checksum Lotus wrote was wrong.** It used the standard zip-style CRC rather than the one the OGG container specifies, so every edited file carried a checksum a strict player can reject.
+- **Lyrics embedded in `.opus` files are read.** The library Lotus uses for tags cannot open these files at all, so their embedded lyrics were simply invisible. (#124)
+
+### Shuffle
+
+- **Smart Shuffle has been rebuilt.** Instead of drawing a random order and hoping it looks spread out, it now deals tracks out like cards — the artist with the most tracks first, one into every other slot — then makes a short pass of random swaps that keeps only the ones that don't make the order worse. Whenever a repeat-free order exists, the deal finds one. The polish that follows scores the queue as a whole, so on compilation-heavy libraries it can occasionally accept a single artist repeat in exchange for better album spacing; measured on randomised test libraries, that happened in under 1% of queues and never cost more than one repeat.
+
+### Playback
+
+- **A file that won't play now says so.** Lotus used to move on in silence when it hit something it couldn't decode, which looked identical to the app being broken. You now get a message naming the reason — unsupported format, unreadable file, or an unknown error. This does not add support for any new formats; ALAC and other unsupported codecs still won't play. (#127)
+
+### New settings
+
+- **Ignore single-track albums**, at **Settings → Music scan**. Hides albums holding only one track from the Albums tab. The tracks stay in your library and stay searchable. (#77)
+- **Reduce lyrics animation**, at **Settings → Lyrics**. Turns off the sweep, glow and zoom on the line being sung; it still brightens as it plays. (#108)
+
+### Global search
+
+- **Search results have the ⋮ menu now.** Tracks found through global search were the only ones in the app without it, so loving a song or adding it to a playlist meant closing the search and hunting the track down somewhere else. Thanks to [@bxdxnn](https://github.com/bxdxnn). (#131)
+
+### Languages
+
+Untranslated strings fall back to English one by one, so nothing appears blank.
+
+- **Spanish**, contributed by [@LunaticWolfOk-py](https://github.com/LunaticWolfOk-py). Covers all but ten strings, which were added during this release cycle. (#99, #138)
+- **Simplified Chinese**, contributed by [@MCfool](https://github.com/MCfool). Covers all but eight, same reason. (#143)
+
+### Fixes
+
+- **Fixed a crash when scrolling a playlist containing the same track twice.** Adding a track to a playlist more than once, or importing an M3U that listed one twice, would take the app down as soon as that list scrolled. (#130)
+- **The playlist title no longer slides under the top bar icons.** 1.8.3 fixed this for the buttons at the top of the list; this covers the remaining case, where dragging the bar slowly and releasing it — rather than flicking — parked it at a height where the title still overlapped. Large font sizes made it easier to hit. (#139)
+
 ## 1.8.3
 
 Lyrics get a clearer, more predictable resolution order, plus a crash fix, a fix for editing tags on large files, and a handful of smaller playback and interface fixes.
