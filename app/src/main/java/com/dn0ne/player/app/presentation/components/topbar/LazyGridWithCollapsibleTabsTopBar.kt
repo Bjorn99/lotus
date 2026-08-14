@@ -562,14 +562,15 @@ fun TabTitle(
     modifier: Modifier = Modifier
 ) {
     with(sharedTransitionScope) {
-        // No .width(IntrinsicSize.Min) here — that override forced the
-        // Column to full natural text width regardless of parent
-        // constraints, which defeats the dynamic .padding(start = ...,
-        // end = ...) on the caller side and lets long titles run under
-        // the button group. Without it, the padding-reduced constraint
-        // reaches the Text and TextOverflow.Ellipsis kicks in when
-        // natural width would overflow. TabRowTitle keeps
-        // IntrinsicSize.Min — pills there need to size to their own text.
+        // No intrinsic-width override here — one forced the Column to full
+        // natural text width regardless of parent constraints, which defeats
+        // the dynamic .padding(start = ..., end = ...) on the caller side and
+        // lets long titles run under the button group. Without it, the
+        // padding-reduced constraint reaches the Text and
+        // TextOverflow.Ellipsis kicks in when natural width would overflow.
+        // TabRowTitle is the opposite case — its pills must size to their own
+        // text, so it uses IntrinsicSize.Max. See the note there for why Max
+        // and not Min.
         Column(
             modifier = modifier
         ) {
@@ -606,9 +607,23 @@ fun TabRowTitle(
     modifier: Modifier = Modifier
 ) {
     with(sharedTransitionScope) {
+        // IntrinsicSize.Max, not Min. Min asks the text how narrow it could be
+        // if it were allowed to wrap at every legal break point. Latin only
+        // breaks at spaces and no tab name has one, so Min happened to equal
+        // the full word — but CJK breaks between almost any two characters, so
+        // Min collapsed to roughly ONE glyph. The Text below then received a
+        // one-glyph constraint with softWrap = false and maxLines = 1, could
+        // not fit even a two-character title like 歌单, and rendered nothing
+        // but the ellipsis: every tab in the row showed as "…".
+        //
+        // Max is the single-line unwrapped width, which is what "size the pill
+        // to its own text" actually means. It is identical to Min for the Latin
+        // titles, so nothing changes there. Keeping a definite width also keeps
+        // the fillMaxWidth() underline below matching the text — deleting the
+        // modifier outright would let that Box fill the whole row instead.
         Column(
             modifier = modifier
-                .width(IntrinsicSize.Min)
+                .width(IntrinsicSize.Max)
                 .heightIn(min = 60.dp)
                 .clickable(
                     interactionSource = remember {
