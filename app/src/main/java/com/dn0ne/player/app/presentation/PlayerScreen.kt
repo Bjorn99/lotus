@@ -1811,6 +1811,26 @@ fun MainPlayerScreen(
         onAlbumPlaylistClick = onAlbumPlaylistSelection,
         onArtistPlaylistClick = onArtistPlaylistSelection,
         onGenrePlaylistClick = onGenrePlaylistSelection,
+        lovedUris = lovedUris,
+        onToggleLovedClick = onToggleLovedClick,
+        onPlayNextClick = onPlayNextClick,
+        onAddToQueueClick = onAddToQueueClick,
+        onAddToPlaylistClick = { tracks ->
+            showGlobalSearch = false
+            onAddToPlaylistClick(tracks)
+        },
+        onViewTrackInfoClick = { track ->
+            showGlobalSearch = false
+            onViewTrackInfoClick(track)
+        },
+        onGoToAlbumClick = { track ->
+            showGlobalSearch = false
+            onGoToAlbumClick(track)
+        },
+        onGoToArtistClick = { track ->
+            showGlobalSearch = false
+            onGoToArtistClick(track)
+        },
         perTrackArtwork = perTrackArtwork,
     )
 
