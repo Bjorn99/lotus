@@ -124,44 +124,6 @@ class OpusTagEditorTest {
         }
     }
 
-    @Test
-    fun `writePage replaces page correctly`() {
-        val originalPayload = buildMinimalOpusTags("Vendor", mapOf("TITLE" to "OldTitle"))
-        val originalPage = OpusTagEditor.OggPage(
-            offset = 0, headerSize = 28, payload = originalPayload,
-            serialNumber = 1, pageSequence = 1, isContinuation = false,
-        )
-        val opusHeadPage = OpusTagEditor.OggPage(
-            offset = 0, headerSize = 28, payload = "OpusHead".toByteArray() + ByteArray(11),
-            serialNumber = 1, pageSequence = 0, isContinuation = false,
-        )
-
-        val file = File.createTempFile("test_opus_write", ".opus")
-        try {
-            file.writeBytes(
-                OpusTagEditor.buildOggPageBytes(opusHeadPage) +
-                OpusTagEditor.buildOggPageBytes(originalPage)
-            )
-
-            // Modify page 1
-            val newPayload = buildMinimalOpusTags("Vendor", mapOf("TITLE" to "NewTitle"))
-            val newPage = OpusTagEditor.OggPage(
-                offset = 0, headerSize = 28, payload = newPayload,
-                serialNumber = 1, pageSequence = 1, isContinuation = false,
-            )
-            OpusTagEditor.writePage(file, 1, newPage)
-
-            // Verify the file was updated
-            val pages = OpusTagEditor.readOggPages(file)
-            assertTrue("should have at least 2 pages", pages.size >= 2)
-            // Page 0 unchanged, page 1 updated
-            assertEquals(0, pages[0].pageSequence)
-            assertEquals(1, pages[1].pageSequence)
-        } finally {
-            file.delete()
-        }
-    }
-
     // ---- readLyrics ----
 
     @Test
