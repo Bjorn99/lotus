@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App name -->
+    <string name="app_name" translatable="false">Lotus</string>
+
+    <!-- Links -->
+    <!-- Lyrics provider link -->
+    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
+    <!-- Metadata provider link -->
+    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
+    <!-- Repository link -->
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
+
+    <!-- Common back button -->
+    <string name="back">返回</string>
+
+    <!-- Setup screens -->
+    <string name="get_started">开始使用</string>
+    <string name="permissions">权限</string>
+    <string name="audio">音频</string>
+    <string name="explain_audio_permission_requirement">Lotus 需要此权限才能为你播放美妙的音乐</string>
+    <string name="grant_permission">授予权限</string>
+    <string name="next">下一步</string>
+    <string name="grant_permission_in_settings">请在系统设置中授予相关权限</string>
+
+    <!-- Track metadata fields -->
+    <string name="title">歌曲名</string>
+    <string name="album">专辑</string>
+    <string name="artist">艺人</string>
+    <string name="genre">流派</string>
+    <string name="year">年份</string>
+    <string name="track_number">音轨号</string>
+    <string name="bitrate">比特率</string>
+    <string name="album_artist">专辑艺人</string>
+    <string name="duration">时长</string>
+    <string name="size">大小</string>
+    <string name="path">路径</string>
+    <string name="date_modified">修改日期</string>
+
+    <string name="unknown_title">未知歌曲</string>
+    <string name="unknown_album">未知专辑</string>
+    <string name="unknown_artist">未知艺人</string>
+    <string name="unknown_album_artist">未知专辑艺人</string>
+    <string name="unknown_genre">未知流派</string>
+    <string name="unknown_year">未知年份</string>
+    <string name="unknown_track_number">未知音轨号</string>
+    <string name="unknown_bitrate">未知比特率</string>
+    <string name="unknown">未知</string>
+
+    <!-- Track dropdown menu -->
+    <string name="track_menu_button">歌曲菜单按钮</string>
+    <string name="play_next">下一首播放</string>
+    <string name="add_to_queue">加入播放队列</string>
+    <string name="remove_from_playlist">从歌单中移除</string>
+    <string name="go_to_album">查看专辑</string>
+    <string name="go_to_artist">查看艺人</string>
+    <string name="share_track">分享</string>
+    <string name="search_library">搜索音乐库</string>
+    <string name="search_library_hint">搜索歌曲、专辑、艺人、流派和歌单</string>
+    <string name="search_no_results">没有找到结果</string>
+    <string name="export_m3u">导出为 M3U</string>
+    <string name="export_m3u_success">歌单已导出</string>
+    <string name="export_m3u_failure">无法导出歌单</string>
+
+    <!-- Smart playlists -->
+    <string name="smart_playlists">智能歌单</string>
+    <string name="smart_recently_added">最近添加</string>
+    <string name="smart_random_mix">随机混搭</string>
+    <string name="smart_loved">我喜欢的歌曲</string>
+    <string name="love_track">喜欢</string>
+    <string name="unlove_track">取消喜欢</string>
+
+    <!-- Backup -->
+    <string name="backup">备份</string>
+    <string name="backup_supporting_text">将你的歌单和喜欢的歌曲保存到你自己的文件中，方便日后恢复。</string>
+    <string name="backup_export">保存备份</string>
+    <string name="backup_import">从文件恢复</string>
+    <string name="backup_what_is_included">备份包含什么</string>
+    <string name="backup_what_is_included_body">包含你的歌单（名称及其中的歌曲）和你喜欢的歌曲。文件为纯 JSON 格式——你可以用任意文本编辑器打开，查看具体保存了哪些内容。应用设置、歌词缓存和崩溃日志不在备份范围内。</string>
+    <string name="backup_import_policy_title">恢复机制说明</string>
+    <string name="backup_import_policy_body">恢复采用增量方式。同名歌单会被保留，仅添加新歌单；喜欢的歌曲会进行合并；文件已从设备中移除的歌曲将被跳过。</string>
+    <string name="backup_import_confirm_title">从此文件恢复？</string>
+    <string name="backup_import_confirm_body">Lotus 将读取你选择的文件，并将其中的新内容添加到音乐库。设备上已有的数据不会被删除。</string>
+    <string name="backup_import_confirm_yes">恢复</string>
+    <string name="backup_export_success">已保存 %1$d 个歌单、%2$d 首喜欢的歌曲和 %3$d 条听歌统计记录。</string>
+    <string name="backup_export_failure">无法保存备份：%1$s</string>
+    <string name="backup_import_success">已添加 %1$d 个歌单，跳过 %2$d 个同名歌单，新增 %3$d 首喜欢的歌曲。有 %4$d 条记录未匹配到本地文件。</string>
+    <string name="backup_import_stats_added">已合并 %1$d 条听歌统计记录。</string>
+    <string name="backup_import_stats_skipped">听歌统计未导入（统计功能已关闭）。</string>
+    <string name="backup_import_failure">无法读取备份：%1$s</string>
+
+    <!-- Tabs' names -->
+    <string name="tracks">歌曲</string>
+    <string name="albums">专辑</string>
+    <string name="artists">艺人</string>
+    <string name="genres">流派</string>
+    <string name="playlists">歌单</string>
+    <string name="folders">文件夹</string>
+
+    <!-- Sorting dialog -->
+    <string name="sort_order">排序方式</string>
+    <string name="sort_ascending">升序排列</string>
+    <string name="sort_descending">降序排列</string>
+    <string name="track_count">歌曲数量</string>
+
+    <!-- Track search -->
+    <string name="close_track_search">关闭歌曲搜索</string>
+    <string name="track_search">歌曲搜索</string>
+
+    <!-- Scroll to buttons -->
+    <string name="scroll_to_top">回到顶部</string>
+    <string name="scroll_to_current_track">定位到当前歌曲</string>
+
+    <!-- Expanded player sheet -->
+    <string name="close_player_sheet">关闭播放器面板</string>
+    <string name="playback_mode_toggle">切换播放模式</string>
+    <string name="playback_mode_repeat">列表循环</string>
+    <string name="playback_mode_repeat_one">单曲循环</string>
+    <string name="playback_mode_shuffle">随机播放</string>
+    <string name="playback_mode_smart_shuffle">智能随机</string>
+    <string name="shuffle_mode_pure_activated">纯随机播放——真正的随机顺序</string>
+    <string name="shuffle_mode_smart_activated">智能随机——减少同一艺人的连续出现</string>
+    <string name="show_lyrics">显示歌词</string>
+    <string name="set_sleep_timer">设置定时关闭</string>
+    <string name="sleep_timer">定时关闭</string>
+    <string name="short_minutes">分钟</string>
+    <string name="stop_timer">停止</string>
+    <string name="start_timer">开始</string>
+    <string name="finish_current_track">播完当前歌曲</string>
+    <string name="tile_label_play">播放</string>
+    <string name="tile_label_pause">暂停</string>
+
+    <!-- Play queue -->
+    <string name="remove_from_queue">从队列中移除</string>
+    <string name="queue">播放队列</string>
+    <string name="show_queue">显示队列</string>
+
+    <!-- Track info screen -->
+    <string name="track_info">歌曲信息</string>
+    <string name="close_track_info_sheet">关闭歌曲信息面板</string>
+    <string name="look_for_metadata">查找元数据</string>
+    <string name="edit_manually">手动编辑</string>
+    <string name="back_to_track_info">返回歌曲信息</string>
+
+    <!-- Risks of metadata editing dialog -->
+    <string name="risks_of_metadata_editing">编辑元数据的风险</string>
+    <string name="risks_of_metadata_editing_explain">编辑元数据是一项强大功能，但有时也可能会出问题，音频文件的标签可能不会按预期方式表现。\n\n建议你在修改前先备份音频文件——小心驶得万年船！\n\n点击“接受”，即表示你确认对自己的文件负责、已完成必要的备份，并理解若出现意外情况我们不负连带责任。\n\n如果你不想继续，请点击“取消”。</string>
+    <string name="accept">接受</string>
+    <string name="cancel">取消</string>
+
+    <!-- Metadata search screen -->
+    <string name="search">搜索</string>
+    <string name="description">简介</string>
+    <string name="album_description">专辑简介</string>
+    <string name="no_description">暂无简介</string>
+    <string name="back_to_info_search">返回信息搜索</string>
+    <string name="search_menu">信息搜索下拉菜单</string>
+    <string name="search_results_provided_by">结果由 MusicBrainz 提供</string>
+
+    <string name="match_duration">匹配时长</string>
+    <string name="format_not_supported_for_writing">此文件格式不支持元数据编辑。</string>
+
+    <!-- Search tips dialog -->
+    <string name="got_it">知道了</string>
+    <string name="search_tips">搜索小技巧</string>
+    <string name="search_explain">我们使用 MusicBrainz 接口帮你查找歌曲信息。</string>
+    <string name="recipe_header">快速上手</string>
+    <string name="recipe_explain">为获得最准确的结果，请同时按艺人名和录音名进行搜索。字段名必须小写，运算符必须大写：</string>
+    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="quotes_explain_header">用引号精确匹配</string>
+    <string name="quotes_explain">使用引号可查找特定的词或短语：</string>
+    <string name="quotes_example_1">\"4:44\"</string>
+    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
+    <string name="field_explain_header">按字段搜索</string>
+    <string name="field_explain">你可以按艺人、专辑或录音（歌曲）名进行搜索：</string>
+    <string name="field_example_1">artist:\"Jay-Z\"</string>
+    <string name="field_example_2">release:\"Over You\"</string>
+    <string name="field_example_3">recording:\"Still Falling For You\"</string>
+    <string name="field_reference_header">字段参考</string>
+    <string name="field_reference_explain">artist: — 艺人或表演者名称\nrecording: — 歌曲或音轨标题（请使用此项，不要用 track:）\nrelease: — 专辑、EP 或单曲名称\n\n提示：track: 不是有效的 MusicBrainz 字段——查找歌曲名请使用 recording:。MusicBrainz 默认按录音标题搜索，因此你也可以不带字段前缀直接搜索。</string>
+    <string name="combine_explain_header">组合搜索</string>
+    <string name="combine_explain">使用 AND、OR、NOT（须大写）组合字段搜索。如果不加引号或字段前缀，这些词将被视为普通文本：</string>
+    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
+    <string name="mbid_lookup_header">MusicBrainz ID 查询</string>
+    <string name="mbid_lookup_explain">粘贴一个 MusicBrainz ID（UUID）即可查找到精确的录音，即使文本搜索失败也无妨：</string>
+    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
+    <string name="duration_toggle_header">时长匹配</string>
+    <string name="duration_toggle_explain">开启后，搜索结果会过滤出与你文件时长相差 ±15 秒以内的歌曲。如果找不到想要的内容，可从溢出菜单中关闭此功能。</string>
+
+    <!-- Search errors -->
+    <string name="unknown_error_occurred">发生未知错误，请重试。</string>
+    <string name="query_was_corrupted">查询已损坏，请重试。</string>
+    <string name="musicbrainz_server_error">MusicBrainz 出现错误，请重试。</string>
+    <string name="musicbrainz_is_unavailable">MusicBrainz 暂时不可用，请稍后再试。</string>
+    <string name="failed_to_parse_response">解析响应失败，请重试。</string>
+    <string name="no_internet">看起来你已离线，请连接网络后重试。</string>
+
+    <!-- Changes screen -->
+    <string name="changes">更改</string>
+    <string name="old_cover_art">原封面</string>
+    <string name="new_cover_art">新封面</string>
+    <string name="overwrite">覆盖</string>
+    <string name="select_fields_to_overwrite">选择要覆盖的字段：</string>
+    <string name="metadata_change_succeed">歌曲信息修改成功，几秒钟后生效。</string>
+    <string name="important_to_know">重要提示</string>
+    <string name="artwork_change_note">如果该歌曲所在专辑的封面已存在于你的设备上，则会使用该封面，与所选封面无关。</string>
+    <string name="cover_art_from_gallery_note">若要显示来自图库的封面，可能需要重启应用或设备。</string>
+
+    <!-- Changes errors -->
+    <string name="failed_to_load_cover_art_album_id_corrupted">加载封面失败，该录音的专辑 ID 似乎已损坏。</string>
+    <string name="cover_art_not_found">很遗憾，未找到该录音的封面。</string>
+    <string name="cover_art_archive_is_unavailable">加载封面失败。Cover Art Archive 暂时不可用，请稍后再试。</string>
+    <string name="failed_to_load_cover_art_request_timeout">3 分钟内未能加载封面，请检查网络后重试。</string>
+
+    <!-- Metadata writing errors -->
+    <string name="write_permission_denied">覆盖元数据失败，权限被拒绝，请重试。</string>
+    <string name="no_read_permission">没有读取权限，请授予权限后重试。</string>
+    <string name="no_write_permission">没有写入权限，请授予权限后重试。</string>
+    <string name="failed_to_read">读取文件失败，请重试。</string>
+    <string name="no_lyrics_found">未找到该歌曲的歌词</string>
+    <string name="failed_to_write">写入文件失败，请重试。</string>
+
+    <string name="select_items">选择</string>
+
+    <!-- Manual editing screen -->
+    <string name="edit">编辑</string>
+    <string name="pick_art">选择封面</string>
+    <string name="restore_art">恢复</string>
+    <string name="restore_tag">恢复标签值</string>
+
+    <!-- Lyrics control screen -->
+    <string name="lyrics_control">歌词管理</string>
+    <string name="lyrics_in_tag">标签中的歌词</string>
+    <string name="lyrics_in_tag_explain">存储在音频文件标签中的歌词</string>
+    <string name="lyrics_in_local_database">本地数据库中的歌词</string>
+    <string name="lyrics_in_local_database_explain">从标签复制、从 LRCLIB 获取或从文件导入的歌词，也就是歌词界面显示的内容</string>
+    <string name="lyrics_actions">歌词操作</string>
+    <string name="lyrics_tools_explained">用于管理或修改本地数据库中歌词的操作</string>
+    <string name="clear_db_entry">清除数据库条目</string>
+    <string name="copy_from_tag">从标签复制</string>
+    <string name="import_from_file">从文件导入</string>
+    <string name="write_to_tag">写入标签</string>
+    <string name="fetch_from_lrclib">从 LRCLIB 获取</string>
+    <string name="publish_on_lrclib">发布到 LRCLIB</string>
+    <string name="unable_to_publish">无法发布：未指定歌曲名、艺人或专辑。</string>
+    <string name="published_successfully">发布成功。</string>
+    <string name="solving_challenge">正在完成验证…</string>
+
+    <!-- Lyrics sheet -->
+    <string name="lyrics">歌词</string>
+    <string name="close_lyrics_sheet">关闭歌词面板</string>
+    <string name="loading_lyrics">正在加载歌词</string>
+    <string name="synced">同步</string>
+    <string name="plain">纯文本</string>
+
+    <!-- Lyrics screen errors -->
+    <string name="cant_look_for_lyrics_title_or_artist_is_missing">无法查找歌词，该歌曲未指定歌曲名或艺人。</string>
+    <string name="lyrics_not_found">很遗憾，找不到该歌曲的歌词。</string>
+    <string name="cant_find_lyrics">找不到歌词。</string>
+    <string name="lyrics_provided_by">歌词由 LRCLIB 提供</string>
+
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">已关闭随机播放，以便下一首播放此歌曲</string>
+
+    <!-- Playlists related -->
+    <string name="create_playlist">新建歌单</string>
+    <string name="add_to_playlist">添加到歌单</string>
+    <string name="back_to_add_to_playlist">返回添加到歌单</string>
+    <string name="name">名称</string>
+    <string name="new_playlist_title_placeholder">例如：我的收藏</string>
+    <string name="create">创建</string>
+    <string name="reorder_track">调整顺序</string>
+    <string name="delete_playlist">删除歌单</string>
+    <string name="rename_playlist">重命名歌单</string>
+    <string name="rename">重命名</string>
+    <string name="delete">删除</string>
+    <string name="delete_playlist_dialog_title">删除歌单？</string>
+    <string name="delete_playlist_dialog_text">此操作不会影响歌单中的歌曲文件。</string>
+    <string name="nothing_yet">还没有内容。</string>
+    <string name="unknown_folder">未知文件夹</string>
+    <string name="enable_list_view">切换为列表视图</string>
+    <string name="enable_grid_view">切换为网格视图</string>
+
+    <!-- Playlists errors -->
+    <string name="blank_playlist_name_error">请输入歌单名称。</string>
+    <string name="playlist_already_exists_error">该名称已被使用。</string>
+    <string name="track_is_already_on_playlist">该歌曲已在歌单中。</string>
+
+    <!-- Settings sheet -->
+    <string name="settings">设置</string>
+    <string name="close_settings_sheet">关闭设置面板</string>
+    <string name="theme">主题</string>
+    <string name="theme_supporting_text">外观、配色</string>
+    <string name="lyrics_supporting_text">字体设置、对齐方式、歌词文件夹</string>
+    <string name="lyrics_folder">歌词文件夹</string>
+    <string name="lyrics_folder_supporting_text">选择一个包含与音频文件同名的 .lrc 文件的文件夹。需要歌词时，应用会查找 &lt;同名>.lrc 文件。</string>
+    <string name="pick_lyrics_folder">选择歌词文件夹</string>
+    <string name="use_lyrics_folder">使用歌词文件夹</string>
+    <string name="use_lyrics_folder_explain">在所选文件夹中查找 .lrc 文件。关闭后仅使用内嵌和下载的歌词。</string>
+    <string name="playback">播放</string>
+    <string name="playback_supporting_text">音频焦点、均衡器</string>
+    <string name="about_app">关于应用</string>
+    <string name="about_explain">版本、代码仓库、反馈</string>
+    <string name="music_scan">音乐扫描</string>
+    <string name="music_scan_supporting_text">过滤模式、文件夹管理、扫描</string>
+    <string name="privacy">隐私</string>
+    <string name="privacy_supporting_text">哪些数据会离开你的设备、网络控制</string>
+    <string name="network_lookups">允许联网查询</string>
+    <string name="network_lookups_explain">LRCLIB 歌词和 MusicBrainz 元数据的总开关。关闭后进入严格离线模式——其余功能仍可正常使用本地音乐库。</string>
+    <string name="track_play_stats">记录听歌统计</string>
+    <string name="track_play_stats_explain">统计你播放和跳过歌曲的次数，以及每首歌的收听时长。数据仅保存在本设备。关闭后会清除现有统计数据。</string>
+
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">哪些数据会离开你的设备</string>
+    <string name="privacy_what_stays">哪些数据仅留在你的设备</string>
+    <string name="privacy_lrclib_title">LRCLIB（lrclib.net）</string>
+    <string name="privacy_lrclib_body">发送内容：歌曲名、艺人、专辑（如已知）和时长。查询时：当你打开某首未缓存歌词的歌曲的歌词界面时发送。发布时：当你在歌词管理面板明确点击“发布到 LRCLIB”时发送。关闭联网查询后，这两条路径均不会激活。</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz（musicbrainz.org、coverartarchive.org）</string>
+    <string name="privacy_musicbrainz_body">发送内容：你输入的搜索词以及歌曲时长。用于查找匹配的发行版以获取封面和元数据。仅当你在“歌曲信息 → 搜索”界面点击搜索时发送——绝不会自动发送。</string>
+    <string name="privacy_local_title">本地数据</string>
+    <string name="privacy_local_body">歌词缓存、音乐扫描结果、应用设置和崩溃日志均保存在本设备。分享崩溃日志是通过系统分享面板手动完成的——不会自行发送任何内容。</string>
+    <string name="privacy_no_telemetry_title">不收集遥测数据</string>
+    <string name="privacy_no_telemetry_body">没有分析、没有使用情况追踪、没有诊断上传。上述域名即为全部网络出口。</string>
+
+    <!-- Theme settings -->
+    <string name="appearance">外观</string>
+    <string name="appearance_system">跟随系统</string>
+    <string name="appearance_light">浅色</string>
+    <string name="appearance_dark">深色</string>
+
+    <string name="palette_style">配色风格</string>
+    <string name="palette_tonal_spot">同色调</string>
+    <string name="palette_neutral">中性色</string>
+    <string name="palette_vibrant">鲜艳</string>
+    <string name="palette_expressive">表现力</string>
+    <string name="palette_rainbow">彩虹</string>
+    <string name="palette_fruit_salad">水果沙拉</string>
+    <string name="palette_monochrome">单色</string>
+    <string name="palette_fidelity">忠于原色</string>
+    <string name="palette_content">内容色</string>
+
+    <string name="black_theme">纯黑主题</string>
+    <string name="black_theme_explain">让深色主题更加纯粹深邃</string>
+    <string name="use_system_key_colors">系统配色</string>
+    <string name="use_system_key_colors_explain">使用系统强调色</string>
+    <string name="use_album_art_color">专辑封面色</string>
+    <string name="use_album_art_color_explain">使用当前歌曲封面的主色调</string>
+
+    <!-- Playback settings -->
+    <string name="audio_focus">音频焦点</string>
+    <string name="audio_focus_explain">当其他应用需要播放音频时暂停播放</string>
+    <string name="changes_will_take_effect_on_next_launch">更改将在下次启动应用时生效。</string>
+    <string name="equalizer">均衡器</string>
+    <string name="equalizer_explain">手动调节音效</string>
+    <string name="jump_to_beginning">从头播放</string>
+    <string name="jump_to_beginning_explain">首次按下上一曲按钮时重新播放当前歌曲</string>
+
+    <!-- Tabs settings -->
+    <string name="tabs">标签页</string>
+    <string name="tabs_supporting_text">默认标签页和顺序</string>
+    <string name="default_tab_and_order">默认标签页和顺序</string>
+    <string name="reorder_tab">调整标签页顺序</string>
+
+    <!-- Playlists settings -->
+    <string name="filter_instead_of_search">用筛选代替搜索</string>
+    <string name="filter_instead_of_search_explain">用筛选替代歌单搜索</string>
+    <string name="playlists_supporting_text">搜索框、导入</string>
+    <string name="filter">筛选</string>
+    <string name="import_playlist">导入歌单</string>
+    <string name="import_playlist_explain">从 M3U 文件添加歌单</string>
+    <string name="imported_successfully">已导入 %1$d 首歌曲。</string>
+    <string name="m3u_imported_partial">已导入 %2$d 首中的 %1$d 首（%3$d 首未找到）。</string>
+    <string name="m3u_no_tracks_found">在设备上未找到歌单中的歌曲。</string>
+    <string name="m3u_import_empty">歌单文件中不包含任何歌曲。</string>
+
+    <!-- Lyrics settings -->
+    <string name="dark_theme_for_lyrics">歌词深色主题</string>
+    <string name="dark_theme_for_lyrics_explain">即使当前为浅色模式，也对歌词界面应用深色主题</string>
+    <string name="lyrics_preview_string">这一行非常非常非常长的文字，用于展示当前设置下歌词界面中歌词的显示效果</string>
+    <string name="font_size">字号</string>
+    <string name="font_weight">字重</string>
+    <string name="line_height">行高</string>
+    <string name="letter_spacing">字间距</string>
+    <string name="alignment">对齐方式</string>
+    <string name="start">左对齐</string>
+    <string name="center">居中</string>
+    <string name="end">右对齐</string>
+    <string name="reset">重置</string>
+
+    <!-- Music scan settings -->
+    <string name="include_music_folder">包含音乐文件夹</string>
+    <string name="include_music_folder_explain">显示默认音乐文件夹中的音乐</string>
+    <string name="included_folders">已包含的文件夹</string>
+    <string name="pick_folder_to_include_in_scanning">选择要加入扫描的文件夹</string>
+    <string name="remove_folder_from_included_in_scanning">从扫描中移除该文件夹</string>
+    <string name="folders_with_audio">含音频的文件夹</string>
+    <string name="include_folder_in_scanning">将文件夹加入扫描</string>
+    <string name="scan_for_folders_with_audio">扫描含音频的文件夹</string>
+    <string name="filter_mode">过滤模式</string>
+    <string name="filter_mode_explain">仅显示指定文件夹中的音乐，或显示除指定文件夹外的全部音乐</string>
+    <string name="inclusive">包含模式</string>
+    <string name="exclusive">排除模式</string>
+    <string name="excluded_folders">已排除的文件夹</string>
+    <string name="pick_folder_to_exclude_from_scanning">选择要排除的文件夹</string>
+    <string name="remove_folder_from_excluded_from_scanning">从排除列表中移除该文件夹</string>
+    <string name="exclude_folder_from_scanning">将文件夹排除出扫描</string>
+    <string name="scanned_successfully">扫描成功</string>
+    <string name="refresh_on_app_launch">启动时刷新</string>
+    <string name="refresh_on_app_launch_explain">应用启动时刷新 MediaStore 中的数据</string>
+    <string name="refresh">刷新 MediaStore</string>
+    <string name="refresh_explain">刷新 MediaStore 中已有的数据</string>
+    <string name="scan_folder">扫描文件夹</string>
+    <string name="scan_folder_explain">扫描音频文件夹，将新数据加入 MediaStore</string>
+    <string name="failed_to_scan">扫描失败</string>
+    <string name="nothing_to_refresh">没有可刷新的内容</string>
+    <string name="refreshed_successfully">刷新成功</string>
+    <string name="failed_to_refresh">刷新失败</string>
+    <string name="ignore_short_tracks">忽略短歌曲</string>
+    <string name="ignore_short_tracks_explain">不显示时长少于 30 秒的歌曲</string>
+
+    <!-- About screen -->
+    <string name="repo">代码仓库</string>
+    <string name="repo_explain">查看项目源码仓库</string>
+    <string name="feedback">反馈</string>
+    <string name="feedback_explain">联系我们提出建议或反馈问题</string>
+
+    <!-- Open a track with "Open with..." dialog -->
+    <string name="track_is_not_found_in_media_store">很遗憾，播放器无法播放此歌曲。可能是因为它位于未加入扫描的文件夹中。</string>
+
+    <string name="copy_error">复制错误</string>
+    <string name="select_all">全选</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">分享上一次崩溃日志</string>
+    <string name="share_crash_log_explain">提交 Bug 时请附上此文件。崩溃日志仅保存在你的设备上。</string>
+    <string name="no_crash_log_available">本设备没有崩溃日志</string>
+    <string name="share_crash_log_subject">Lotus 崩溃报告</string>
+
+    <!-- Listening stats screen -->
+    <string name="stats_title">听歌统计</string>
+    <string name="stats_supporting_text">最常播放、最常收听、最近播放、热门艺人</string>
+    <string name="stats_summary_title">总体</string>
+    <string name="stats_summary_total_time">累计收听时长</string>
+    <string name="stats_summary_plays_skips">播放 / 跳过</string>
+    <string name="stats_summary_plays_skips_value">%1$d / %2$d</string>
+    <string name="stats_summary_tracks">有统计数据的歌曲</string>
+    <string name="stats_section_most_played">最常播放</string>
+    <string name="stats_section_most_listened">最常收听</string>
+    <string name="stats_section_recently_played">最近播放</string>
+    <string name="stats_section_top_artists">热门艺人</string>
+    <string name="stats_disabled_title">听歌统计已关闭</string>
+    <string name="stats_disabled_body">已在 设置 → 隐私 中关闭统计。重新开启后即可恢复播放和跳过的计数。</string>
+    <string name="stats_disabled_action">打开隐私设置</string>
+    <string name="stats_empty_title">暂无内容</string>
+    <string name="stats_empty_body">播放几首歌曲并超过半程，它们就会出现在这里。</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$d 次播放</item>
+        <item quantity="other">%1$d 次播放</item>
+    </plurals>
+    <string name="per_track_artwork">单曲封面</string>
+    <string name="per_track_artwork_explain">开启后，显示每个音频文件内嵌的封面，而非专辑封面。对于未内嵌图片的歌曲，将回退使用专辑封面。</string>
+</resources>
