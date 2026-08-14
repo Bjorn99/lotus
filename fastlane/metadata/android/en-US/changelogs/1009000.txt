@@ -1,0 +1,12 @@
+Lotus 1.9.0
+
+Cover art from MusicBrainz downloads again, after being broken since 1.5.0. OPUS files can now carry cover art, and editing tags no longer throws it away.
+
+Also:
+- Now in Spanish and Simplified Chinese
+- Smart Shuffle rebuilt to spread artists out
+- Unplayable files say why instead of failing silently
+- MusicBrainz results ranked and de-duplicated
+- Ignore single-track albums; reduce lyrics animation
+- Track menu in global search
+- Fixed a crash on playlists holding a track twice
