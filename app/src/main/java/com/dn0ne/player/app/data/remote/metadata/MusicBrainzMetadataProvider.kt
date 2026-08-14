@@ -23,6 +23,7 @@ import com.dn0ne.player.core.util.RateLimiter
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonPrimitive
 import java.io.IOException
 import java.net.SocketException
 import java.net.UnknownHostException
@@ -31,10 +32,97 @@ import javax.net.ssl.SSLException
 import com.dn0ne.player.R
 import com.dn0ne.player.core.util.getAppVersionName
 
+// CoverArtArchive path prefixes. Named so the two lookups can't be mistyped
+// into each other at the call site.
+internal const val RELEASE_PATH = "release"
+internal const val RELEASE_GROUP_PATH = "release-group"
+
+// CoverArtArchive currently takes two hops to reach the image bytes
+// (coverartarchive.org -> archive.org -> a numbered archive.org CDN node).
+// Four leaves room for the chain to grow a hop without falling over, while
+// still ending a redirect loop quickly.
+internal const val MAX_COVER_ART_HOPS = 4
+
+// Every hop must land inside archive.org. This is the whole reason the app
+// follows redirects by hand instead of letting Ktor do it: Ktor would follow
+// wherever it was pointed, including off-site.
+internal val coverArtAllowedHosts = listOf("archive.org")
+
+/** What to do with a response while walking the cover-art redirect chain. */
+internal sealed interface CoverArtStep {
+    /** Terminal success — this response carries the image bytes. */
+    data object Read : CoverArtStep
+
+    /** Another validated hop to fetch. */
+    data class Follow(val url: String) : CoverArtStep
+
+    /** Terminal failure. */
+    data class Fail(val error: DataError.Network) : CoverArtStep
+}
+
+/**
+ * Decides the next move from one response in the cover-art chain.
+ *
+ * Pure, so the redirect policy — which statuses are hops, how many are
+ * allowed, and that *every* hop is host-checked rather than only the first —
+ * is testable without an HTTP engine. The bug this replaced was invisible to
+ * unit tests precisely because the policy lived inside the network call.
+ */
+internal fun nextCoverArtStep(
+    status: Int,
+    location: String?,
+    hopsUsed: Int,
+    maxHops: Int,
+    allowedHosts: List<String>,
+): CoverArtStep = when (status) {
+    200 -> CoverArtStep.Read
+
+    // 303 and 307/308 all appear in this chain depending on which archive.org
+    // tier answers; treat the whole redirect family alike.
+    301, 302, 303, 307, 308 -> {
+        if (hopsUsed >= maxHops) {
+            CoverArtStep.Fail(DataError.Network.Unknown)
+        } else {
+            when (val validated = validateCoverArtRedirect(location, allowedHosts)) {
+                is Result.Success -> CoverArtStep.Follow(validated.data)
+                is Result.Error -> CoverArtStep.Fail(validated.error)
+            }
+        }
+    }
+
+    400 -> CoverArtStep.Fail(DataError.Network.BadRequest)
+    404 -> CoverArtStep.Fail(DataError.Network.NotFound)
+    503 -> CoverArtStep.Fail(DataError.Network.ServiceUnavailable)
+    else -> CoverArtStep.Fail(DataError.Network.Unknown)
+}
+
+// Whether a failed release-level cover-art lookup is worth retrying against
+// the release-group.
+//
+// ONLY a 404 qualifies. A 404 means "this pressing has no uploaded art", which
+// a sibling release in the same album may well have. Every other failure —
+// timeout, no internet, 503, a parse failure on the body — says nothing about
+// the group's art and would just spend a second request to fail the same way,
+// so those propagate unchanged. Kept pure and separate from the Ktor call so
+// the branch can be tested without an HTTP engine.
+internal fun shouldRetryWithReleaseGroup(
+    error: DataError,
+    releaseGroupId: String?,
+): Boolean = error == DataError.Network.NotFound && !releaseGroupId.isNullOrBlank()
+
 internal val MBID_REGEX =
     Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 internal val LUCENE_SPECIAL =
     Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^\"~*?:\\\\/])")
+// The same set minus ':' and '"'. A structured query is built out of exactly
+// those two characters, so escaping them is what silently broke field search:
+// `artist:"Chevelle"` went out as `artist\:\"Chevelle\"`, which is not a field
+// query at all but the literal words `artist` and `Chevelle`. That both loses
+// the field restriction and drags in every recording containing the word
+// "artist". Everything else is still escaped, so a stray brace or tilde can't
+// reach the parser.
+internal val LUCENE_SPECIAL_STRUCTURED =
+    Regex("(&&|\\|\\||[+\\-!(){}\\[\\]^~*?\\\\/])")
 // Lucene word-level boolean operators — uppercase only, must be
 // standalone tokens (word-boundary delimited). Lowercasing them
 // preserves the user's intent while preventing Lucene from
@@ -48,32 +136,42 @@ internal fun escapeLuceneQuery(query: String): String {
     return query.replace(LUCENE_SPECIAL, "\\\\$1")
 }
 
+// Escapes everything [escapeLuceneQuery] does except the two characters that
+// carry structure. Only ever applied to a query that passed
+// [hasStructuredSyntax].
+internal fun escapeStructuredQuery(query: String): String {
+    return query.replace(LUCENE_SPECIAL_STRUCTURED, "\\\\$1")
+}
+
+// Whether the user is writing a structured query rather than plain text.
+//
+// A double quote is the signal, but only a BALANCED pair can be parsed. An odd
+// count means a stray quote — someone typing an inch mark or a smart-quote
+// mismatch — and handing that to Lucene unescaped earns a 400 and a "query was
+// corrupted" snackbar. Those fall back to the plain-text path, where the quote
+// is escaped and the search still works.
+internal fun hasStructuredSyntax(query: String): Boolean {
+    val quotes = query.count { it == '"' }
+    return quotes >= 2 && quotes % 2 == 0
+}
+
 // Normalizes a user query for MusicBrainz Lucene search.
 //
 // Two paths:
-// 1. Plain text (no quotes, no field: syntax) — escape special chars
-//    AND lowercase AND/OR/NOT.  "Roses AND Thorns" → literal "and".
-// 2. Lucene syntax (quotes present) — the user is writing a structured
-//    query.  Lowercase field names (Artist: → artist:) and escape
-//    special chars, but preserve AND/OR/NOT as boolean operators.
-private fun normalizeQuery(query: String): String {
-    val hasLuceneSyntax = HAS_LUCENE_SYNTAX.containsMatchIn(query)
-
-    val withNormalizedFields = if (hasLuceneSyntax) {
-        query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
-    } else {
-        query
-    }
-
-    // Always escape Lucene special characters
-    val escaped = escapeLuceneQuery(withNormalizedFields)
-
-    return if (hasLuceneSyntax) {
-        // User is writing explicit Lucene — preserve AND/OR/NOT as operators
-        escaped
+// 1. Plain text (no balanced quotes) — escape every special char AND lowercase
+//    AND/OR/NOT.  "Roses AND Thorns" → literal "and".
+// 2. Structured (balanced quotes present) — the user is writing Lucene.
+//    Lowercase field names (Artist: → artist:) so capitalisation doesn't
+//    matter, keep ':' and '"' intact so the query stays a query, and preserve
+//    AND/OR/NOT as boolean operators.
+internal fun normalizeQuery(query: String): String {
+    return if (hasStructuredSyntax(query)) {
+        escapeStructuredQuery(
+            query.replace(FIELD_NORMALIZE) { it.value.lowercase() }
+        )
     } else {
         // Plain text — AND/OR/NOT are likely literal words, lowercase them
-        escaped.replace(AND_OR_NOT) { it.value.lowercase() }
+        escapeLuceneQuery(query).replace(AND_OR_NOT) { it.value.lowercase() }
     }
 }
 
@@ -263,7 +361,16 @@ class MusicBrainzMetadataProvider(
                 url {
                     appendPathSegments("recording", mbid)
                     parameters.append("fmt", "json")
-                    parameters.append("inc", "artist-credits releases media")
+                    // "release-groups" is NOT implied by "releases": on the
+                    // lookup endpoint each linked entity needs its own inc
+                    // token. Without it every release comes back with a null
+                    // release-group, which would silently disable both the
+                    // de-dup below and the cover-art group fallback for any
+                    // track matched by MBID. Same request, no extra call.
+                    parameters.append(
+                        "inc",
+                        "artist-credits releases release-groups media"
+                    )
                 }
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json.toString())
@@ -302,107 +409,114 @@ class MusicBrainzMetadataProvider(
         }
     }
 
+    // Cover art, with a release-group fallback.
+    //
+    // CoverArtArchive coverage is per-RELEASE, but a library holds one
+    // particular pressing. Asking only for `release/{id}/front` therefore 404s
+    // constantly on regional pressings and remasters whose album plainly does
+    // have art uploaded against a sibling release. `release-group/{id}/front`
+    // returns the group's representative front image and succeeds whenever ANY
+    // release in the album has one, so it is a far larger hit set.
+    //
+    // Order matters: the release-specific image is tried FIRST because it is
+    // the art for the exact pressing the user holds; the group image is only a
+    // fallback for when that doesn't exist.
     override suspend fun getCoverArtBytes(searchResult: MetadataSearchResult): Result<ByteArray, DataError> {
-        rateLimiter.acquire()
-        val response = try {
-            client.get(coverArtArchiveEndpoint) {
-                url {
-                    appendPathSegments(
-                        "release",
-                        searchResult.albumId,
-                        "front"
-                    )
-                }
-                headers {
-                    append(HttpHeaders.UserAgent, userAgent)
-                }
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
+        val fromRelease = fetchCoverArtFront(RELEASE_PATH, searchResult.albumId)
+        if (fromRelease is Result.Success) return fromRelease
+
+        val releaseGroupId = searchResult.releaseGroupId
+        if (fromRelease is Result.Error &&
+            releaseGroupId != null &&
+            shouldRetryWithReleaseGroup(fromRelease.error, releaseGroupId)
+        ) {
+            Log.d(logTag, "no cover art for release; trying release-group")
+            return fetchCoverArtFront(RELEASE_GROUP_PATH, releaseGroupId)
         }
 
-        when (response.status) {
-            HttpStatusCode.OK -> {
-                try {
-                    val bytes = response.body<ByteArray>()
-                    return Result.Success(bytes)
+        return fromRelease
+    }
+
+    // A single CoverArtArchive "front image" request, followed to wherever the
+    // image actually lives. Both the release and the release-group lookups go
+    // through here so they cannot drift apart: same redirect handling, same
+    // status mapping, same user agent.
+    //
+    // Reaching the bytes takes more than one hop, which is what this used to
+    // get wrong:
+    //   coverartarchive.org/release/{id}/front -> 307 archive.org/download/...
+    //   archive.org/download/...               -> 302 dn######.ca.archive.org/...
+    //   dn######.ca.archive.org/...            -> 200 image
+    // Following only the first hop meant the second 302 fell through to
+    // "unknown error", so cover art never loaded at all — and the
+    // release-group fallback above it was equally unreachable.
+    private suspend fun fetchCoverArtFront(
+        entity: String,
+        id: String,
+    ): Result<ByteArray, DataError> {
+        // Acquired per request rather than per hop: the redirects go to
+        // archive.org, which is not what the MusicBrainz rate limit governs.
+        rateLimiter.acquire()
+
+        // null means "the initial CoverArtArchive request"; every later pass
+        // carries an already-validated absolute URL.
+        var location: String? = null
+        var hopsUsed = 0
+
+        while (true) {
+            val response = try {
+                if (location == null) {
+                    client.get(coverArtArchiveEndpoint) {
+                        url {
+                            appendPathSegments(entity, id, "front")
+                        }
+                        headers {
+                            append(HttpHeaders.UserAgent, userAgent)
+                        }
+                    }
+                } else {
+                    client.get(location) {
+                        headers {
+                            append(HttpHeaders.UserAgent, userAgent)
+                        }
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                return Result.Error(e.toNetworkError())
+            }
+
+            val step = nextCoverArtStep(
+                status = response.status.value,
+                location = response.headers[HttpHeaders.Location],
+                hopsUsed = hopsUsed,
+                maxHops = MAX_COVER_ART_HOPS,
+                allowedHosts = coverArtAllowedHosts,
+            )
+
+            when (step) {
+                is CoverArtStep.Read -> return try {
+                    Result.Success(response.body<ByteArray>())
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Throwable) {
                     Log.w(logTag, "Failed to read cover-art body", e)
-                    return Result.Error(DataError.Network.ParseError)
-                }
-            }
-
-            HttpStatusCode.TemporaryRedirect, HttpStatusCode.PermanentRedirect -> {
-                // CoverArtArchive 30x-redirects to its CDN (archive.org / S3)
-                // for the actual image bytes. The shared HttpClient has
-                // followRedirects = false as a defence-in-depth measure, so
-                // we follow this one redirect ourselves with explicit checks
-                // on the destination URL.
-                return followCoverArtRedirect(response)
-            }
-
-            HttpStatusCode.BadRequest -> {
-                return Result.Error(DataError.Network.BadRequest)
-            }
-
-            HttpStatusCode.NotFound -> {
-                return Result.Error(DataError.Network.NotFound)
-            }
-
-            HttpStatusCode.ServiceUnavailable -> {
-                return Result.Error(DataError.Network.ServiceUnavailable)
-            }
-
-            else -> return Result.Error(DataError.Network.Unknown)
-        }
-    }
-
-    // Follows a single 30x from CoverArtArchive after validating the
-    // destination. Delegates to validateCoverArtRedirect for the allow-list
-    // check, then fetches the image from the validated URL.
-    // This is the only place in the app that follows a redirect — everywhere
-    // else uses the strict client default.
-    private suspend fun followCoverArtRedirect(
-        response: io.ktor.client.statement.HttpResponse,
-    ): Result<ByteArray, DataError> {
-        val validation = validateCoverArtRedirect(
-            location = response.headers[HttpHeaders.Location],
-            allowedHosts = listOf("archive.org"),
-        )
-        if (validation is Result.Error) {
-            Log.w(logTag, "CoverArtArchive redirect validation failed: ${validation.error}")
-            return Result.Error(validation.error)
-        }
-
-        val location = (validation as Result.Success).data
-
-        val final = try {
-            client.get(location) {
-                headers { append(HttpHeaders.UserAgent, userAgent) }
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Throwable) {
-            return Result.Error(e.toNetworkError())
-        }
-
-        return when (final.status) {
-            HttpStatusCode.OK -> {
-                try {
-                    Result.Success(final.body<ByteArray>())
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Throwable) {
-                    Log.w(logTag, "Failed to read cover-art body after redirect", e)
                     Result.Error(DataError.Network.ParseError)
                 }
+
+                is CoverArtStep.Follow -> {
+                    location = step.url
+                    hopsUsed++
+                }
+
+                is CoverArtStep.Fail -> {
+                    if (step.error == DataError.Network.Unknown) {
+                        Log.w(logTag, "cover-art hop $hopsUsed rejected: ${response.status}")
+                    }
+                    return Result.Error(step.error)
+                }
             }
-            HttpStatusCode.NotFound -> Result.Error(DataError.Network.NotFound)
-            else -> Result.Error(DataError.Network.Unknown)
         }
     }
 
@@ -440,13 +554,15 @@ class MusicBrainzMetadataProvider(
     }
 }
 
-// Extracted from followCoverArtRedirect so the allow-list logic can be
-// unit-tested without a Ktor engine. Validates the Location header of a
-// 30x response before we follow it — this is the only redirect path in
-// the app, so the validation must be strict.
+// Validates the Location header of a 30x response before we follow it, and is
+// kept separate from the network call so the allow-list logic can be unit
+// tested without a Ktor engine. Called from nextCoverArtStep on every hop, not
+// just the first — this is the only redirect path in the app, so the
+// validation must be strict.
 //
-// The IA node hostnames (ia800–ia905) are all subdomains of archive.org,
-// so the single "archive.org" entry covers them via the endsWith check.
+// The IA node hostnames (ia800–ia905, dn######.ca and friends) are all
+// subdomains of archive.org, so the single "archive.org" entry covers them via
+// the endsWith check.
 internal fun validateCoverArtRedirect(
     location: String?,
     allowedHosts: List<String>,
@@ -469,37 +585,141 @@ internal data class SearchResultDto(
     val recordings: List<Recording>
 )
 
+// Flattens the search response into pickable rows, then ranks and collapses
+// them.
+//
+// The previous version emitted one row per (recording × release) in whatever
+// order MusicBrainz returned. A popular song has dozens of releases — regional
+// pressings, remasters, compilations — so the canonical album ended up buried
+// mid-list and the same album appeared many times over.
+//
+// Every signal used to fix that (score, status, date, release-group) already
+// arrives in the response we were parsing, so ranking costs no extra network
+// call; we were simply discarding it.
 internal fun SearchResultDto.toMetadataSearchResultList(): List<MetadataSearchResult> {
-    var results = mutableListOf<MetadataSearchResult>()
+    val rows = mutableListOf<RankedRow>()
     recordings.fastForEach { recording ->
         val artist = recording.artistCredit.ifEmpty { null }?.map {
             it.name + (it.joinphrase ?: "")
         }?.joinToString(separator = "") ?: ""
         val genres = recording.tags?.map { it.name }
+        val score = recording.score.asIntOrNull()
 
         recording.releases?.forEach { release ->
             val albumArtist = release.artistCredit?.map {
                 it.name + (it.joinphrase ?: "")
             }?.joinToString(separator = "") ?: artist
             val trackNumber = release.media?.firstOrNull()?.track?.firstOrNull()?.number
-            results += MetadataSearchResult(
-                id = recording.id,
-                title = recording.title,
-                artist = artist,
-                albumId = release.id,
-                album = release.title,
-                albumArtist = albumArtist,
-                trackNumber = trackNumber,
-                year = recording.firstReleaseDate,
-                genres = genres,
-                description = recording.disambiguation,
-                albumDescription = release.disambiguation
+            rows += RankedRow(
+                result = MetadataSearchResult(
+                    id = recording.id,
+                    title = recording.title,
+                    artist = artist,
+                    albumId = release.id,
+                    album = release.title,
+                    albumArtist = albumArtist,
+                    trackNumber = trackNumber,
+                    // Deliberately the RECORDING's first-release date, as
+                    // before — this is the value written to the year tag and
+                    // changing it is not this patch's business. The release's
+                    // own date is used for ranking only, just below.
+                    year = recording.firstReleaseDate,
+                    genres = genres,
+                    description = recording.disambiguation,
+                    albumDescription = release.disambiguation,
+                    releaseGroupId = release.releaseGroup?.id,
+                    albumArtistId = release.artistCredit?.firstOrNull()?.id,
+                ),
+                score = score,
+                statusRank = statusRank(release.status),
+                typeRank = releaseTypeRank(
+                    primaryType = release.releaseGroup?.primaryType,
+                    secondaryTypes = release.releaseGroup?.secondaryTypes,
+                ),
+                year = releaseYear(release.date),
+                ordinal = rows.size,
             )
         }
     }
 
-    return results
+    return rows
+        .sortedWith(RANKED_ROW_ORDER)
+        .map { it.result }
+        // One row per album. Sorting first means the survivor of each group is
+        // its best-ranked pressing. Releases with no group id can't be grouped,
+        // so they fall back to their own release id and are always kept.
+        .distinctBy { it.releaseGroupId ?: it.albumId }
 }
+
+// A row plus its precomputed sort keys. The keys are computed once, up front,
+// so the comparator is a pure function of stored values — a comparator that
+// recomputed or randomised anything would risk violating transitivity and
+// blowing up inside sort.
+internal data class RankedRow(
+    val result: MetadataSearchResult,
+    val score: Int?,
+    val statusRank: Int,
+    val typeRank: Int,
+    val year: Int?,
+    val ordinal: Int,
+)
+
+// Desirability order, most desirable first. Every criterion is total and
+// deterministic, and `ordinal` at the end keeps the original API order as the
+// final tiebreak so the result never depends on sort implementation details.
+internal val RANKED_ROW_ORDER: Comparator<RankedRow> =
+    compareByDescending<RankedRow> { it.score ?: Int.MIN_VALUE }
+        .thenBy { it.statusRank }
+        .thenBy { it.typeRank }
+        .thenBy { it.year ?: Int.MAX_VALUE }
+        .thenBy { it.ordinal }
+
+// MusicBrainz sends `score` as a search-relevance percentage. It has been
+// serialised both as a bare number and as a quoted string over the years, and
+// the app's Json is type-strict (`ignoreUnknownKeys` only, no `isLenient`), so
+// pinning the field to one of those shapes risks a parse failure that would
+// take the WHOLE response down — one odd value, zero search results. Holding
+// the raw primitive accepts either shape, and anything unexpected degrades to
+// a null score (that row simply ranks last) instead of an error.
+internal fun JsonPrimitive?.asIntOrNull(): Int? = this?.content?.toIntOrNull()
+
+// Official pressings first, bootlegs last. Unknown/absent status sits in the
+// middle: plenty of legitimate releases carry no status, so an unrecognised
+// value must not be treated as worse than a known-bad one.
+internal fun statusRank(status: String?): Int = when (status?.lowercase()) {
+    "official" -> 0
+    null -> 1
+    "promotion" -> 2
+    "bootleg" -> 3
+    "pseudo-release" -> 4
+    else -> 1
+}
+
+// Prefers the album a track actually belongs to over the ways it was later
+// repackaged. Primary type orders the main kinds; any secondary type
+// (Compilation, Live, Remix, Soundtrack…) demotes the release within its
+// primary tier, which is what pushes greatest-hits collections below the
+// original album they borrow from.
+internal fun releaseTypeRank(
+    primaryType: String?,
+    secondaryTypes: List<String>? = null,
+): Int {
+    val primary = when (primaryType?.lowercase()) {
+        "album" -> 0
+        "ep" -> 1
+        "single" -> 2
+        "broadcast" -> 3
+        else -> 4
+    }
+    val repackaged = if (secondaryTypes.isNullOrEmpty()) 0 else 1
+    return primary * 2 + repackaged
+}
+
+// Year from an ISO-8601 MusicBrainz date, which may be "2016-08-26", "2016-08"
+// or just "2016". Earliest wins, so an original pressing outranks its
+// remasters. Anything unparseable returns null and sorts last.
+internal fun releaseYear(date: String?): Int? =
+    date?.take(4)?.takeIf { it.length == 4 }?.toIntOrNull()
 
 @Serializable
 internal data class Recording(
@@ -511,7 +731,12 @@ internal data class Recording(
     @SerialName("first-release-date")
     val firstReleaseDate: String? = null,
     val releases: List<Release>? = null,
-    val tags: List<Tag>? = null
+    val tags: List<Tag>? = null,
+    // Search relevance, 0-100. Present on search hits only — the lookup-by-MBID
+    // endpoint returns a single exact match and sends no score, so this is
+    // null on that path and ranking falls through to the criteria below it.
+    // Held as a raw primitive rather than an Int; see asIntOrNull().
+    val score: JsonPrimitive? = null,
 )
 
 @Serializable
@@ -528,7 +753,24 @@ internal data class Release(
     @SerialName("artist-credit")
     val artistCredit: List<Artist>? = null,
     val media: List<Media>? = null,
-    val disambiguation: String? = null
+    val disambiguation: String? = null,
+    // Ranking signals. All of these already arrive in the search response;
+    // they were being parsed away before, which is why results came out
+    // unordered. (`country` is deliberately NOT parsed: it arrives too, but
+    // nothing ranks by it and an unused field is just clutter.)
+    val status: String? = null,
+    val date: String? = null,
+    @SerialName("release-group")
+    val releaseGroup: ReleaseGroup? = null,
+)
+
+@Serializable
+internal data class ReleaseGroup(
+    val id: String,
+    @SerialName("primary-type")
+    val primaryType: String? = null,
+    @SerialName("secondary-types")
+    val secondaryTypes: List<String>? = null,
 )
 
 @Serializable

@@ -25,12 +25,21 @@ class LyricsReaderImpl(private val context: Context) : LyricsReader {
                 }
             } ?: return Result.Error(DataError.Local.NoReadPermission)
 
-            val audioFile = AudioFileIO.read(temp)
-                ?: return Result.Error(DataError.Local.FailedToRead)
-            val tag = audioFile.tagAndConvertOrCreateAndSetDefault
-                ?: return Result.Error(DataError.Local.FailedToRead)
+            val tempFile = temp ?: return Result.Error(DataError.Local.FailedToRead)
 
-            val lyricsText = tag.getFirst(FieldKey.LYRICS)
+            val lyricsText = if (track.format == "opus") {
+                // jaudiotagger 3.0.1 has no .opus mapping and its OggFileReader
+                // rejects OpusHead, so opus tags are read by the same in-house
+                // editor the write path already uses.
+                OpusTagEditor.readLyrics(tempFile)
+            } else {
+                val audioFile = AudioFileIO.read(tempFile)
+                    ?: return Result.Error(DataError.Local.FailedToRead)
+                val tag = audioFile.tagAndConvertOrCreateAndSetDefault
+                    ?: return Result.Error(DataError.Local.FailedToRead)
+
+                tag.getFirst(FieldKey.LYRICS)
+            }
             if (lyricsText?.isNotBlank() != true) {
                 return Result.Error(DataError.Local.NoLyricsFound)
             }

@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.io.File
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder
@@ -36,6 +37,9 @@ import com.dn0ne.player.app.domain.lyrics.toSyncedLyrics
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.playback.PlaybackMode
 import com.dn0ne.player.app.domain.playback.ShuffleEngine
+import com.dn0ne.player.app.domain.playback.recentlyPlayedIndices
+import com.dn0ne.player.app.domain.playback.playbackErrorKind
+import com.dn0ne.player.app.domain.playback.PlaybackErrorKind
 import com.dn0ne.player.app.domain.result.DataError
 import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.sort.sortedBy
@@ -481,6 +485,19 @@ class PlayerViewModel(
 
                         positionUpdateJob?.cancel()
                         positionUpdateJob = startPositionUpdate()
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        val messageRes = when (playbackErrorKind(error.errorCode)) {
+                            PlaybackErrorKind.UnsupportedFormat -> R.string.playback_error_unsupported_format
+                            PlaybackErrorKind.FileUnreadable -> R.string.playback_error_file_unreadable
+                            PlaybackErrorKind.Unknown -> R.string.playback_error_unknown
+                        }
+                        viewModelScope.launch {
+                            SnackbarController.sendEvent(
+                                SnackbarEvent(message = messageRes)
+                            )
+                        }
                     }
                 }
             )
@@ -1103,7 +1120,16 @@ class PlayerViewModel(
                             albumArtist = event.searchResult.albumArtist,
                             genre = event.searchResult.genres?.joinToString(" / "),
                             year = event.searchResult.year,
-                            trackNumber = event.searchResult.trackNumber
+                            trackNumber = event.searchResult.trackNumber,
+                            // MetadataWriterImpl has always been wired to
+                            // persist these — to the MusicBrainz tag fields and
+                            // to the track_metadata row — but nothing on the
+                            // pick path ever set them, so that write path was
+                            // unreachable from the UI. Carrying the ids the
+                            // search result already holds turns it back on.
+                            mbAlbumId = event.searchResult.albumId,
+                            mbReleaseGroupId = event.searchResult.releaseGroupId,
+                            mbAlbumArtistId = event.searchResult.albumArtistId,
                         ),
                         isArtFromGallery = false
                     )
@@ -1647,10 +1673,11 @@ class PlayerViewModel(
             PlaybackMode.SmartShuffle -> {
                 val tracks = _playbackState.value.playlist?.trackList
                 if (tracks != null && tracks.isNotEmpty()) {
-                    val previousIndices = currentShuffleOrder?.toSet() ?: emptySet()
+                    val previousIndices = recentlyPlayedIndices(currentShuffleOrder)
                     // TODO: wrap in withContext(Dispatchers.Default) if users with
-                    // large libraries (>5000 tracks) report UI jank. Benchmark
-                    // shows ~200ms for 10k tracks — fine for the median user.
+                    // large libraries (>5000 tracks) report UI jank. Measured on a
+                    // desktop JVM at ~1.5ms for 10k tracks, so a phone has room to
+                    // spare; the ordering work is capped either way.
                     val order = shuffleEngine.generateOrder(
                         trackCount = tracks.size,
                         mode = playbackMode,
@@ -1674,7 +1701,7 @@ class PlayerViewModel(
 
     private fun regenerateShuffleOrder(mode: PlaybackMode) {
         val tracks = _playbackState.value.playlist?.trackList ?: return
-        val previousIndices = currentShuffleOrder?.toSet() ?: emptySet()
+        val previousIndices = recentlyPlayedIndices(currentShuffleOrder)
         val order = shuffleEngine.generateOrder(
             trackCount = tracks.size,
             mode = mode,

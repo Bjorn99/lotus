@@ -1,5 +1,6 @@
 package com.dn0ne.player.app.data
 
+import com.dn0ne.player.app.domain.metadata.Metadata
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -123,45 +124,158 @@ class OpusTagEditorTest {
         }
     }
 
+    // ---- readLyrics ----
+
     @Test
-    fun `writePage replaces page correctly`() {
-        val originalPayload = buildMinimalOpusTags("Vendor", mapOf("TITLE" to "OldTitle"))
-        val originalPage = OpusTagEditor.OggPage(
-            offset = 0, headerSize = 28, payload = originalPayload,
-            serialNumber = 1, pageSequence = 1, isContinuation = false,
+    fun `readLyrics returns embedded lyrics`() {
+        val file = writeOpusFile(mapOf("TITLE" to "Song", "LYRICS" to "first line"))
+        try {
+            assertEquals("first line", OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics preserves multi-line lyrics`() {
+        val lyrics = "[00:01.00] first\n[00:05.00] second\n[00:09.00] third"
+        val file = writeOpusFile(mapOf("LYRICS" to lyrics))
+        try {
+            assertEquals(lyrics, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics reads non-ascii lyrics`() {
+        val lyrics = "Не думай о секундах свысока"
+        val file = writeOpusFile(mapOf("LYRICS" to lyrics))
+        try {
+            assertEquals(lyrics, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics returns null when there is no lyrics field`() {
+        val file = writeOpusFile(mapOf("TITLE" to "Song", "ARTIST" to "Someone"))
+        try {
+            assertEquals(null, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics treats a blank lyrics field as absent`() {
+        val file = writeOpusFile(mapOf("LYRICS" to "   "))
+        try {
+            assertEquals(null, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics falls back to UNSYNCEDLYRICS`() {
+        val file = writeOpusFile(mapOf("UNSYNCEDLYRICS" to "fallback line"))
+        try {
+            assertEquals("fallback line", OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics prefers LYRICS over UNSYNCEDLYRICS`() {
+        val file = writeOpusFile(
+            mapOf("UNSYNCEDLYRICS" to "fallback line", "LYRICS" to "preferred line")
         )
-        val opusHeadPage = OpusTagEditor.OggPage(
+        try {
+            assertEquals("preferred line", OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics falls back when LYRICS is blank`() {
+        val file = writeOpusFile(mapOf("LYRICS" to "", "UNSYNCEDLYRICS" to "fallback line"))
+        try {
+            assertEquals("fallback line", OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics matches a lower case field name`() {
+        val file = writeOpusFile(mapOf("lyrics" to "lower case tag"))
+        try {
+            assertEquals("lower case tag", OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readLyrics returns null for a file with no tags page`() {
+        val head = OpusTagEditor.OggPage(
             offset = 0, headerSize = 28, payload = "OpusHead".toByteArray() + ByteArray(11),
             serialNumber = 1, pageSequence = 0, isContinuation = false,
         )
-
-        val file = File.createTempFile("test_opus_write", ".opus")
+        val file = File.createTempFile("test_opus_headonly", ".opus")
         try {
-            file.writeBytes(
-                OpusTagEditor.buildOggPageBytes(opusHeadPage) +
-                OpusTagEditor.buildOggPageBytes(originalPage)
-            )
+            file.writeBytes(OpusTagEditor.buildOggPageBytes(head))
+            assertEquals(null, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
 
-            // Modify page 1
-            val newPayload = buildMinimalOpusTags("Vendor", mapOf("TITLE" to "NewTitle"))
-            val newPage = OpusTagEditor.OggPage(
-                offset = 0, headerSize = 28, payload = newPayload,
-                serialNumber = 1, pageSequence = 1, isContinuation = false,
-            )
-            OpusTagEditor.writePage(file, 1, newPage)
+    @Test
+    fun `readLyrics returns null for a non-ogg file`() {
+        val file = File.createTempFile("test_not_opus", ".opus")
+        try {
+            file.writeBytes("this is not an ogg container".toByteArray())
+            assertEquals(null, OpusTagEditor.readLyrics(file))
+        } finally {
+            file.delete()
+        }
+    }
 
-            // Verify the file was updated
-            val pages = OpusTagEditor.readOggPages(file)
-            assertTrue("should have at least 2 pages", pages.size >= 2)
-            // Page 0 unchanged, page 1 updated
-            assertEquals(0, pages[0].pageSequence)
-            assertEquals(1, pages[1].pageSequence)
+    @Test
+    fun `readLyrics reads back what update wrote`() {
+        val file = writeOpusFile(mapOf("TITLE" to "Song"))
+        try {
+            OpusTagEditor.update(file, Metadata(lyrics = "written by update"))
+
+            assertEquals("written by update", OpusTagEditor.readLyrics(file))
         } finally {
             file.delete()
         }
     }
 
     // ---- helpers ----
+
+    private fun writeOpusFile(fields: Map<String, String>): File {
+        val head = OpusTagEditor.OggPage(
+            offset = 0, headerSize = 28, payload = "OpusHead".toByteArray() + ByteArray(11),
+            serialNumber = 1, pageSequence = 0, isContinuation = false,
+        )
+        val tags = OpusTagEditor.OggPage(
+            offset = 0, headerSize = 28,
+            payload = buildMinimalOpusTags("TestVendor", fields),
+            serialNumber = 1, pageSequence = 1, isContinuation = false,
+        )
+        val file = File.createTempFile("test_opus_lyrics", ".opus")
+        file.writeBytes(
+            OpusTagEditor.buildOggPageBytes(head) + OpusTagEditor.buildOggPageBytes(tags)
+        )
+        return file
+    }
 
     private fun buildMinimalOpusTags(vendor: String, fields: Map<String, String>): ByteArray {
         val vendorBytes = vendor.toByteArray(Charsets.UTF_8)

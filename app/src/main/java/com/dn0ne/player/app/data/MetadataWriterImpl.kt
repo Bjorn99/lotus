@@ -84,7 +84,15 @@ class MetadataWriterImpl(
                     trackNumber?.let { tag.setField(FieldKey.TRACK, it) }
 
                     coverArtBytes?.let { artBytes ->
-                        val cover = AndroidArtwork.createArtworkFromFile(file)
+                        // Constructed empty, not via createArtworkFromFile:
+                        // that helper reads the whole file it is given into a
+                        // byte array, and the file here is the audio track,
+                        // not an image. Every field it set was overwritten on
+                        // the lines below, so the read bought nothing and cost
+                        // one full-size allocation per edit — an
+                        // OutOfMemoryError on a large file, which is an Error
+                        // and so slips past the catch-all below.
+                        val cover = AndroidArtwork()
                         cover.binaryData = artBytes
                         cover.mimeType =
                             ImageFormats.getMimeTypeForBinarySignature(artBytes)

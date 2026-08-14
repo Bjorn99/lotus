@@ -53,13 +53,11 @@ Send it as a pull request (preferred). If you'd rather not use git, attach the f
 
 ## Attribution
 
-If the maintainer re-implements your PR, credit goes in the commit message itself (e.g., "Based on a patch by @username"), in the release changelog, and in the Contributors list below.
+If the maintainer re-implements your PR, credit goes in the commit message itself (e.g., "Based on a patch by @username"), in the release changelog, and in the contributors list.
 
 ## Contributors
 
-Thanks to everyone who has helped improve this fork:
-
-- **[@uhrfra](https://github.com/uhrfra)** — relative-path support in M3U playlist import (based on [#73](https://github.com/Bjorn99/lotus/pull/73), shipped in v1.8.0); on-device testing of the v1.8.2 fixes.
+The contributors list lives on the [README](README.md#contributors), where people actually see it.
 
 ## Legal
 

@@ -102,4 +102,121 @@ class CoverArtRedirectTest {
         )
         assertTrue(result is Result.Error)
     }
+
+    // ---- hop policy ----
+    //
+    // The real CoverArtArchive chain, which the single-hop version could not
+    // complete:
+    //   coverartarchive.org/release/{id}/front -> 307 archive.org/download/...
+    //   archive.org/download/...               -> 302 dn######.ca.archive.org/...
+    //   dn######.ca.archive.org/...            -> 200 image
+
+    private fun step(
+        status: Int,
+        location: String? = null,
+        hopsUsed: Int = 0,
+        maxHops: Int = MAX_COVER_ART_HOPS,
+    ) = nextCoverArtStep(status, location, hopsUsed, maxHops, allowed)
+
+    @Test
+    fun `200 reads the body`() {
+        assertEquals(CoverArtStep.Read, step(status = 200))
+    }
+
+    @Test
+    fun `the full CoverArtArchive chain completes`() {
+        val first = step(
+            status = 307,
+            location = "https://archive.org/download/mbid-abc/mbid-abc-123.jpg",
+            hopsUsed = 0,
+        )
+        assertEquals(
+            CoverArtStep.Follow("https://archive.org/download/mbid-abc/mbid-abc-123.jpg"),
+            first,
+        )
+
+        // The hop that used to fail: a 302 fell through to "unknown error"
+        // because only 200 and 404 were handled after the first redirect.
+        val second = step(
+            status = 302,
+            location = "https://dn720706.ca.archive.org/0/items/mbid-abc/mbid-abc-123.jpg",
+            hopsUsed = 1,
+        )
+        assertEquals(
+            CoverArtStep.Follow("https://dn720706.ca.archive.org/0/items/mbid-abc/mbid-abc-123.jpg"),
+            second,
+        )
+
+        assertEquals(CoverArtStep.Read, step(status = 200, hopsUsed = 2))
+    }
+
+    @Test
+    fun `every redirect status in the family is followed`() {
+        for (status in listOf(301, 302, 303, 307, 308)) {
+            assertEquals(
+                "status $status must be treated as a hop",
+                CoverArtStep.Follow("https://archive.org/front.jpg"),
+                step(status = status, location = "https://archive.org/front.jpg"),
+            )
+        }
+    }
+
+    @Test
+    fun `a later hop is host-checked, not just the first`() {
+        // The security property that matters: hop 2 pointing off-site is
+        // rejected exactly like hop 1 would be.
+        val result = step(
+            status = 302,
+            location = "https://evil.com/front.jpg",
+            hopsUsed = 1,
+        )
+        assertEquals(CoverArtStep.Fail(DataError.Network.Unknown), result)
+    }
+
+    @Test
+    fun `a redirect loop is cut off at the hop limit`() {
+        val result = step(
+            status = 302,
+            location = "https://archive.org/front.jpg",
+            hopsUsed = MAX_COVER_ART_HOPS,
+        )
+        assertEquals(CoverArtStep.Fail(DataError.Network.Unknown), result)
+    }
+
+    @Test
+    fun `the last allowed hop is still followed`() {
+        val result = step(
+            status = 302,
+            location = "https://archive.org/front.jpg",
+            hopsUsed = MAX_COVER_ART_HOPS - 1,
+        )
+        assertEquals(CoverArtStep.Follow("https://archive.org/front.jpg"), result)
+    }
+
+    @Test
+    fun `a redirect with no Location header fails instead of looping`() {
+        assertEquals(
+            CoverArtStep.Fail(DataError.Network.Unknown),
+            step(status = 302, location = null),
+        )
+    }
+
+    @Test
+    fun `error statuses map to their own errors`() {
+        assertEquals(CoverArtStep.Fail(DataError.Network.BadRequest), step(status = 400))
+        assertEquals(CoverArtStep.Fail(DataError.Network.NotFound), step(status = 404))
+        assertEquals(
+            CoverArtStep.Fail(DataError.Network.ServiceUnavailable),
+            step(status = 503),
+        )
+        assertEquals(CoverArtStep.Fail(DataError.Network.Unknown), step(status = 418))
+    }
+
+    @Test
+    fun `404 stays a 404 so the release-group fallback still triggers`() {
+        // shouldRetryWithReleaseGroup keys off NotFound specifically. If a 404
+        // were flattened to Unknown here, the fallback added alongside it
+        // would go quiet again.
+        assertEquals(CoverArtStep.Fail(DataError.Network.NotFound), step(status = 404))
+    }
 }

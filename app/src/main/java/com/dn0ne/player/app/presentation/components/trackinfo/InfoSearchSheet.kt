@@ -487,6 +487,8 @@ fun SearchHintDialog(
                         .padding(8.dp)
                 )
 
+                Text(text = context.resources.getString(R.string.recipe_caution))
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(

@@ -101,6 +101,7 @@ import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.filterPlaylists
 import com.dn0ne.player.app.domain.track.filterTracks
+import com.dn0ne.player.app.domain.track.withoutSingleTrackAlbums
 import com.dn0ne.player.app.presentation.components.GlobalSearchSheet
 import com.dn0ne.player.app.presentation.components.PlaylistSortButton
 import com.dn0ne.player.app.presentation.components.TrackSortButton
@@ -237,6 +238,8 @@ fun PlayerScreen(
                 }
 
                 val perTrackArtwork = viewModel.settings.perTrackArtwork
+                val ignoreSingleTrackAlbums
+                        by viewModel.settings.ignoreSingleTrackAlbums.collectAsState()
                 val trackSort by viewModel.trackSort.collectAsState()
                 val trackSortOrder by viewModel.trackSortOrder.collectAsState()
                 val playlistSort by viewModel.playlistSort.collectAsState()
@@ -539,6 +542,7 @@ fun PlayerScreen(
                                 )
                             },
                             perTrackArtwork = perTrackArtwork,
+                            ignoreSingleTrackAlbums = ignoreSingleTrackAlbums,
                         )
                     }
 
@@ -1150,6 +1154,7 @@ fun MainPlayerScreen(
     onGridPlaylistsClick: () -> Unit,
     onSettingsClick: () -> Unit,
     perTrackArtwork: Boolean = false,
+    ignoreSingleTrackAlbums: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -1685,7 +1690,12 @@ fun MainPlayerScreen(
                     // album art as the fallback. Playlists and the Tracks tab
                     // keep per-track artwork.
                     perTrackArtwork = false,
-                    playlists = albumPlaylists.filterPlaylists(searchFieldValue),
+                    // Filtered here rather than at the source: `albumPlaylists`
+                    // also backs global search and "go to album", which must
+                    // keep finding one-track albums even while the tab hides them.
+                    playlists = albumPlaylists
+                        .withoutSingleTrackAlbums(ignoreSingleTrackAlbums)
+                        .filterPlaylists(searchFieldValue),
                     gridPlaylists = gridPlaylists,
                     playlistSort = albumSort,
                     playlistSortOrder = albumSortOrder,
@@ -1801,6 +1811,26 @@ fun MainPlayerScreen(
         onAlbumPlaylistClick = onAlbumPlaylistSelection,
         onArtistPlaylistClick = onArtistPlaylistSelection,
         onGenrePlaylistClick = onGenrePlaylistSelection,
+        lovedUris = lovedUris,
+        onToggleLovedClick = onToggleLovedClick,
+        onPlayNextClick = onPlayNextClick,
+        onAddToQueueClick = onAddToQueueClick,
+        onAddToPlaylistClick = { tracks ->
+            showGlobalSearch = false
+            onAddToPlaylistClick(tracks)
+        },
+        onViewTrackInfoClick = { track ->
+            showGlobalSearch = false
+            onViewTrackInfoClick(track)
+        },
+        onGoToAlbumClick = { track ->
+            showGlobalSearch = false
+            onGoToAlbumClick(track)
+        },
+        onGoToArtistClick = { track ->
+            showGlobalSearch = false
+            onGoToArtistClick(track)
+        },
         perTrackArtwork = perTrackArtwork,
     )
 

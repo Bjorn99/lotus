@@ -166,8 +166,9 @@
     <string name="search_tips">Search tips</string>
     <string name="search_explain">We use the MusicBrainz API to help you find track info.</string>
     <string name="recipe_header">Quick recipe</string>
-    <string name="recipe_explain">For the most accurate results, search by artist AND recording name together. Field names must be lowercase, operators must be UPPERCASE:</string>
+    <string name="recipe_explain">For the most accurate results, search for the artist and the recording together, with each value in quotes. Field names can be capitalised however you like, but AND must be uppercase:</string>
     <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="recipe_caution">The quotes are what make AND work. Without them the whole line is treated as plain text, and a plain search matches song titles only — so searching for a song and its artist together, unquoted, tends to find songs named after the artist instead.</string>
     <string name="quotes_explain_header">Quotes for exact matches</string>
     <string name="quotes_explain">Use quotes to find specific words or phrases:</string>
     <string name="quotes_example_1">\"4:44\"</string>
@@ -180,7 +181,7 @@
     <string name="field_reference_header">Field reference</string>
     <string name="field_reference_explain">artist: — artist or performer name\nrecording: — song or track title (use this, not track:)\nrelease: — album, EP, or single name\n\nTip: track: is not a valid MusicBrainz field — use recording: for song names. MusicBrainz searches recording titles by default, so you can also search without a field prefix.</string>
     <string name="combine_explain_header">Combine searches</string>
-    <string name="combine_explain">Use AND, OR, NOT (uppercase) to combine field searches. Without quotes or field prefixes, these words are treated as literal text:</string>
+    <string name="combine_explain">Use AND, OR, NOT (uppercase) to combine searches. They only act as operators when the query contains a matched pair of quotes — otherwise they are treated as literal words:</string>
     <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
     <string name="mbid_lookup_header">MusicBrainz ID lookup</string>
     <string name="mbid_lookup_explain">Paste a MusicBrainz ID (UUID) to find the exact recording, even when text search fails:</string>
@@ -458,6 +459,13 @@
         <item quantity="one">%1$d play</item>
         <item quantity="other">%1$d plays</item>
     </plurals>
+    <string name="ignore_single_track_albums">Ignore single-track albums</string>
+    <string name="ignore_single_track_albums_explain">Hides albums that contain only one track from the Albums tab. The tracks stay in your library and remain searchable.</string>
+    <string name="reduce_lyrics_animation">Reduce lyrics animation</string>
+    <string name="reduce_lyrics_animation_explain">Turns off the sweep, glow, and zoom on the line being sung. It still brightens as it plays.</string>
     <string name="per_track_artwork">Per-track artwork</string>
     <string name="per_track_artwork_explain">When enabled, displays artwork embedded in each audio file instead of the album cover. Falls back to album art for tracks without embedded images.</string>
+    <string name="playback_error_unsupported_format">This format can\'t be played on this device</string>
+    <string name="playback_error_file_unreadable">This file couldn\'t be read — it may be corrupt or inaccessible</string>
+    <string name="playback_error_unknown">An unknown playback error occurred</string>
 </resources>
