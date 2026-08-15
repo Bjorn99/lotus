@@ -77,6 +77,13 @@ Same-artist back-to-backs against a pure shuffle, 500 queues per row:
 
 The second pass scores the queue as a whole, so on compilation-shaped libraries it can occasionally trade one artist repeat for better album spacing — under 1% of queues when measured, and never more than one repeat.
 
+Treating playlist sequencing as constrained optimisation is well-trodden ground: Pauws, Verhaegh and Vossen model it that way and solve it with adapted simulated annealing [1]. Lotus keeps the weighted cost but reaches the answer by construction rather than by search, which is what lets it land on a good order immediately instead of converging on one while you wait. Bioinformatics sequence shuffling [2] looks adjacent and isn't: it *preserves* local statistics to build null models, where Smart Shuffle exists to break adjacencies up.
+
+### References
+
+1. Pauws, Verhaegh & Vossen, "Music playlist generation by adapted simulated annealing" (2008), *Information Sciences* 178(3):647–662. [doi:10.1016/j.ins.2007.08.019](https://doi.org/10.1016/j.ins.2007.08.019)
+2. Altschul & Erickson, "Significance of nucleotide sequence alignments: a method for random sequence permutation that preserves dinucleotide and codon usage" (1985), *Mol Biol Evol* 2(6):526–538. [doi:10.1093/oxfordjournals.molbev.a040370](https://doi.org/10.1093/oxfordjournals.molbev.a040370) — Jiang, Anderson, Gillespie & Mayne, "uShuffle: a useful tool for shuffling biological sequences while preserving the k-let counts" (2008), *BMC Bioinformatics* 9:192. [doi:10.1186/1471-2105-9-192](https://doi.org/10.1186/1471-2105-9-192)
+
 ## Download
 
 [<img src="https://f-droid.org/badge/get-it-on.png"
