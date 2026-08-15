@@ -114,7 +114,7 @@ jobs:
 
           # Standard fork-summary preamble on every release.
           cat > "$NOTES_FILE" <<'EOF'
-          > **Community fork of [Lotus](https://github.com/dn0ne/lotus).** See the [README](https://github.com/Bjorn99/lotus/blob/master/README.md#what-this-fork-adds-vs-upstream-dn0nelotus) for the cumulative list of improvements this fork carries over the upstream.
+          > **Community fork of [Lotus](https://github.com/dn0ne/lotus).** See the [README](https://github.com/Bjorn99/lotus/blob/master/README.md#what-sets-this-fork-apart) for the cumulative list of improvements this fork carries over the upstream.
           >
           > **Which APK do I pick?** If you're not sure, download `lotus-*-universal-release.apk` — it works on any phone. Otherwise pick the one matching your CPU architecture (`arm64-v8a` covers most modern phones). Verify the download against `SHA256SUMS.txt`.
 
