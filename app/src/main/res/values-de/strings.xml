@@ -1,1 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App name -->
+    <string name="app_name" translatable="false">Lotus</string>
 
+    <!-- Links -->
+    <!-- Lyrics provider link -->
+    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
+    <!-- Metadata provider link -->
+    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
+    <!-- Repository link -->
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
+
+    <!-- Common back button -->
+    <string name="back">Zurück</string>
+
+    <!-- Setup screens -->
+    <string name="get_started">Los geht\'s</string>
+    <string name="permissions">Berechtigungen</string>
+    <string name="audio">Audio</string>
+    <string name="explain_audio_permission_requirement">Lotus braucht diese Berechtigung, um deine wunderbare Musik abzuspielen</string>
+    <string name="grant_permission">Berechtigung erteilen</string>
+    <string name="next">Weiter</string>
+    <string name="grant_permission_in_settings">Bitte erteile die Berechtigung in den Einstellungen</string>
+
+    <!-- Track metadata fields -->
+    <string name="title">Titel</string>
+    <string name="album">Album</string>
+    <string name="artist">Interpret</string>
+    <string name="genre">Genre</string>
+    <string name="year">Jahr</string>
+    <string name="track_number">Titelnummer</string>
+    <string name="bitrate">Bitrate</string>
+    <string name="album_artist">Album-Interpret</string>
+    <string name="duration">Dauer</string>
+    <string name="size">Größe</string>
+    <string name="path">Pfad</string>
+    <string name="date_modified">Änderungsdatum</string>
+
+    <string name="unknown_title">Unbekannter Titel</string>
+    <string name="unknown_album">Unbekanntes Album</string>
+    <string name="unknown_artist">Unbekannter Interpret</string>
+    <string name="unknown_album_artist">Unbekannter Album-Interpret</string>
+    <string name="unknown_genre">Unbekanntes Genre</string>
+    <string name="unknown_year">Unbekanntes Jahr</string>
+    <string name="unknown_track_number">Unbekannte Titelnummer</string>
+    <string name="unknown_bitrate">Unbekannte Bitrate</string>
+    <string name="unknown">Unbekannt</string>
+
+    <!-- Track dropdown menu -->
+    <string name="track_menu_button">Titelmenü-Schaltfläche</string>
+    <string name="play_next">Als Nächstes abspielen</string>
+    <string name="add_to_queue">Zur Warteschlange hinzufügen</string>
+    <string name="remove_from_playlist">Aus Playlist entfernen</string>
+    <string name="go_to_album">Zum Album</string>
+    <string name="go_to_artist">Zum Interpreten</string>
+    <string name="share_track">Teilen</string>
+    <string name="search_library">Bibliothek durchsuchen</string>
+    <string name="search_library_hint">Titel, Alben, Interpreten, Genres und Playlists durchsuchen</string>
+    <string name="search_no_results">Keine Ergebnisse</string>
+    <string name="export_m3u">Als M3U exportieren</string>
+    <string name="export_m3u_success">Playlist exportiert</string>
+    <string name="export_m3u_failure">Playlist konnte nicht exportiert werden</string>
+
+    <!-- Smart playlists -->
+    <string name="smart_playlists">Smart</string>
+    <string name="smart_recently_added">Kürzlich hinzugefügt</string>
+    <string name="smart_random_mix">Zufallsmix</string>
+    <string name="smart_loved">Lieblingstitel</string>
+    <string name="love_track">Favorisieren</string>
+    <string name="unlove_track">Nicht mehr favorisieren</string>
+
+    <!-- Backup -->
+    <string name="backup">Sicherung</string>
+    <string name="backup_supporting_text">Speichere deine Playlists und favorisierten Titel in einer Datei, die du selbst verwaltest. Hol sie später wieder zurück.</string>
+    <string name="backup_export">Sicherung speichern</string>
+    <string name="backup_import">Aus Datei wiederherstellen</string>
+    <string name="backup_what_is_included">Was in der Datei enthalten ist</string>
+    <string name="backup_what_is_included_body">Deine Playlists (Namen + die enthaltenen Titel) und deine favorisierten Titel. Reines JSON — öffne es in einem beliebigen Texteditor, um genau zu sehen, was gespeichert wurde. Einstellungen, Songtext-Cache und Absturzprotokolle sind nicht enthalten.</string>
+    <string name="backup_import_policy_title">Wie die Wiederherstellung funktioniert</string>
+    <string name="backup_import_policy_body">Die Wiederherstellung ergänzt nur. Bestehende Playlists mit demselben Namen bleiben erhalten; es werden nur neue hinzugefügt. Favorisierte Titel werden zusammengeführt. Titel, deren Dateien nicht mehr auf dem Gerät sind, werden übersprungen.</string>
+    <string name="backup_import_confirm_title">Aus dieser Datei wiederherstellen?</string>
+    <string name="backup_import_confirm_body">Lotus liest die ausgewählte Datei und fügt alles Neue zu deiner Bibliothek hinzu. Nichts, was bereits auf diesem Gerät vorhanden ist, wird entfernt.</string>
+    <string name="backup_import_confirm_yes">Wiederherstellen</string>
+    <string name="backup_export_success">%1$d Playlists, %2$d favorisierte Titel und %3$d Einträge zu Hörstatistiken gespeichert.</string>
+    <string name="backup_export_failure">Sicherung konnte nicht gespeichert werden: %1$s</string>
+    <string name="backup_import_success">%1$d Playlists hinzugefügt, %2$d bereits vorhandene übersprungen, %3$d favorisierte Titel hinzugefügt. %4$d Einträge stimmten mit keiner lokalen Datei überein.</string>
+    <string name="backup_import_stats_added">%1$d Einträge zu Hörstatistiken zusammengeführt.</string>
+    <string name="backup_import_stats_skipped">Hörstatistiken nicht importiert (Aufzeichnung ist deaktiviert).</string>
+    <string name="backup_import_failure">Sicherung konnte nicht gelesen werden: %1$s</string>
+
+    <!-- Tabs' names -->
+    <string name="tracks">Titel</string>
+    <string name="albums">Alben</string>
+    <string name="artists">Interpreten</string>
+    <string name="genres">Genres</string>
+    <string name="playlists">Playlists</string>
+    <string name="folders">Ordner</string>
+
+    <!-- Sorting dialog -->
+    <string name="sort_order">Sortierreihenfolge</string>
+    <string name="sort_ascending">Aufsteigend sortieren</string>
+    <string name="sort_descending">Absteigend sortieren</string>
+    <string name="track_count">Titelanzahl</string>
+
+    <!-- Track search -->
+    <string name="close_track_search">Titelsuche schließen</string>
+    <string name="track_search">Titelsuche</string>
+
+    <!-- Scroll to buttons -->
+    <string name="scroll_to_top">Nach oben scrollen</string>
+    <string name="scroll_to_current_track">Zum aktuellen Titel scrollen</string>
+
+    <!-- Expanded player sheet -->
+    <string name="close_player_sheet">Player-Ansicht schließen</string>
+    <string name="playback_mode_toggle">Wiedergabemodus umschalten</string>
+    <string name="playback_mode_repeat">Alle wiederholen</string>
+    <string name="playback_mode_repeat_one">Einen wiederholen</string>
+    <string name="playback_mode_shuffle">Zufallswiedergabe</string>
+    <string name="playback_mode_smart_shuffle">Intelligente Zufallswiedergabe</string>
+    <string name="shuffle_mode_pure_activated">Reine Zufallswiedergabe — wirklich zufällige Reihenfolge</string>
+    <string name="shuffle_mode_smart_activated">Intelligente Zufallswiedergabe — reduziert Wiederholungen desselben Interpreten</string>
+    <string name="show_lyrics">Songtext anzeigen</string>
+    <string name="set_sleep_timer">Sleep-Timer einstellen</string>
+    <string name="sleep_timer">Sleep-Timer</string>
+    <string name="short_minutes">min</string>
+    <string name="stop_timer">Stopp</string>
+    <string name="start_timer">Start</string>
+    <string name="finish_current_track">Aktuellen Titel beenden</string>
+    <string name="tile_label_play">Abspielen</string>
+    <string name="tile_label_pause">Pause</string>
+
+    <!-- Play queue -->
+    <string name="remove_from_queue">Aus Warteschlange entfernen</string>
+    <string name="queue">Warteschlange</string>
+    <string name="show_queue">Warteschlange anzeigen</string>
+
+    <!-- Track info screen -->
+    <string name="track_info">Titelinfo</string>
+    <string name="close_track_info_sheet">Titelinfo schließen</string>
+    <string name="look_for_metadata">Nach Metadaten suchen</string>
+    <string name="edit_manually">Manuell bearbeiten</string>
+    <string name="back_to_track_info">Zurück zur Titelinfo</string>
+
+    <!-- Risks of metadata editing dialog -->
+    <string name="risks_of_metadata_editing">Risiken der Metadatenbearbeitung</string>
+    <string name="risks_of_metadata_editing_explain">Das Bearbeiten von Metadaten ist eine mächtige Funktion, aber manchmal kann dabei etwas schiefgehen, und Audio-Datei-Tags verhalten sich möglicherweise nicht wie erwartet.\n\nWir empfehlen, deine Audiodateien vor Änderungen zu sichern — Vorsicht ist besser als Nachsicht!\n\nMit einem Klick auf \"Akzeptieren\" bestätigst du, dass du für deine Dateien verantwortlich bist, die notwendigen Sicherungen erstellt hast, und dass wir nicht haftbar gemacht werden können, falls etwas Unerwartetes passiert.\n\nKlicke auf \"Abbrechen\", wenn du nicht fortfahren möchtest.</string>
+    <string name="accept">Akzeptieren</string>
+    <string name="cancel">Abbrechen</string>
+
+    <!-- Metadata search screen -->
+    <string name="search">Suchen</string>
+    <string name="description">Beschreibung</string>
+    <string name="album_description">Albumbeschreibung</string>
+    <string name="no_description">Keine Beschreibung</string>
+    <string name="back_to_info_search">Zurück zur Infosuche</string>
+    <string name="search_menu">Menü der Infosuche</string>
+    <string name="search_results_provided_by">Ergebnisse bereitgestellt von MusicBrainz</string>
+
+    <string name="match_duration">Dauer abgleichen</string>
+    <string name="format_not_supported_for_writing">Dieses Dateiformat wird für die Metadatenbearbeitung nicht unterstützt.</string>
+
+    <!-- Search tips dialog -->
+    <string name="got_it">Verstanden</string>
+    <string name="search_tips">Suchtipps</string>
+    <string name="search_explain">Wir verwenden die MusicBrainz-API, um dir bei der Suche nach Titelinfos zu helfen.</string>
+    <string name="recipe_header">Kurzanleitung</string>
+    <string name="recipe_explain">Für die genauesten Ergebnisse suche nach Interpreten und Aufnahme zusammen, wobei jeder Wert in Anführungszeichen steht. Feldnamen können beliebig groß- oder kleingeschrieben werden, aber AND muss großgeschrieben sein:</string>
+    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="recipe_caution">Die Anführungszeichen sind es, die AND funktionieren lassen. Ohne sie wird die gesamte Zeile als reiner Text behandelt, und eine einfache Suche findet nur Songtitel — wenn du also einen Song und seinen Interpreten zusammen und ohne Anführungszeichen suchst, werden meist Songs gefunden, die nach dem Interpreten benannt sind.</string>
+    <string name="quotes_explain_header">Anführungszeichen für genaue Treffer</string>
+    <string name="quotes_explain">Verwende Anführungszeichen, um bestimmte Wörter oder Phrasen zu finden:</string>
+    <string name="quotes_example_1">\"4:44\"</string>
+    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
+    <string name="field_explain_header">Suche nach Feld</string>
+    <string name="field_explain">Du kannst nach Interpreten, Album oder Aufnahme (Titel) suchen:</string>
+    <string name="field_example_1">artist:\"Jay-Z\"</string>
+    <string name="field_example_2">release:\"Over You\"</string>
+    <string name="field_example_3">recording:\"Still Falling For You\"</string>
+    <string name="field_reference_header">Feldübersicht</string>
+    <string name="field_reference_explain">artist: — Name des Interpreten oder Ausführenden\nrecording: — Song- oder Titelname (verwende dieses Feld, nicht track:)\nrelease: — Name von Album, EP oder Single\n\nTipp: track: ist kein gültiges MusicBrainz-Feld — verwende recording: für Songnamen. MusicBrainz durchsucht standardmäßig Aufnahmetitel, du kannst also auch ohne Feldpräfix suchen.</string>
+    <string name="combine_explain_header">Suchen kombinieren</string>
+    <string name="combine_explain">Verwende AND, OR, NOT (großgeschrieben), um Suchen zu kombinieren. Sie wirken nur als Operatoren, wenn die Abfrage ein zusammengehöriges Paar von Anführungszeichen enthält — andernfalls werden sie als normale Wörter behandelt:</string>
+    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
+    <string name="mbid_lookup_header">MusicBrainz-ID-Suche</string>
+    <string name="mbid_lookup_explain">Füge eine MusicBrainz-ID (UUID) ein, um die genaue Aufnahme zu finden, selbst wenn die Textsuche fehlschlägt:</string>
+    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
+    <string name="duration_toggle_header">Dauerabgleich</string>
+    <string name="duration_toggle_explain">Wenn aktiviert, werden die Suchergebnisse auf Titel innerhalb von ±15 Sekunden der Dauer deiner Datei gefiltert. Deaktiviere dies im Überlaufmenü, wenn du nicht findest, wonach du suchst.</string>
+
+    <!-- Search errors -->
+    <string name="unknown_error_occurred">Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.</string>
+    <string name="query_was_corrupted">Die Abfrage war fehlerhaft. Bitte versuche es erneut.</string>
+    <string name="musicbrainz_server_error">Ein MusicBrainz-Fehler ist aufgetreten. Bitte versuche es erneut.</string>
+    <string name="musicbrainz_is_unavailable">MusicBrainz ist nicht verfügbar. Bitte versuche es später erneut.</string>
+    <string name="failed_to_parse_response">Antwort konnte nicht verarbeitet werden. Bitte versuche es erneut.</string>
+    <string name="no_internet">Sieht so aus, als wärst du offline. Verbinde dich mit dem Internet und versuche es erneut.</string>
+
+    <!-- Changes screen -->
+    <string name="changes">Änderungen</string>
+    <string name="old_cover_art">Altes Cover</string>
+    <string name="new_cover_art">Neues Cover</string>
+    <string name="overwrite">Überschreiben</string>
+    <string name="select_fields_to_overwrite">Zu überschreibende Felder auswählen:</string>
+    <string name="metadata_change_succeed">Titelinfo wurde erfolgreich geändert. Die Änderungen werden in ein paar Sekunden wirksam.</string>
+    <string name="important_to_know">Wichtig zu wissen</string>
+    <string name="artwork_change_note">Wenn das Cover für das Album dieses Titels auf deinem Gerät vorhanden ist, wird es unabhängig vom ausgewählten Cover verwendet.</string>
+    <string name="cover_art_from_gallery_note">Um Cover aus der Galerie anzuzeigen, musst du möglicherweise die App oder das Gerät neu starten.</string>
+
+    <!-- Changes errors -->
+    <string name="failed_to_load_cover_art_album_id_corrupted">Cover konnte nicht geladen werden. Die Album-ID für diese Aufnahme scheint fehlerhaft zu sein.</string>
+    <string name="cover_art_not_found">Leider wurde für diese Aufnahme kein Cover gefunden.</string>
+    <string name="cover_art_archive_is_unavailable">Cover konnte nicht geladen werden. Cover Art Archive ist nicht verfügbar. Bitte versuche es später erneut.</string>
+    <string name="failed_to_load_cover_art_request_timeout">Cover konnte innerhalb von 3 Minuten nicht geladen werden. Bitte überprüfe deine Netzwerkverbindung und versuche es erneut.</string>
+
+    <!-- Metadata writing errors -->
+    <string name="write_permission_denied">Metadaten konnten nicht überschrieben werden. Zugriff verweigert. Bitte versuche es erneut.</string>
+    <string name="no_read_permission">Keine Leseberechtigung. Bitte erteile sie oder versuche es erneut.</string>
+    <string name="no_write_permission">Keine Schreibberechtigung. Bitte erteile sie oder versuche es erneut.</string>
+    <string name="failed_to_read">Datei konnte nicht gelesen werden. Bitte versuche es erneut.</string>
+    <string name="no_lyrics_found">Kein Songtext für diesen Titel gefunden</string>
+    <string name="failed_to_write">Datei konnte nicht geschrieben werden. Bitte versuche es erneut.</string>
+
+    <string name="select_items">Auswählen</string>
+
+    <!-- Manual editing screen -->
+    <string name="edit">Bearbeiten</string>
+    <string name="pick_art">Cover auswählen</string>
+    <string name="restore_art">Wiederherstellen</string>
+    <string name="restore_tag">Tag-Wert wiederherstellen</string>
+
+    <!-- Lyrics control screen -->
+    <string name="lyrics_control">Songtext-Verwaltung</string>
+    <string name="lyrics_in_tag">Songtext im Tag</string>
+    <string name="lyrics_in_tag_explain">Songtext, gespeichert im Tag der Audiodatei</string>
+    <string name="lyrics_in_local_database">Songtext in lokaler Datenbank</string>
+    <string name="lyrics_in_local_database_explain">Songtext, kopiert aus einem Tag, von LRCLIB übernommen oder aus einer Datei hinzugefügt. Das ist es, was du auf dem Songtext-Bildschirm siehst</string>
+    <string name="lyrics_actions">Songtext-Aktionen</string>
+    <string name="lyrics_tools_explained">Aktionen zum Verwalten oder Bearbeiten von Songtexten in der lokalen Datenbank</string>
+    <string name="clear_db_entry">Datenbankeintrag löschen</string>
+    <string name="copy_from_tag">Aus Tag kopieren</string>
+    <string name="import_from_file">Aus Datei importieren</string>
+    <string name="write_to_tag">In Tag schreiben</string>
+    <string name="fetch_from_lrclib">Von LRCLIB abrufen</string>
+    <string name="publish_on_lrclib">Auf LRCLIB veröffentlichen</string>
+    <string name="unable_to_publish">Veröffentlichung nicht möglich: Titel, Interpret oder Album nicht angegeben.</string>
+    <string name="published_successfully">Erfolgreich veröffentlicht.</string>
+    <string name="solving_challenge">Challenge wird gelöst...</string>
+
+    <!-- Lyrics sheet -->
+    <string name="lyrics">Songtext</string>
+    <string name="close_lyrics_sheet">Songtext schließen</string>
+    <string name="loading_lyrics">Songtext wird geladen</string>
+    <string name="synced">Synchronisiert</string>
+    <string name="plain">Einfach</string>
+
+    <!-- Lyrics screen errors -->
+    <string name="cant_look_for_lyrics_title_or_artist_is_missing">Songtext kann nicht gesucht werden. Titel oder Interpret ist für diesen Titel nicht angegeben.</string>
+    <string name="lyrics_not_found">Leider konnte für diesen Titel kein Songtext gefunden werden.</string>
+    <string name="cant_find_lyrics">Songtext kann nicht gefunden werden.</string>
+    <string name="lyrics_provided_by">Songtext bereitgestellt von LRCLIB</string>
+
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">Zufallswiedergabe deaktiviert, damit dieser Titel als Nächstes gespielt wird</string>
+
+    <!-- Playlists related -->
+    <string name="create_playlist">Playlist erstellen</string>
+    <string name="add_to_playlist">Zur Playlist hinzufügen</string>
+    <string name="back_to_add_to_playlist">Zurück zum Hinzufügen zur Playlist</string>
+    <string name="name">Name</string>
+    <string name="new_playlist_title_placeholder">z. B. Favoriten</string>
+    <string name="create">Erstellen</string>
+    <string name="reorder_track">Titel neu anordnen</string>
+    <string name="delete_playlist">Playlist löschen</string>
+    <string name="rename_playlist">Playlist umbenennen</string>
+    <string name="rename">Umbenennen</string>
+    <string name="delete">Löschen</string>
+    <string name="delete_playlist_dialog_title">Playlist löschen?</string>
+    <string name="delete_playlist_dialog_text">Dies wirkt sich nicht auf die enthaltenen Titel aus.</string>
+    <string name="nothing_yet">Noch nichts.</string>
+    <string name="unknown_folder">Unbekannter Ordner</string>
+    <string name="enable_list_view">Listenansicht aktivieren</string>
+    <string name="enable_grid_view">Rasteransicht aktivieren</string>
+
+    <!-- Playlists errors -->
+    <string name="blank_playlist_name_error">Bitte gib der Playlist einen Namen.</string>
+    <string name="playlist_already_exists_error">Dieser Name ist bereits vergeben.</string>
+    <string name="track_is_already_on_playlist">Dieser Titel ist bereits auf der Playlist.</string>
+
+    <!-- Settings sheet -->
+    <string name="settings">Einstellungen</string>
+    <string name="close_settings_sheet">Einstellungen schließen</string>
+    <string name="theme">Design</string>
+    <string name="theme_supporting_text">Erscheinungsbild, Farbpalette</string>
+    <string name="lyrics_supporting_text">Schrifteinstellungen, Ausrichtung, Sidecar-Ordner</string>
+    <string name="lyrics_folder">Songtext-Ordner</string>
+    <string name="lyrics_folder_supporting_text">Wähle einen Ordner, der .lrc-Dateien passend zu deinen Audiodateien enthält. Die App sucht nach &lt;basename>.lrc, wenn Songtext benötigt wird.</string>
+    <string name="pick_lyrics_folder">Songtext-Ordner auswählen</string>
+    <string name="use_lyrics_folder">Songtext-Ordner verwenden</string>
+    <string name="use_lyrics_folder_explain">Suche nach .lrc-Dateien im ausgewählten Ordner. Wenn deaktiviert, werden nur eingebettete und heruntergeladene Songtexte verwendet.</string>
+    <string name="playback">Wiedergabe</string>
+    <string name="playback_supporting_text">Audiofokus, Equalizer</string>
+    <string name="about_app">Über die App</string>
+    <string name="about_explain">Version, Repository, Feedback</string>
+    <string name="music_scan">Musik-Scan</string>
+    <string name="music_scan_supporting_text">Filtermodus, Ordnerverwaltung, Scannen</string>
+    <string name="privacy">Datenschutz</string>
+    <string name="privacy_supporting_text">Was dein Gerät verlässt, Netzwerksteuerung</string>
+    <string name="network_lookups">Netzwerkabfragen zulassen</string>
+    <string name="network_lookups_explain">Hauptschalter für LRCLIB-Songtexte und MusicBrainz-Metadaten. Deaktiviere dies für einen strikten Offline-Modus — der Rest der App funktioniert weiterhin mit deiner lokalen Bibliothek.</string>
+    <string name="track_play_stats">Hörstatistiken aufzeichnen</string>
+    <string name="track_play_stats_explain">Zählt, wie oft du Titel abspielst und überspringst, und wie lange du jeden Titel gehört hast. Wird nur auf diesem Gerät gespeichert. Wenn du dies deaktivierst, werden die vorhandenen Zählungen gelöscht.</string>
+
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">Was dein Gerät verlässt</string>
+    <string name="privacy_what_stays">Was auf deinem Gerät bleibt</string>
+    <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
+    <string name="privacy_lrclib_body">Gesendet: Titelname, Interpret, Album (falls bekannt) und Dauer. Für die Suche: gesendet, wenn du die Songtext-Ansicht für einen Titel öffnest, dessen Songtext noch nicht zwischengespeichert ist. Für die Veröffentlichung: gesendet, wenn du ausdrücklich auf \"Auf LRCLIB veröffentlichen\" im Songtext-Verwaltungsbereich tippst. Keiner der beiden Wege ist aktiv, wenn Netzwerkabfragen deaktiviert sind.</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
+    <string name="privacy_musicbrainz_body">Gesendet: die von dir eingegebene Suchanfrage sowie die Dauer des Titels. Wird verwendet, um eine passende Veröffentlichung mit Cover und Metadaten zu finden. Wird nur gesendet, wenn du auf dem Bildschirm Titelinfo → Suche auf Suchen tippst — niemals automatisch.</string>
+    <string name="privacy_local_title">Lokale Daten</string>
+    <string name="privacy_local_body">Songtext-Cache, Ergebnisse des Musik-Scans, App-Einstellungen und Absturzprotokolle befinden sich alle auf diesem Gerät. Das Teilen eines Absturzprotokolls ist eine manuelle Aktion über das System-Freigabemenü — nichts wird von selbst gesendet.</string>
+    <string name="privacy_no_telemetry_title">Keine Telemetrie</string>
+    <string name="privacy_no_telemetry_body">Keine Analysen, keine Nutzungsverfolgung, keine Diagnose-Uploads. Die oben genannten Hosts sind die gesamte Netzwerkoberfläche.</string>
+
+    <!-- Theme settings -->
+    <string name="appearance">Erscheinungsbild</string>
+    <string name="appearance_system">System</string>
+    <string name="appearance_light">Hell</string>
+    <string name="appearance_dark">Dunkel</string>
+
+    <string name="palette_style">Paletten-Stil</string>
+    <string name="palette_tonal_spot">Tonal Spot</string>
+    <string name="palette_neutral">Neutral</string>
+    <string name="palette_vibrant">Kräftig</string>
+    <string name="palette_expressive">Ausdrucksstark</string>
+    <string name="palette_rainbow">Regenbogen</string>
+    <string name="palette_fruit_salad">Fruchtsalat</string>
+    <string name="palette_monochrome">Monochrom</string>
+    <string name="palette_fidelity">Wiedergabetreue</string>
+    <string name="palette_content">Inhalt</string>
+
+    <string name="black_theme">Schwarzes Design</string>
+    <string name="black_theme_explain">Macht das dunkle Design wirklich dunkel</string>
+    <string name="use_system_key_colors">Systemfarben</string>
+    <string name="use_system_key_colors_explain">Akzentfarben des Systems verwenden</string>
+    <string name="use_album_art_color">Cover-Farbe</string>
+    <string name="use_album_art_color_explain">Verwendet die dominante Farbe des Covers des aktuellen Titels</string>
+
+    <!-- Playback settings -->
+    <string name="audio_focus">Audiofokus</string>
+    <string name="audio_focus_explain">Wiedergabe pausieren, wenn eine andere App Audio abspielen muss</string>
+    <string name="changes_will_take_effect_on_next_launch">Änderungen werden beim nächsten Start wirksam.</string>
+    <string name="equalizer">Equalizer</string>
+    <string name="equalizer_explain">Klang manuell anpassen</string>
+    <string name="jump_to_beginning">Zum Anfang springen</string>
+    <string name="jump_to_beginning_explain">Startet den aktuellen Titel beim ersten Drücken der Zurück-Taste neu</string>
+
+    <!-- Tabs settings -->
+    <string name="tabs">Tabs</string>
+    <string name="tabs_supporting_text">Standard-Tab und Reihenfolge</string>
+    <string name="default_tab_and_order">Standard-Tab und Reihenfolge</string>
+    <string name="reorder_tab">Tab neu anordnen</string>
+
+    <!-- Playlists settings -->
+    <string name="filter_instead_of_search">Filter statt Suche</string>
+    <string name="filter_instead_of_search_explain">Ersetzt die Playlist-Suche durch einen Filter</string>
+    <string name="playlists_supporting_text">Suchfeld, Import</string>
+    <string name="filter">Filter</string>
+    <string name="import_playlist">Playlist importieren</string>
+    <string name="import_playlist_explain">Playlist aus M3U-Datei hinzufügen</string>
+    <string name="imported_successfully">%1$d Titel importiert.</string>
+    <string name="m3u_imported_partial">%1$d von %2$d Titeln importiert (%3$d nicht gefunden).</string>
+    <string name="m3u_no_tracks_found">Keine Titel aus der Playlist auf dem Gerät gefunden.</string>
+    <string name="m3u_import_empty">Die Playlist-Datei enthält keine Titel.</string>
+
+    <!-- Lyrics settings -->
+    <string name="dark_theme_for_lyrics">Dunkles Design für Songtext</string>
+    <string name="dark_theme_for_lyrics_explain">Wendet das dunkle Design auf den Songtext-Bildschirm an, auch wenn der helle Modus aktiv ist</string>
+    <string name="lyrics_preview_string">Diese sehr, sehr, sehr lange Zeile zeigt, wie der Songtext des Titels mit diesen Einstellungen auf dem entsprechenden Bildschirm aussehen wird</string>
+    <string name="font_size">Schriftgröße</string>
+    <string name="font_weight">Schriftstärke</string>
+    <string name="line_height">Zeilenhöhe</string>
+    <string name="letter_spacing">Zeichenabstand</string>
+    <string name="alignment">Ausrichtung</string>
+    <string name="start">Anfang</string>
+    <string name="center">Mitte</string>
+    <string name="end">Ende</string>
+    <string name="reset">Zurücksetzen</string>
+
+    <!-- Music scan settings -->
+    <string name="include_music_folder">Musik-Ordner einbeziehen</string>
+    <string name="include_music_folder_explain">Musik aus dem Standard-Musikordner anzeigen</string>
+    <string name="included_folders">Einbezogene Ordner</string>
+    <string name="pick_folder_to_include_in_scanning">Ordner zum Einbeziehen in den Scan auswählen</string>
+    <string name="remove_folder_from_included_in_scanning">Ordner aus dem Scan entfernen</string>
+    <string name="folders_with_audio">Ordner mit Audio</string>
+    <string name="include_folder_in_scanning">Ordner in den Scan einbeziehen</string>
+    <string name="scan_for_folders_with_audio">Nach Ordnern mit Audio suchen</string>
+    <string name="filter_mode">Filtermodus</string>
+    <string name="filter_mode_explain">Musik aus den angegebenen Ordnern anzeigen oder aus allen außer diesen</string>
+    <string name="inclusive">Inklusiv</string>
+    <string name="exclusive">Exklusiv</string>
+    <string name="excluded_folders">Ausgeschlossene Ordner</string>
+    <string name="pick_folder_to_exclude_from_scanning">Ordner zum Ausschließen vom Scan auswählen</string>
+    <string name="remove_folder_from_excluded_from_scanning">Ordner aus den ausgeschlossenen Ordnern entfernen</string>
+    <string name="exclude_folder_from_scanning">Ordner vom Scan ausschließen</string>
+    <string name="scanned_successfully">Erfolgreich gescannt</string>
+    <string name="refresh_on_app_launch">Beim App-Start aktualisieren</string>
+    <string name="refresh_on_app_launch_explain">Daten im MediaStore beim Start aktualisieren</string>
+    <string name="refresh">MediaStore aktualisieren</string>
+    <string name="refresh_explain">Bereits im MediaStore vorhandene Daten aktualisieren</string>
+    <string name="scan_folder">Ordner scannen</string>
+    <string name="scan_folder_explain">Audio-Ordner scannen, um neue Daten in den MediaStore aufzunehmen</string>
+    <string name="failed_to_scan">Scan fehlgeschlagen</string>
+    <string name="nothing_to_refresh">Nichts zu aktualisieren</string>
+    <string name="refreshed_successfully">Erfolgreich aktualisiert</string>
+    <string name="failed_to_refresh">Aktualisierung fehlgeschlagen</string>
+    <string name="ignore_short_tracks">Kurze Titel ignorieren</string>
+    <string name="ignore_short_tracks_explain">Titel, die kürzer als 30 Sekunden sind, nicht anzeigen</string>
+
+    <!-- About screen -->
+    <string name="repo">Repository</string>
+    <string name="repo_explain">Repository des Projekts ansehen</string>
+    <string name="feedback">Feedback</string>
+    <string name="feedback_explain">Kontakt, um ein Feature vorzuschlagen oder ein Problem zu melden</string>
+
+    <!-- Open a track with "Open with..." dialog -->
+    <string name="track_is_not_found_in_media_store">Dieser Titel ist leider für den Player nicht verfügbar. Möglicherweise liegt das daran, dass er sich in einem Ordner befindet, der nicht im Scan enthalten ist.</string>
+
+    <string name="copy_error">Fehler kopieren</string>
+    <string name="select_all">Alle auswählen</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">Letztes Absturzprotokoll teilen</string>
+    <string name="share_crash_log_explain">Hänge diese Datei an, wenn du einen Fehler meldest. Absturzprotokolle bleiben auf deinem Gerät.</string>
+    <string name="no_crash_log_available">Keine Absturzprotokolle auf diesem Gerät</string>
+    <string name="share_crash_log_subject">Lotus-Absturzbericht</string>
+
+    <!-- Listening stats screen -->
+    <string name="stats_title">Hörstatistiken</string>
+    <string name="stats_supporting_text">Meistgespielt, meistgehört, kürzlich gespielt, Top-Interpreten</string>
+    <string name="stats_summary_title">Übersicht</string>
+    <string name="stats_summary_total_time">Gesamte Hörzeit</string>
+    <string name="stats_summary_plays_skips">Wiedergaben / Übersprungen</string>
+    <string name="stats_summary_plays_skips_value">%1$d / %2$d</string>
+    <string name="stats_summary_tracks">Titel mit Statistiken</string>
+    <string name="stats_section_most_played">Meistgespielt</string>
+    <string name="stats_section_most_listened">Meistgehört</string>
+    <string name="stats_section_recently_played">Kürzlich gespielt</string>
+    <string name="stats_section_top_artists">Top-Interpreten</string>
+    <string name="stats_disabled_title">Hörstatistiken sind deaktiviert</string>
+    <string name="stats_disabled_body">Die Aufzeichnung ist in Einstellungen → Datenschutz deaktiviert. Aktiviere sie wieder, um erneut Wiedergaben und Übersprünge zu zählen.</string>
+    <string name="stats_disabled_action">Datenschutzeinstellungen öffnen</string>
+    <string name="stats_empty_title">Noch nichts zu sehen</string>
+    <string name="stats_empty_body">Spiele ein paar Titel über ihre Hälfte hinaus, dann erscheinen sie hier.</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$d Wiedergabe</item>
+        <item quantity="other">%1$d Wiedergaben</item>
+    </plurals>
+    <string name="ignore_single_track_albums">Alben mit nur einem Titel ignorieren</string>
+    <string name="ignore_single_track_albums_explain">Blendet Alben, die nur einen Titel enthalten, im Tab Alben aus. Die Titel bleiben in deiner Bibliothek und weiterhin durchsuchbar.</string>
+    <string name="reduce_lyrics_animation">Songtext-Animation reduzieren</string>
+    <string name="reduce_lyrics_animation_explain">Schaltet das Wischen, Leuchten und Zoomen bei der gerade gesungenen Zeile aus. Sie wird beim Abspielen weiterhin heller.</string>
+    <string name="per_track_artwork">Cover pro Titel</string>
+    <string name="per_track_artwork_explain">Wenn aktiviert, wird das in jeder Audiodatei eingebettete Cover anstelle des Album-Covers angezeigt. Für Titel ohne eingebettetes Bild wird auf das Album-Cover zurückgegriffen.</string>
+    <string name="playback_error_unsupported_format">Dieses Format kann auf diesem Gerät nicht abgespielt werden</string>
+    <string name="playback_error_file_unreadable">Diese Datei konnte nicht gelesen werden — sie ist möglicherweise beschädigt oder nicht zugänglich</string>
+    <string name="playback_error_unknown">Ein unbekannter Wiedergabefehler ist aufgetreten</string>
+</resources>
