@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App name -->
+    <string name="app_name" translatable="false">Lotus</string>
+
+    <!-- Links -->
+    <!-- Lyrics provider link -->
+    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
+    <!-- Metadata provider link -->
+    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
+    <!-- Repository link -->
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
+
+    <!-- Common back button -->
+    <string name="back">वापस</string>
+
+    <!-- Setup screens -->
+    <string name="get_started">शुरू करें</string>
+    <string name="permissions">अनुमतियाँ</string>
+    <string name="audio">ऑडियो</string>
+    <string name="explain_audio_permission_requirement">लोटस को आपके शानदार संगीत को चलाने के लिए इस अनुमति की आवश्यकता है</string>
+    <string name="grant_permission">अनुमति दें</string>
+    <string name="next">अगला</string>
+    <string name="grant_permission_in_settings">कृपया सेटिंग्स में अनुमति प्रदान करें</string>
+
+    <!-- Track metadata fields -->
+    <string name="title">शीर्षक</string>
+    <string name="album">एल्बम</string>
+    <string name="artist">कलाकार</string>
+    <string name="genre">शैली</string>
+    <string name="year">वर्ष</string>
+    <string name="track_number">ट्रैक संख्या</string>
+    <string name="bitrate">बिटरेट</string>
+    <string name="album_artist">एल्बम कलाकार</string>
+    <string name="duration">अवधि</string>
+    <string name="size">आकार</string>
+    <string name="path">पथ</string>
+    <string name="date_modified">संशोधन की तिथि</string>
+
+    <string name="unknown_title">अज्ञात शीर्षक</string>
+    <string name="unknown_album">अज्ञात एल्बम</string>
+    <string name="unknown_artist">अज्ञात कलाकार</string>
+    <string name="unknown_album_artist">अज्ञात एल्बम कलाकार</string>
+    <string name="unknown_genre">अज्ञात शैली</string>
+    <string name="unknown_year">अज्ञात वर्ष</string>
+    <string name="unknown_track_number">अज्ञात ट्रैक संख्या</string>
+    <string name="unknown_bitrate">अज्ञात बिटरेट</string>
+    <string name="unknown">अज्ञात</string>
+
+    <!-- Track dropdown menu -->
+    <string name="track_menu_button">ट्रैक मेनू बटन</string>
+    <string name="play_next">अगला चलाएं</string>
+    <string name="add_to_queue">कतार में जोड़ें</string>
+    <string name="remove_from_playlist">प्लेलिस्ट से हटाएं</string>
+    <string name="go_to_album">एल्बम पर जाएं</string>
+    <string name="go_to_artist">कलाकार पर जाएं</string>
+    <string name="share_track">साझा करें</string>
+    <string name="search_library">लाइब्रेरी खोजें</string>
+    <string name="search_library_hint">ट्रैक, एल्बम, कलाकार, शैलियां और प्लेलिस्ट खोजें</string>
+    <string name="search_no_results">कोई परिणाम नहीं मिला</string>
+    <string name="export_m3u">M3U में निर्यात करें</string>
+    <string name="export_m3u_success">प्लेलिस्ट निर्यात की गई</string>
+    <string name="export_m3u_failure">प्लेलिस्ट निर्यात नहीं की जा सकी</string>
+
+    <!-- Smart playlists -->
+    <string name="smart_playlists">स्मार्ट</string>
+    <string name="smart_recently_added">हाल ही में जोड़े गए</string>
+    <string name="smart_random_mix">रैंडम मिक्स</string>
+    <string name="smart_loved">पसंदीदा ट्रैक</string>
+    <string name="love_track">पसंदीदा बनाएं</string>
+    <string name="unlove_track">पसंदीदा से हटाएं</string>
+
+    <!-- Backup -->
+    <string name="backup">बैकअप</string>
+    <string name="backup_supporting_text">अपनी प्लेलिस्ट और पसंदीदा ट्रैक को अपने नियंत्रण वाली फ़ाइल में सहेजें। उन्हें बाद में पुनर्स्थापित करें।</string>
+    <string name="backup_export">बैकअप सहेजें</string>
+    <string name="backup_import">फ़ाइल से पुनर्स्थापित करें</string>
+    <string name="backup_what_is_included">फ़ाइल में क्या शामिल है</string>
+    <string name="backup_what_is_included_body">आपकी प्लेलिस्ट (नाम + उनमें मौजूद ट्रैक) और पसंदीदा ट्रैक। यह सादा JSON है — यदि आप देखना चाहते हैं कि वास्तव में क्या सहेजा गया है, तो इसे किसी भी टेक्स्ट एडिटर में खोलें। सेटिंग्स, बोल (लिरिक्स) कैश और क्रैश लॉग शामिल नहीं हैं।</string>
+    <string name="backup_import_policy_title">पुनर्स्थापना कैसे काम करती है</string>
+    <string name="backup_import_policy_body">पुनर्स्थापना योगात्मक (additive) है। समान नाम वाली मौजूदा प्लेलिस्ट रखी जाती हैं; केवल नई जोड़ी जाती हैं। पसंदीदा ट्रैक मिला दिए जाते हैं। वे ट्रैक जिनकी फ़ाइलें डिवाइस से हटा दी गई हैं, छोड़ दिए जाते हैं।</string>
+    <string name="backup_import_confirm_title">इस फ़ाइल से पुनर्स्थापित करें?</string>
+    <string name="backup_import_confirm_body">लोटस चयनित फ़ाइल को पढ़ेगा और आपकी लाइब्रेरी में नई चीजें जोड़ेगा। जो कुछ भी पहले से इस डिवाइस पर है, उसे हटाया नहीं जाएगा।</string>
+    <string name="backup_import_confirm_yes">पुनर्स्थापित करें</string>
+    <string name="backup_export_success">%1$d प्लेलिस्ट, %2$d पसंदीदा ट्रैक, और %3$d प्ले आँकड़े सहेजे गए।</string>
+    <string name="backup_export_failure">बैकअप सहेजा नहीं जा सका: %1$s</string>
+    <string name="backup_import_success">%1$d प्लेलिस्ट जोड़ी गईं, मौजूदा नाम वाली %2$d छोड़ी गईं, %3$d पसंदीदा ट्रैक जोड़े गए। %4$d प्रविष्टियां किसी भी स्थानीय फ़ाइल से मेल नहीं खातीं।</string>
+    <string name="backup_import_stats_added">%1$d प्ले आँकड़े प्रविष्टियां मिला दी गईं।</string>
+    <string name="backup_import_stats_skipped">प्ले आँकड़े आयात नहीं किए गए (रिकॉर्डिंग अक्षम है)।</string>
+    <string name="backup_import_failure">बैकअप पढ़ा नहीं जा सका: %1$s</string>
+
+    <!-- Tabs' names -->
+    <string name="tracks">ट्रैक</string>
+    <string name="albums">एल्बम</string>
+    <string name="artists">कलाकार</string>
+    <string name="genres">शैलियां</string>
+    <string name="playlists">प्लेलिस्ट</string>
+    <string name="folders">फ़ोल्डर</string>
+
+    <!-- Sorting dialog -->
+    <string name="sort_order">क्रमबद्ध करें</string>
+    <string name="sort_ascending">आरोही</string>
+    <string name="sort_descending">अवरोही</string>
+    <string name="track_count">ट्रैक की संख्या</string>
+
+    <!-- Track search -->
+    <string name="close_track_search">ट्रैक खोज बंद करें</string>
+    <string name="track_search">ट्रैक खोज</string>
+
+    <!-- Scroll to buttons -->
+    <string name="scroll_to_top">शीर्ष पर स्क्रॉल करें</string>
+    <string name="scroll_to_current_track">वर्तमान ट्रैक पर स्क्रॉल करें</string>
+
+    <!-- Expanded player sheet -->
+    <string name="close_player_sheet">प्लेयर बंद करें</string>
+    <string name="playback_mode_toggle">प्लेबैक मोड बदलें</string>
+    <string name="playback_mode_repeat">सभी दोहराएं</string>
+    <string name="playback_mode_repeat_one">एक दोहराएं</string>
+    <string name="playback_mode_shuffle">शफ़ल</string>
+    <string name="playback_mode_smart_shuffle">स्मार्ट शफ़ल</string>
+    <string name="shuffle_mode_pure_activated">शुद्ध शफ़ल — पूरी तरह से यादृच्छिक क्रम</string>
+    <string name="shuffle_mode_smart_activated">स्मार्ट शफ़ल — एक ही कलाकार के बार-बार आने को कम करता है</string>
+    <string name="show_lyrics">बोल दिखाएं</string>
+    <string name="set_sleep_timer">स्लीप टाइमर सेट करें</string>
+    <string name="sleep_timer">स्लीप टाइमर</string>
+    <string name="short_minutes">मिनट</string>
+    <string name="stop_timer">रोकें</string>
+    <string name="start_timer">शुरू करें</string>
+    <string name="finish_current_track">वर्तमान ट्रैक समाप्त करें</string>
+    <string name="tile_label_play">चलाएं</string>
+    <string name="tile_label_pause">रोकें</string>
+
+    <!-- Play queue -->
+    <string name="remove_from_queue">कतार से हटाएं</string>
+    <string name="queue">कतार</string>
+    <string name="show_queue">कतार दिखाएं</string>
+
+    <!-- Track info screen -->
+    <string name="track_info">ट्रैक की जानकारी</string>
+    <string name="close_track_info_sheet">ट्रैक जानकारी बंद करें</string>
+    <string name="look_for_metadata">मेटाडेटा खोजें</string>
+    <string name="edit_manually">मैन्युअल रूप से संपादित करें</string>
+    <string name="back_to_track_info">ट्रैक जानकारी पर वापस जाएं</string>
+
+    <!-- Risks of metadata editing dialog -->
+    <string name="risks_of_metadata_editing">मेटाडेटा संपादन के जोखिम</string>
+    <string name="risks_of_metadata_editing_explain">मेटाडेटा संपादित करना एक शक्तिशाली सुविधा है, लेकिन कभी-कभी चीजें गलत हो सकती हैं और ऑडियो फ़ाइल टैग उम्मीद के मुताबिक काम नहीं कर सकते हैं।\n\nहम अनुशंसा करते हैं कि आप कोई भी परिवर्तन करने से पहले अपनी ऑडियो फ़ाइलों का बैकअप लें — बाद में पछताने से बेहतर है सुरक्षित रहना!\n\n\"स्वीकार करें\" पर क्लिक करके, आप मानते हैं कि आप अपनी फ़ाइलों के लिए जिम्मेदार हैं, आपने आवश्यक बैकअप ले लिए हैं, और यदि कुछ अप्रत्याशित होता है तो हम जिम्मेदार नहीं होंगे।\n\nयदि आप आगे नहीं बढ़ना चाहते हैं तो \"रद्द करें\" पर क्लिक करें।</string>
+    <string name="accept">स्वीकार करें</string>
+    <string name="cancel">रद्द करें</string>
+
+    <!-- Metadata search screen -->
+    <string name="search">खोजें</string>
+    <string name="description">विवरण</string>
+    <string name="album_description">एल्बम विवरण</string>
+    <string name="no_description">कोई विवरण नहीं</string>
+    <string name="back_to_info_search">जानकारी खोज पर वापस जाएं</string>
+    <string name="search_menu">जानकारी खोज ड्रॉपडाउन मेनू</string>
+    <string name="search_results_provided_by">परिणाम MusicBrainz द्वारा प्रदान किए गए</string>
+
+    <string name="match_duration">अवधि मिलाएं</string>
+    <string name="format_not_supported_for_writing">यह फ़ाइल स्वरूप मेटाडेटा संपादन का समर्थन नहीं करता है।</string>
+
+    <!-- Search tips dialog -->
+    <string name="got_it">समझ गया</string>
+    <string name="search_tips">खोज युक्तियाँ</string>
+    <string name="search_explain">हम ट्रैक के बारे में जानकारी खोजने में आपकी सहायता करने के लिए MusicBrainz API का उपयोग करते हैं।</string>
+    <string name="recipe_header">त्वरित विधि</string>
+    <string name="recipe_explain">सबसे सटीक परिणामों के लिए, कलाकार और रिकॉर्डिंग को एक साथ उद्धरण चिह्नों (quotes) में खोजें। फ़ील्ड के नाम लोअरकेस या अपरकेस हो सकते हैं, लेकिन शब्द AND अपरकेस होना चाहिए:</string>
+    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="recipe_caution">उद्धरण चिह्न AND को काम करने देते हैं। उनके बिना, पूरी लाइन को सादे पाठ के रूप में माना जाता है, और एक सादी खोज केवल गीत के शीर्षकों से मेल खाती है — इसलिए उद्धरणों के बिना किसी गीत और उसके कलाकार को एक साथ खोजने से कलाकार के नाम वाले गीत ही मिलते हैं।</string>
+    <string name="quotes_explain_header">सटीक मिलान के लिए उद्धरण</string>
+    <string name="quotes_explain">विशिष्ट शब्दों या वाक्यांशों को खोजने के लिए उद्धरण चिह्नों का उपयोग करें:</string>
+    <string name="quotes_example_1">\"4:44\"</string>
+    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
+    <string name="field_explain_header">फ़ील्ड खोज</string>
+    <string name="field_explain">आप कलाकार, एल्बम, या रिकॉर्डिंग (ट्रैक) के नाम से खोज सकते हैं:</string>
+    <string name="field_example_1">artist:\"Jay-Z\"</string>
+    <string name="field_example_2">release:\"Over You\"</string>
+    <string name="field_example_3">recording:\"Still Falling For You\"</string>
+    <string name="field_reference_header">फ़ील्ड संदर्भ</string>
+    <string name="field_reference_explain">artist: — कलाकार या प्रदर्शक का नाम\nrecording: — गीत या ट्रैक का शीर्षक (इसका उपयोग करें, track: का नहीं)\nrelease: — एल्बम, ईपी, या एकल का नाम\n\nयुक्ति: MusicBrainz में track: एक मान्य फ़ील्ड नहीं है — गीत के नाम के लिए recording: का उपयोग करें। MusicBrainz डिफ़ॉल्ट रूप से रिकॉर्डिंग शीर्षकों में खोजता है, इसलिए आप फ़ील्ड उपसर्ग के बिना भी खोज सकते हैं।</string>
+    <string name="combine_explain_header">खोजों को मिलाना</string>
+    <string name="combine_explain">खोजों को मिलाने के लिए AND, OR, NOT (अपरकेस में) का उपयोग करें। वे केवल तभी ऑपरेटर के रूप में काम करते हैं जब खोज में मेल खाने वाले उद्धरण चिह्नों की एक जोड़ी हो — अन्यथा उन्हें शाब्दिक शब्दों के रूप में माना जाता है:</string>
+    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
+    <string name="mbid_lookup_header">MusicBrainz ID लुकअप</string>
+    <string name="mbid_lookup_explain">सटीक रिकॉर्डिंग खोजने के लिए MusicBrainz ID (UUID) पेस्ट करें, तब भी जब पाठ खोज विफल हो जाती है:</string>
+    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
+    <string name="duration_toggle_header">अवधि मिलाएं</string>
+    <string name="duration_toggle_explain">सक्षम होने पर, खोज परिणामों को उन ट्रैकों के लिए फ़िल्टर किया जाता है जो आपकी फ़ाइल की अवधि के ±15 सेकंड के भीतर हैं। यदि आपको वह नहीं मिल रहा है जो आप खोज रहे हैं, तो इसे ड्रॉपडाउन मेनू से अक्षम करें।</string>
+
+    <!-- Search errors -->
+    <string name="unknown_error_occurred">एक अज्ञात त्रुटि हुई। कृपया पुनः प्रयास करें।</string>
+    <string name="query_was_corrupted">क्वेरी दूषित हो गई थी। कृपया पुनः प्रयास करें।</string>
+    <string name="musicbrainz_server_error">MusicBrainz पर एक त्रुटि हुई। कृपया पुनः प्रयास करें।</string>
+    <string name="musicbrainz_is_unavailable">MusicBrainz वर्तमान में अनुपलब्ध है। कृपया बाद में पुनः प्रयास करें।</string>
+    <string name="failed_to_parse_response">प्रतिक्रिया को पार्स करने में विफल। कृपया पुनः प्रयास करें।</string>
+    <string name="no_internet">ऐसा लगता है कि आप ऑफ़लाइन हैं। कृपया इंटरनेट से जुड़ें और पुनः प्रयास करें।</string>
+
+    <!-- Changes screen -->
+    <string name="changes">परिवर्तन</string>
+    <string name="old_cover_art">पुरानी कवर कला</string>
+    <string name="new_cover_art">नई कवर कला</string>
+    <string name="overwrite">ओवरराइट करें</string>
+    <string name="select_fields_to_overwrite">ओवरराइट करने के लिए फ़ील्ड चुनें:</string>
+    <string name="metadata_change_succeed">ट्रैक की जानकारी सफलतापूर्वक बदल दी गई। परिवर्तन कुछ सेकंड में लागू हो जाएंगे।</string>
+    <string name="important_to_know">जानना महत्वपूर्ण है</string>
+    <string name="artwork_change_note">यदि इस ट्रैक की एल्बम कला आपके डिवाइस पर मौजूद है, तो चयनित कला की परवाह किए बिना इसका उपयोग किया जाएगा।</string>
+    <string name="cover_art_from_gallery_note">गैलरी से एक कवर देखने के लिए, आपको ऐप या अपने डिवाइस को पुनरारंभ करने की आवश्यकता हो सकती है।</string>
+
+    <!-- Changes errors -->
+    <string name="failed_to_load_cover_art_album_id_corrupted">कवर कला लोड करने में विफल। ऐसा लगता है कि इस रिकॉर्डिंग की एल्बम आईडी दूषित है।</string>
+    <string name="cover_art_not_found">दुर्भाग्य से, इस रिकॉर्डिंग के लिए कवर कला नहीं मिली।</string>
+    <string name="cover_art_archive_is_unavailable">कवर कला लोड करने में विफल। कवर आर्ट आर्काइव वर्तमान में अनुपलब्ध है। कृपया बाद में पुनः प्रयास करें।</string>
+    <string name="failed_to_load_cover_art_request_timeout">3 मिनट के भीतर कवर कला लोड नहीं की जा सकी। कृपया अपनी कनेक्शन गुणवत्ता जांचें और पुनः प्रयास करें।</string>
+
+    <!-- Metadata writing errors -->
+    <string name="write_permission_denied">मेटाडेटा को ओवरराइट करने में विफल। अनुमति अस्वीकृत। कृपया पुनः प्रयास करें।</string>
+    <string name="no_read_permission">कोई पढ़ने की अनुमति नहीं। कृपया अनुमति दें या पुनः प्रयास करें।</string>
+    <string name="no_write_permission">कोई लिखने की अनुमति नहीं। कृपया अनुमति दें या पुनः प्रयास करें।</string>
+    <string name="failed_to_read">फ़ाइल पढ़ने में विफल। कृपया पुनः प्रयास करें।</string>
+    <string name="no_lyrics_found">इस ट्रैक के लिए कोई बोल नहीं मिला</string>
+    <string name="failed_to_write">फ़ाइल में लिखने में विफल। कृपया पुनः प्रयास करें।</string>
+
+    <string name="select_items">चुनें</string>
+
+    <!-- Manual editing screen -->
+    <string name="edit">संपादित करें</string>
+    <string name="pick_art">कला चुनें</string>
+    <string name="restore_art">पुनर्स्थापित करें</string>
+    <string name="restore_tag">टैग मान पुनर्स्थापित करें</string>
+
+    <!-- Lyrics control screen -->
+    <string name="lyrics_control">बोल नियंत्रण</string>
+    <string name="lyrics_in_tag">टैग में बोल</string>
+    <string name="lyrics_in_tag_explain">ऑडियो फ़ाइल के टैग में सहेजे गए बोल</string>
+    <string name="lyrics_in_local_database">स्थानीय डेटाबेस में बोल</string>
+    <string name="lyrics_in_local_database_explain">टैग से कॉपी किए गए, LRCLIB से लाए गए, या फ़ाइल से जोड़े गए बोल। यह वही है जो आप बोल स्क्रीन पर देखते हैं</string>
+    <string name="lyrics_actions">बोल की क्रियाएं</string>
+    <string name="lyrics_tools_explained">स्थानीय डेटाबेस में बोल प्रबंधित करने या बदलने की क्रियाएं</string>
+    <string name="clear_db_entry">डीबी प्रविष्टि साफ़ करें</string>
+    <string name="copy_from_tag">टैग से कॉपी करें</string>
+    <string name="import_from_file">फ़ाइल से आयात करें</string>
+    <string name="write_to_tag">टैग में लिखें</string>
+    <string name="fetch_from_lrclib">LRCLIB से प्राप्त करें</string>
+    <string name="publish_on_lrclib">LRCLIB पर प्रकाशित करें</string>
+    <string name="unable_to_publish">प्रकाशित करने में असमर्थ: शीर्षक, कलाकार, या एल्बम निर्दिष्ट नहीं है।</string>
+    <string name="published_successfully">सफलतापूर्वक प्रकाशित किया गया।</string>
+    <string name="solving_challenge">चुनौती हल की जा रही है...</string>
+
+    <!-- Lyrics sheet -->
+    <string name="lyrics">बोल</string>
+    <string name="close_lyrics_sheet">बोल स्क्रीन बंद करें</string>
+    <string name="loading_lyrics">बोल लोड हो रहे हैं</string>
+    <string name="synced">सिंक किए गए</string>
+    <string name="plain">सादा पाठ</string>
+
+    <!-- Lyrics screen errors -->
+    <string name="cant_look_for_lyrics_title_or_artist_is_missing">बोल नहीं खोजे जा सकते। इस ट्रैक में शीर्षक या कलाकार गायब है।</string>
+    <string name="lyrics_not_found">दुर्भाग्य से, इस ट्रैक के बोल नहीं मिले।</string>
+    <string name="cant_find_lyrics">बोल नहीं मिल सके।</string>
+    <string name="lyrics_provided_by">बोल LRCLIB द्वारा प्रदान किए गए</string>
+
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">इस ट्रैक को अगला चलाने के लिए शफ़ल अक्षम किया गया</string>
+
+    <!-- Playlists related -->
+    <string name="create_playlist">प्लेलिस्ट बनाएं</string>
+    <string name="add_to_playlist">प्लेलिस्ट में जोड़ें</string>
+    <string name="back_to_add_to_playlist">प्लेलिस्ट में जोड़ने पर वापस जाएं</string>
+    <string name="name">नाम</string>
+    <string name="new_playlist_title_placeholder">उदा. मेरी पसंदीदा</string>
+    <string name="create">बनाएं</string>
+    <string name="reorder_track">ट्रैक को फिर से क्रमबद्ध करें</string>
+    <string name="delete_playlist">प्लेलिस्ट हटाएं</string>
+    <string name="rename_playlist">प्लेलिस्ट का नाम बदलें</string>
+    <string name="rename">नाम बदलें</string>
+    <string name="delete">हटाएं</string>
+    <string name="delete_playlist_dialog_title">प्लेलिस्ट हटाएं?</string>
+    <string name="delete_playlist_dialog_text">यह इसके अंदर के ट्रैक को प्रभावित नहीं करेगा।</string>
+    <string name="nothing_yet">अभी तक कुछ नहीं।</string>
+    <string name="unknown_folder">अज्ञात फ़ोल्डर</string>
+    <string name="enable_list_view">सूची दृश्य सक्षम करें</string>
+    <string name="enable_grid_view">ग्रिड दृश्य सक्षम करें</string>
+
+    <!-- Playlists errors -->
+    <string name="blank_playlist_name_error">कृपया प्लेलिस्ट के लिए एक नाम दर्ज करें।</string>
+    <string name="playlist_already_exists_error">यह नाम पहले से ही उपयोग में है।</string>
+    <string name="track_is_already_on_playlist">यह ट्रैक पहले से ही प्लेलिस्ट में है।</string>
+
+    <!-- Settings sheet -->
+    <string name="settings">सेटिंग्स</string>
+    <string name="close_settings_sheet">सेटिंग्स बंद करें</string>
+    <string name="theme">थीम</string>
+    <string name="theme_supporting_text">दिखावट, रंग पटल</string>
+    <string name="lyrics_supporting_text">फ़ॉन्ट सेटिंग्स, संरेखण, बाहरी फ़ोल्डर</string>
+    <string name="lyrics_folder">बोल फ़ोल्डर</string>
+    <string name="lyrics_folder_supporting_text">अपनी ऑडियो फ़ाइलों से मेल खाने वाली .lrc फ़ाइलों वाला एक फ़ोल्डर चुनें। ऐप आवश्यकतानुसार &lt;basename>.lrc खोजेगा।</string>
+    <string name="pick_lyrics_folder">बोल फ़ोल्डर चुनें</string>
+    <string name="use_lyrics_folder">बोल फ़ोल्डर का उपयोग करें</string>
+    <string name="use_lyrics_folder_explain">चयनित फ़ोल्डर में .lrc फ़ाइलों की खोज करता है। यदि अक्षम किया जाता है, तो केवल एम्बेडेड और डाउनलोड किए गए बोल का उपयोग किया जाएगा।</string>
+    <string name="playback">प्लेबैक</string>
+    <string name="playback_supporting_text">ऑडियो फ़ोकस, इक्वलाइज़र</string>
+    <string name="about_app">ऐप के बारे में</string>
+    <string name="about_explain">संस्करण, रिपॉजिटरी, फ़ीडबैक</string>
+    <string name="music_scan">संगीत स्कैन</string>
+    <string name="music_scan_supporting_text">फ़िल्टर मोड, फ़ोल्डर प्रबंधन, स्कैनिंग</string>
+    <string name="privacy">गोपनीयता</string>
+    <string name="privacy_supporting_text">आपके डिवाइस से क्या बाहर जाता है, नेटवर्क नियंत्रण</string>
+    <string name="network_lookups">नेटवर्क लुकअप की अनुमति दें</string>
+    <string name="network_lookups_explain">LRCLIB बोल और MusicBrainz मेटाडेटा के लिए मास्टर स्विच। इसे पूरी तरह से ऑफ़लाइन मोड के लिए अक्षम करें — बाकी ऐप आपकी स्थानीय लाइब्रेरी के साथ काम करना जारी रखेगा।</string>
+    <string name="track_play_stats">प्ले आँकड़े रिकॉर्ड करें</string>
+    <string name="track_play_stats_explain">गिनता है कि आप कितनी बार ट्रैक चलाते हैं और छोड़ते हैं, और आपने उन्हें कितनी देर तक सुना है। केवल इसी डिवाइस पर सहेजा गया। इसे अक्षम करने से वर्तमान गिनती साफ़ हो जाएगी।</string>
+
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">आपके डिवाइस से क्या बाहर जाता है</string>
+    <string name="privacy_what_stays">आपके डिवाइस पर क्या रहता है</string>
+    <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
+    <string name="privacy_lrclib_body">भेजा गया: ट्रैक का शीर्षक, कलाकार, एल्बम (यदि ज्ञात हो) और अवधि। खोजते समय: कैश किए गए बोल के बिना किसी ट्रैक के लिए बोल स्क्रीन खोलने पर भेजा गया। प्रकाशित करते समय: बोल नियंत्रण में स्पष्ट रूप से \"LRCLIB पर प्रकाशित करें\" टैप करने पर भेजा गया। यदि नेटवर्क लुकअप अक्षम हैं तो कोई डेटा नहीं भेजा जाता है।</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
+    <string name="privacy_musicbrainz_body">भेजा गया: टाइप की गई खोज और ट्रैक की अवधि। कवर कला और मेटाडेटा के साथ एक मिलान रिलीज खोजने के लिए उपयोग किया जाता है। केवल ट्रैक जानकारी → खोजें में खोजें पर टैप करने पर भेजा गया — कभी भी स्वचालित रूप से नहीं।</string>
+    <string name="privacy_local_title">स्थानीय डेटा</string>
+    <string name="privacy_local_body">बोल कैश, संगीत स्कैन परिणाम, ऐप सेटिंग्स, और क्रैश लॉग सभी इस डिवाइस पर रहते हैं। क्रैश लॉग साझा करना सिस्टम मेनू के माध्यम से एक मैन्युअल क्रिया है — कुछ भी अपने आप नहीं भेजा जाता है।</string>
+    <string name="privacy_no_telemetry_title">कोई टेलीमेट्री नहीं</string>
+    <string name="privacy_no_telemetry_body">कोई डेटा विश्लेषण नहीं, उपयोग ट्रैकिंग नहीं, या डायग्नोस्टिक्स नहीं भेजा जाता है। ऊपर सूचीबद्ध सर्वर ही एकमात्र नेटवर्क कनेक्शन हैं जो बनाए जाते हैं。</string>
+
+    <!-- Theme settings -->
+    <string name="appearance">दिखावट</string>
+    <string name="appearance_system">सिस्टम</string>
+    <string name="appearance_light">लाइट</string>
+    <string name="appearance_dark">डार्क</string>
+
+    <string name="palette_style">रंग पटल शैली</string>
+    <string name="palette_tonal_spot">टोनल स्पॉट</string>
+    <string name="palette_neutral">तटस्थ</string>
+    <string name="palette_vibrant">जीवंत</string>
+    <string name="palette_expressive">अभिव्यंजक</string>
+    <string name="palette_rainbow">इंद्रधनुष</string>
+    <string name="palette_fruit_salad">फ्रूट सलाद</string>
+    <string name="palette_monochrome">मोनोक्रोम</string>
+    <string name="palette_fidelity">फ़िडेलिटी</string>
+    <string name="palette_content">सामग्री</string>
+
+    <string name="black_theme">ब्लैक थीम</string>
+    <string name="black_theme_explain">डार्क थीम को पूरी तरह से काला कर देता है</string>
+    <string name="use_system_key_colors">सिस्टम के रंग</string>
+    <string name="use_system_key_colors_explain">सिस्टम के प्रमुख रंगों का उपयोग करता है</string>
+    <string name="use_album_art_color">एल्बम कला का रंग</string>
+    <string name="use_album_art_color_explain">वर्तमान ट्रैक के कवर से प्रमुख रंग का उपयोग करता है</string>
+
+    <!-- Playback settings -->
+    <string name="audio_focus">ऑडियो फ़ोकस</string>
+    <string name="audio_focus_explain">जब किसी अन्य ऐप को ऑडियो चलाने की आवश्यकता होती है तो प्लेबैक रोक देता है</string>
+    <string name="changes_will_take_effect_on_next_launch">परिवर्तन अगले लॉन्च पर प्रभावी होंगे।</string>
+    <string name="equalizer">इक्वलाइज़र</string>
+    <string name="equalizer_explain">ध्वनि को मैन्युअल रूप से समायोजित करें</string>
+    <string name="jump_to_beginning">शुरुआत पर जाएं</string>
+    <string name="jump_to_beginning_explain">पहली बार पिछला बटन दबाने पर वर्तमान ट्रैक को फिर से शुरू करता है</string>
+
+    <!-- Tabs settings -->
+    <string name="tabs">टैब</string>
+    <string name="tabs_supporting_text">डिफ़ॉल्ट टैब और क्रम</string>
+    <string name="default_tab_and_order">डिफ़ॉल्ट टैब और क्रम</string>
+    <string name="reorder_tab">टैब को फिर से क्रमबद्ध करें</string>
+
+    <!-- Playlists settings -->
+    <string name="filter_instead_of_search">खोज के बजाय फ़िल्टर करें</string>
+    <string name="filter_instead_of_search_explain">प्लेलिस्ट खोज को फ़िल्टर से बदल देता है</string>
+    <string name="playlists_supporting_text">खोज फ़ील्ड, आयात</string>
+    <string name="filter">फ़िल्टर</string>
+    <string name="import_playlist">प्लेलिस्ट आयात करें</string>
+    <string name="import_playlist_explain">M3U फ़ाइल से प्लेलिस्ट जोड़ता है</string>
+    <string name="imported_successfully">%1$d ट्रैक आयात किए गए।</string>
+    <string name="m3u_imported_partial">%2$d में से %1$d ट्रैक आयात किए गए (%3$d नहीं मिले)।</string>
+    <string name="m3u_no_tracks_found">डिवाइस पर कोई प्लेलिस्ट ट्रैक नहीं मिला।</string>
+    <string name="m3u_import_empty">प्लेलिस्ट फ़ाइल में कोई ट्रैक नहीं है।</string>
+
+    <!-- Lyrics settings -->
+    <string name="dark_theme_for_lyrics">बोल के लिए डार्क थीम</string>
+    <string name="dark_theme_for_lyrics_explain">लाइट मोड सक्रिय होने पर भी बोल स्क्रीन पर डार्क थीम लागू करता है</string>
+    <string name="lyrics_preview_string">यह बहुत, बहुत लंबी लाइन दिखाती है कि इन सेटिंग्स के साथ गीत के बोल संबंधित स्क्रीन पर कैसे दिखेंगे</string>
+    <string name="font_size">फ़ॉन्ट आकार</string>
+    <string name="font_weight">फ़ॉन्ट मोटाई</string>
+    <string name="line_height">लाइन की ऊंचाई</string>
+    <string name="letter_spacing">अक्षरों के बीच की जगह</string>
+    <string name="alignment">संरेखण</string>
+    <string name="start">शुरू</string>
+    <string name="center">केंद्र</string>
+    <string name="end">अंत</string>
+    <string name="reset">रीसेट करें</string>
+
+    <!-- Music scan settings -->
+    <string name="include_music_folder">संगीत फ़ोल्डर शामिल करें</string>
+    <string name="include_music_folder_explain">डिफ़ॉल्ट संगीत फ़ोल्डर से संगीत दिखाता है</string>
+    <string name="included_folders">शामिल फ़ोल्डर</string>
+    <string name="pick_folder_to_include_in_scanning">स्कैनिंग में शामिल करने के लिए फ़ोल्डर चुनें</string>
+    <string name="remove_folder_from_included_in_scanning">स्कैनिंग में शामिल फ़ोल्डरों से हटाएं</string>
+    <string name="folders_with_audio">ऑडियो वाले फ़ोल्डर</string>
+    <string name="include_folder_in_scanning">स्कैनिंग में फ़ोल्डर शामिल करें</string>
+    <string name="scan_for_folders_with_audio">ऑडियो वाले फ़ोल्डरों के लिए स्कैन करें</string>
+    <string name="filter_mode">फ़िल्टर मोड</string>
+    <string name="filter_mode_explain">विशिष्ट फ़ोल्डरों से या उनके अलावा कहीं से भी संगीत दिखाता है</string>
+    <string name="inclusive">समावेशी (Inclusive)</string>
+    <string name="exclusive">अनन्य (Exclusive)</string>
+    <string name="excluded_folders">बाहर रखे गए फ़ोल्डर</string>
+    <string name="pick_folder_to_exclude_from_scanning">स्कैनिंग से बाहर रखने के लिए फ़ोल्डर चुनें</string>
+    <string name="remove_folder_from_excluded_from_scanning">स्कैनिंग से बाहर रखे गए फ़ोल्डरों से हटाएं</string>
+    <string name="exclude_folder_from_scanning">स्कैनिंग से फ़ोल्डर बाहर रखें</string>
+    <string name="scanned_successfully">स्कैन सफलतापूर्वक पूरा हुआ</string>
+    <string name="refresh_on_app_launch">ऐप लॉन्च पर रीफ्रेश करें</string>
+    <string name="refresh_on_app_launch_explain">शुरू होने पर MediaStore डेटा को अपडेट करता है</string>
+    <string name="refresh">MediaStore को रीफ्रेश करें</string>
+    <string name="refresh_explain">MediaStore में पहले से मौजूद डेटा को अपडेट करता है</string>
+    <string name="scan_folder">फ़ोल्डर स्कैन करें</string>
+    <string name="scan_folder_explain">MediaStore में नया डेटा शामिल करने के लिए ऑडियो फ़ोल्डर को स्कैन करता है</string>
+    <string name="failed_to_scan">स्कैन करने में विफल</string>
+    <string name="nothing_to_refresh">रीफ्रेश करने के लिए कुछ नहीं</string>
+    <string name="refreshed_successfully">सफलतापूर्वक रीफ्रेश किया गया</string>
+    <string name="failed_to_refresh">रीफ्रेश करने में विफल</string>
+    <string name="ignore_short_tracks">छोटे ट्रैक पर ध्यान न दें</string>
+    <string name="ignore_short_tracks_explain">30 सेकंड से कम के ट्रैक नहीं दिखाता है</string>
+
+    <!-- About screen -->
+    <string name="repo">रिपॉजिटरी</string>
+    <string name="repo_explain">प्रोजेक्ट की रिपॉजिटरी देखें</string>
+    <string name="feedback">फ़ीडबैक</string>
+    <string name="feedback_explain">कोई सुविधा सुझाएं या समस्या की रिपोर्ट करें</string>
+
+    <!-- Open a track with "Open with..." dialog -->
+    <string name="track_is_not_found_in_media_store">दुर्भाग्य से, यह ट्रैक प्लेयर में उपलब्ध नहीं है। हो सकता है कि यह स्कैनिंग में शामिल न किए गए फ़ोल्डर में हो।</string>
+
+    <string name="copy_error">कॉपी करने में त्रुटि</string>
+    <string name="select_all">सभी चुनें</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">नवीनतम क्रैश लॉग साझा करें</string>
+    <string name="share_crash_log_explain">बग की रिपोर्ट करते समय इस फ़ाइल को संलग्न करें। क्रैश लॉग केवल आपके डिवाइस पर रहते हैं।</string>
+    <string name="no_crash_log_available">इस डिवाइस पर कोई क्रैश लॉग नहीं है</string>
+    <string name="share_crash_log_subject">लोटस क्रैश रिपोर्ट</string>
+
+    <!-- Listening stats screen -->
+    <string name="stats_title">प्लेबैक आँकड़े</string>
+    <string name="stats_supporting_text">सबसे ज्यादा चलाए गए, सबसे ज्यादा सुने गए, हाल ही में चलाए गए, शीर्ष कलाकार</string>
+    <string name="stats_summary_title">सामान्य</string>
+    <string name="stats_summary_total_time">कुल सुना गया समय</string>
+    <string name="stats_summary_plays_skips">चलाए गए / छोड़े गए</string>
+    <string name="stats_summary_plays_skips_value">%1$d / %2$d</string>
+    <string name="stats_summary_tracks">आँकड़ों वाले ट्रैक</string>
+    <string name="stats_section_most_played">सबसे ज्यादा चलाए गए</string>
+    <string name="stats_section_most_listened">सबसे ज्यादा सुने गए</string>
+    <string name="stats_section_recently_played">हाल ही में चलाए गए</string>
+    <string name="stats_section_top_artists">शीर्ष कलाकार</string>
+    <string name="stats_disabled_title">आँकड़े अक्षम हैं</string>
+    <string name="stats_disabled_body">सेटिंग्स → गोपनीयता में रिकॉर्डिंग बंद है। प्ले और स्किप की गिनती फिर से शुरू करने के लिए इसे वापस चालू करें।</string>
+    <string name="stats_disabled_action">गोपनीयता सेटिंग्स खोलें</string>
+    <string name="stats_empty_title">अभी दिखाने के लिए कुछ नहीं है</string>
+    <string name="stats_empty_body">कुछ ट्रैक्स को आधे से अधिक चलाएं और वे यहाँ दिखाई देंगे।</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$d प्ले</item>
+        <item quantity="other">%1$d प्ले</item>
+    </plurals>
+    <string name="ignore_single_track_albums">सिंगल-ट्रैक एल्बम पर ध्यान न दें</string>
+    <string name="ignore_single_track_albums_explain">एल्बम टैब से केवल एक ट्रैक वाले एल्बम को छुपाता है। ट्रैक अभी भी लाइब्रेरी में रहेंगे और खोजे जा सकेंगे।</string>
+    <string name="reduce_lyrics_animation">बोल के एनीमेशन कम करें</string>
+    <string name="reduce_lyrics_animation_explain">चल रही लाइन पर स्लाइडिंग, ब्लर और ज़ूम को अक्षम करता है। गाते समय प्रकाश प्रभाव सक्रिय रहता है।</string>
+    <string name="per_track_artwork">प्रति-ट्रैक कवर कला</string>
+    <string name="per_track_artwork_explain">यदि सक्षम है, तो यह एल्बम कवर के बजाय प्रत्येक ऑडियो फ़ाइल में एम्बेडेड छवि प्रदर्शित करता है। यदि ट्रैक में एम्बेडेड छवि नहीं है, तो यह एल्बम कवर पर वापस आ जाता है।</string>
+    <string name="playback_error_unsupported_format">यह प्रारूप इस डिवाइस पर नहीं चलाया जा सकता</string>
+    <string name="playback_error_file_unreadable">यह फ़ाइल पढ़ी नहीं जा सकी — हो सकता है कि यह दूषित हो या पहुंच से बाहर हो</string>
+    <string name="playback_error_unknown">एक अज्ञात प्लेबैक त्रुटि हुई</string>
+</resources>
