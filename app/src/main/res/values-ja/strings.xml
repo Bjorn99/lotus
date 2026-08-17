@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App name -->
+    <string name="app_name" translatable="false">Lotus</string>
+
+    <!-- Links -->
+    <!-- Lyrics provider link -->
+    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
+    <!-- Metadata provider link -->
+    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
+    <!-- Repository link -->
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
+
+    <!-- Common back button -->
+    <string name="back">戻る</string>
+
+    <!-- Setup screens -->
+    <string name="get_started">はじめる</string>
+    <string name="permissions">権限</string>
+    <string name="audio">オーディオ</string>
+    <string name="explain_audio_permission_requirement">素晴らしい音楽を再生するためにLotusにはこの権限が必要です</string>
+    <string name="grant_permission">権限を付与する</string>
+    <string name="next">次へ</string>
+    <string name="grant_permission_in_settings">設定から権限を付与してください</string>
+
+    <!-- Track metadata fields -->
+    <string name="title">タイトル</string>
+    <string name="album">アルバム</string>
+    <string name="artist">アーティスト</string>
+    <string name="genre">ジャンル</string>
+    <string name="year">年</string>
+    <string name="track_number">トラック番号</string>
+    <string name="bitrate">ビットレート</string>
+    <string name="album_artist">アルバムアーティスト</string>
+    <string name="duration">再生時間</string>
+    <string name="size">サイズ</string>
+    <string name="path">パス</string>
+    <string name="date_modified">更新日</string>
+
+    <string name="unknown_title">不明なタイトル</string>
+    <string name="unknown_album">不明なアルバム</string>
+    <string name="unknown_artist">不明なアーティスト</string>
+    <string name="unknown_album_artist">不明なアルバムアーティスト</string>
+    <string name="unknown_genre">不明なジャンル</string>
+    <string name="unknown_year">不明な年</string>
+    <string name="unknown_track_number">不明なトラック番号</string>
+    <string name="unknown_bitrate">不明なビットレート</string>
+    <string name="unknown">不明</string>
+
+    <!-- Track dropdown menu -->
+    <string name="track_menu_button">トラックメニューボタン</string>
+    <string name="play_next">次に再生</string>
+    <string name="add_to_queue">キューに追加</string>
+    <string name="remove_from_playlist">プレイリストから削除</string>
+    <string name="go_to_album">アルバムに移動</string>
+    <string name="go_to_artist">アーティストに移動</string>
+    <string name="share_track">共有</string>
+    <string name="search_library">ライブラリを検索</string>
+    <string name="search_library_hint">トラック、アルバム、アーティスト、ジャンル、プレイリストを検索</string>
+    <string name="search_no_results">結果がありません</string>
+    <string name="export_m3u">M3Uへエクスポート</string>
+    <string name="export_m3u_success">プレイリストをエクスポートしました</string>
+    <string name="export_m3u_failure">プレイリストをエクスポートできませんでした</string>
+
+    <!-- Smart playlists -->
+    <string name="smart_playlists">スマート</string>
+    <string name="smart_recently_added">最近追加した項目</string>
+    <string name="smart_random_mix">ランダムミックス</string>
+    <string name="smart_loved">お気に入りのトラック</string>
+    <string name="love_track">お気に入り</string>
+    <string name="unlove_track">お気に入り解除</string>
+
+    <!-- Backup -->
+    <string name="backup">バックアップ</string>
+    <string name="backup_supporting_text">プレイリストとお気に入りのトラックをファイルに保存します。後で復元できます。</string>
+    <string name="backup_export">バックアップを保存</string>
+    <string name="backup_import">ファイルから復元</string>
+    <string name="backup_what_is_included">ファイルに含まれるもの</string>
+    <string name="backup_what_is_included_body">プレイリスト（名前と含まれるトラック）およびお気に入りのトラック。プレーンなJSON形式なので、保存内容を確認したい場合は任意のテキストエディタで開けます。設定、歌詞のキャッシュ、クラッシュログは含まれません。</string>
+    <string name="backup_import_policy_title">復元の仕組み</string>
+    <string name="backup_import_policy_body">復元は追加で行われます。同じ名前の既存のプレイリストは保持され、新しいものだけが追加されます。お気に入りのトラックは統合されます。デバイスからファイルが移動されたトラックはスキップされます。</string>
+    <string name="backup_import_confirm_title">このファイルから復元しますか？</string>
+    <string name="backup_import_confirm_body">Lotusは選択したファイルを読み込み、ライブラリに新しい項目を追加します。すでにこのデバイスにあるものは一切削除されません。</string>
+    <string name="backup_import_confirm_yes">復元</string>
+    <string name="backup_export_success">%1$d 件のプレイリスト、%2$d 件のお気に入りトラック、%3$d 件の再生統計エントリを保存しました。</string>
+    <string name="backup_export_failure">バックアップを保存できませんでした: %1$s</string>
+    <string name="backup_import_success">%1$d 件のプレイリストを追加し、%2$d 件の同名プレイリストをスキップ、%3$d 件のお気に入りトラックを追加しました。%4$d 件のエントリはローカルファイルと一致しませんでした。</string>
+    <string name="backup_import_stats_added">%1$d 件の再生統計エントリを統合しました。</string>
+    <string name="backup_import_stats_skipped">再生統計はインポートされませんでした（記録がオフになっています）。</string>
+    <string name="backup_import_failure">バックアップを読み込めませんでした: %1$s</string>
+
+    <!-- Tabs' names -->
+    <string name="tracks">トラック</string>
+    <string name="albums">アルバム</string>
+    <string name="artists">アーティスト</string>
+    <string name="genres">ジャンル</string>
+    <string name="playlists">プレイリスト</string>
+    <string name="folders">フォルダ</string>
+
+    <!-- Sorting dialog -->
+    <string name="sort_order">並べ替え順</string>
+    <string name="sort_ascending">昇順</string>
+    <string name="sort_descending">降順</string>
+    <string name="track_count">トラック数</string>
+
+    <!-- Track search -->
+    <string name="close_track_search">トラック検索を閉じる</string>
+    <string name="track_search">トラック検索</string>
+
+    <!-- Scroll to buttons -->
+    <string name="scroll_to_top">一番上へスクロール</string>
+    <string name="scroll_to_current_track">現在のトラックへスクロール</string>
+
+    <!-- Expanded player sheet -->
+    <string name="close_player_sheet">プレイヤー画面を閉じる</string>
+    <string name="playback_mode_toggle">再生モードを切り替え</string>
+    <string name="playback_mode_repeat">すべてリピート</string>
+    <string name="playback_mode_repeat_one">1曲リピート</string>
+    <string name="playback_mode_shuffle">シャッフル</string>
+    <string name="playback_mode_smart_shuffle">スマートシャッフル</string>
+    <string name="shuffle_mode_pure_activated">ピュアシャッフル — 完全にランダムな順序</string>
+    <string name="shuffle_mode_smart_activated">スマートシャッフル — アーティストの連続再生を減らします</string>
+    <string name="show_lyrics">歌詞を表示</string>
+    <string name="set_sleep_timer">スリープタイマーを設定</string>
+    <string name="sleep_timer">スリープタイマー</string>
+    <string name="short_minutes">分</string>
+    <string name="stop_timer">停止</string>
+    <string name="start_timer">開始</string>
+    <string name="finish_current_track">現在のトラックを最後まで再生</string>
+    <string name="tile_label_play">再生</string>
+    <string name="tile_label_pause">一時停止</string>
+
+    <!-- Play queue -->
+    <string name="remove_from_queue">キューから削除</string>
+    <string name="queue">キュー</string>
+    <string name="show_queue">キューを表示</string>
+
+    <!-- Track info screen -->
+    <string name="track_info">トラック情報</string>
+    <string name="close_track_info_sheet">トラック情報画面を閉じる</string>
+    <string name="look_for_metadata">メタデータを検索</string>
+    <string name="edit_manually">手動で編集</string>
+    <string name="back_to_track_info">トラック情報へ戻る</string>
+
+    <!-- Risks of metadata editing dialog -->
+    <string name="risks_of_metadata_editing">メタデータ編集のリスク</string>
+    <string name="risks_of_metadata_editing_explain">メタデータの編集は強力な機能ですが、予期せぬ動作を引き起こし、オーディオファイルのタグが正常に機能しなくなる場合があります。\n\n念のため、変更を加える前にオーディオファイルのバックアップを取ることをお勧めします。\n\n「同意する」をクリックすることで、ファイルに対する責任を負い、必要なバックアップを作成し、予期せぬ事態が発生した場合に私たちが責任を負えないことを理解したものとみなされます。\n\n続行しない場合は「キャンセル」をクリックしてください。</string>
+    <string name="accept">同意する</string>
+    <string name="cancel">キャンセル</string>
+
+    <!-- Metadata search screen -->
+    <string name="search">検索</string>
+    <string name="description">説明</string>
+    <string name="album_description">アルバムの説明</string>
+    <string name="no_description">説明なし</string>
+    <string name="back_to_info_search">情報検索へ戻る</string>
+    <string name="search_menu">情報検索ドロップダウンメニュー</string>
+    <string name="search_results_provided_by">検索結果の提供元: MusicBrainz</string>
+
+    <string name="match_duration">再生時間を一致させる</string>
+    <string name="format_not_supported_for_writing">このファイル形式はメタデータ編集をサポートしていません。</string>
+
+    <!-- Search tips dialog -->
+    <string name="got_it">OK</string>
+    <string name="search_tips">検索のヒント</string>
+    <string name="search_explain">トラック情報の検索にはMusicBrainz APIを使用しています。</string>
+    <string name="recipe_header">クイックレシピ</string>
+    <string name="recipe_explain">最も正確な結果を得るには、アーティストと録音（トラック）の両方を引用符で囲んで検索してください。フィールド名は大文字でも小文字でも構いませんが、ANDは必ず大文字にする必要があります：</string>
+    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="recipe_caution">ANDを機能させるには引用符が必要です。引用符がない場合、行全体がプレーンテキストとして扱われ、単純な検索では曲名のみが一致します。そのため、引用符なしで曲とそのアーティストを一緒に検索すると、アーティストにちなんで名付けられた曲が見つかる傾向があります。</string>
+    <string name="quotes_explain_header">完全一致のための引用符</string>
+    <string name="quotes_explain">特定の単語やフレーズを見つけるには引用符を使用します：</string>
+    <string name="quotes_example_1">\"4:44\"</string>
+    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
+    <string name="field_explain_header">フィールドごとの検索</string>
+    <string name="field_explain">アーティスト、アルバム、または録音（トラック）名で検索できます：</string>
+    <string name="field_example_1">artist:\"Jay-Z\"</string>
+    <string name="field_example_2">release:\"Over You\"</string>
+    <string name="field_example_3">recording:\"Still Falling For You\"</string>
+    <string name="field_reference_header">フィールドリファレンス</string>
+    <string name="field_reference_explain">artist: — アーティストまたは演奏者名\nrecording: — 曲またはトラックのタイトル（track: ではなくこちらを使用）\nrelease: — アルバム、EP、シングルの名前\n\nヒント: track: は有効なMusicBrainzフィールドではありません。曲名には recording: を使用してください。MusicBrainzはデフォルトで録音タイトルを検索するため、フィールドプレフィックスなしでも検索できます。</string>
+    <string name="combine_explain_header">検索の組み合わせ</string>
+    <string name="combine_explain">AND、OR、NOT（大文字）を使用して検索を組み合わせます。これらはクエリに引用符のペアが含まれている場合にのみ演算子として機能します。それ以外の場合は文字通りの単語として扱われます：</string>
+    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
+    <string name="mbid_lookup_header">MusicBrainz ID 検索</string>
+    <string name="mbid_lookup_explain">テキスト検索が失敗した場合でも、MusicBrainz ID (UUID) を貼り付けることで正確な録音を見つけることができます：</string>
+    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
+    <string name="duration_toggle_header">再生時間の一致</string>
+    <string name="duration_toggle_explain">有効にすると、ファイルの再生時間から±15秒以内のトラックに検索結果がフィルタリングされます。探しているものが見つからない場合は、オーバーフローメニューから無効にしてください。</string>
+
+    <!-- Search errors -->
+    <string name="unknown_error_occurred">不明なエラーが発生しました。もう一度お試しください。</string>
+    <string name="query_was_corrupted">クエリが破損しています。もう一度お試しください。</string>
+    <string name="musicbrainz_server_error">MusicBrainzのエラーが発生しました。もう一度お試しください。</string>
+    <string name="musicbrainz_is_unavailable">MusicBrainzは現在利用できません。後でもう一度お試しください。</string>
+    <string name="failed_to_parse_response">応答の解析に失敗しました。もう一度お試しください。</string>
+    <string name="no_internet">オフラインのようです。インターネットに接続してもう一度お試しください。</string>
+
+    <!-- Changes screen -->
+    <string name="changes">変更</string>
+    <string name="old_cover_art">古いカバーアート</string>
+    <string name="new_cover_art">新しいカバーアート</string>
+    <string name="overwrite">上書き</string>
+    <string name="select_fields_to_overwrite">上書きするフィールドを選択：</string>
+    <string name="metadata_change_succeed">トラック情報が正常に変更されました。数秒後に変更が適用されます。</string>
+    <string name="important_to_know">重要な注意事項</string>
+    <string name="artwork_change_note">このトラックのアルバムのアートワークがデバイスに存在する場合、選択したアートワークに関係なくそれが使用されます。</string>
+    <string name="cover_art_from_gallery_note">ギャラリーのカバーアートを表示するには、アプリまたはデバイスの再起動が必要になる場合があります。</string>
+
+    <!-- Changes errors -->
+    <string name="failed_to_load_cover_art_album_id_corrupted">カバーアートの読み込みに失敗しました。この録音のアルバムIDが破損している可能性があります。</string>
+    <string name="cover_art_not_found">残念ながら、この録音のカバーアートは見つかりませんでした。</string>
+    <string name="cover_art_archive_is_unavailable">カバーアートの読み込みに失敗しました。Cover Art Archiveは現在利用できません。後でもう一度お試しください。</string>
+    <string name="failed_to_load_cover_art_request_timeout">3分以内にカバーアートを読み込めませんでした。ネットワークの品質を確認し、もう一度お試しください。</string>
+
+    <!-- Metadata writing errors -->
+    <string name="write_permission_denied">メタデータの上書きに失敗しました。権限が拒否されました。もう一度お試しください。</string>
+    <string name="no_read_permission">読み取り権限がありません。権限を付与するか、もう一度お試しください。</string>
+    <string name="no_write_permission">書き込み権限がありません。権限を付与するか、もう一度お試しください。</string>
+    <string name="failed_to_read">ファイルの読み取りに失敗しました。もう一度お試しください。</string>
+    <string name="no_lyrics_found">このトラックの歌詞は見つかりませんでした</string>
+    <string name="failed_to_write">ファイルの書き込みに失敗しました。もう一度お試しください。</string>
+
+    <string name="select_items">選択</string>
+
+    <!-- Manual editing screen -->
+    <string name="edit">編集</string>
+    <string name="pick_art">アートを選択</string>
+    <string name="restore_art">復元</string>
+    <string name="restore_tag">タグ値を復元</string>
+
+    <!-- Lyrics control screen -->
+    <string name="lyrics_control">歌詞コントロール</string>
+    <string name="lyrics_in_tag">タグ内の歌詞</string>
+    <string name="lyrics_in_tag_explain">オーディオファイルのタグに保存されている歌詞</string>
+    <string name="lyrics_in_local_database">ローカルデータベースの歌詞</string>
+    <string name="lyrics_in_local_database_explain">タグからのコピー、LRCLIBからの取得、またはファイルから追加された歌詞。これは歌詞画面に表示されるものです</string>
+    <string name="lyrics_actions">歌詞アクション</string>
+    <string name="lyrics_tools_explained">ローカルデータベース内の歌詞を管理または変更するアクション</string>
+    <string name="clear_db_entry">DBエントリをクリア</string>
+    <string name="copy_from_tag">タグからコピー</string>
+    <string name="import_from_file">ファイルからインポート</string>
+    <string name="write_to_tag">タグに書き込む</string>
+    <string name="fetch_from_lrclib">LRCLIBから取得</string>
+    <string name="publish_on_lrclib">LRCLIBに公開</string>
+    <string name="unable_to_publish">公開できません: タイトル、アーティスト、またはアルバムが指定されていません。</string>
+    <string name="published_successfully">正常に公開されました。</string>
+    <string name="solving_challenge">チャレンジを解決中...</string>
+
+    <!-- Lyrics sheet -->
+    <string name="lyrics">歌詞</string>
+    <string name="close_lyrics_sheet">歌詞画面を閉じる</string>
+    <string name="loading_lyrics">歌詞を読み込み中</string>
+    <string name="synced">同期済み</string>
+    <string name="plain">プレーン</string>
+
+    <!-- Lyrics screen errors -->
+    <string name="cant_look_for_lyrics_title_or_artist_is_missing">歌詞を検索できません。このトラックのタイトルまたはアーティストが指定されていません。</string>
+    <string name="lyrics_not_found">残念ながら、このトラックの歌詞は見つかりませんでした。</string>
+    <string name="cant_find_lyrics">歌詞が見つかりません。</string>
+    <string name="lyrics_provided_by">歌詞の提供元: LRCLIB</string>
+
+    <!-- Playback queue -->
+    <string name="shuffle_disabled_for_play_next">次にこのトラックを再生するため、シャッフルはオフになっています</string>
+
+    <!-- Playlists related -->
+    <string name="create_playlist">プレイリストを作成</string>
+    <string name="add_to_playlist">プレイリストに追加</string>
+    <string name="back_to_add_to_playlist">プレイリストへの追加へ戻る</string>
+    <string name="name">名前</string>
+    <string name="new_playlist_title_placeholder">例: お気に入り</string>
+    <string name="create">作成</string>
+    <string name="reorder_track">トラックを並べ替え</string>
+    <string name="delete_playlist">プレイリストを削除</string>
+    <string name="rename_playlist">プレイリスト名を変更</string>
+    <string name="rename">名前を変更</string>
+    <string name="delete">削除</string>
+    <string name="delete_playlist_dialog_title">プレイリストを削除しますか？</string>
+    <string name="delete_playlist_dialog_text">これによってトラック自体が影響を受けることはありません。</string>
+    <string name="nothing_yet">まだ何もありません。</string>
+    <string name="unknown_folder">不明なフォルダ</string>
+    <string name="enable_list_view">リスト表示を有効にする</string>
+    <string name="enable_grid_view">グリッド表示を有効にする</string>
+
+    <!-- Playlists errors -->
+    <string name="blank_playlist_name_error">プレイリストの名前を入力してください。</string>
+    <string name="playlist_already_exists_error">この名前は既に使用されています。</string>
+    <string name="track_is_already_on_playlist">このトラックは既にプレイリストに存在します。</string>
+
+    <!-- Settings sheet -->
+    <string name="settings">設定</string>
+    <string name="close_settings_sheet">設定画面を閉じる</string>
+    <string name="theme">テーマ</string>
+    <string name="theme_supporting_text">外観、パレット</string>
+    <string name="lyrics_supporting_text">フォント設定、配置、サイドカーフォルダ</string>
+    <string name="lyrics_folder">歌詞フォルダ</string>
+    <string name="lyrics_folder_supporting_text">オーディオファイルと一致する .lrc ファイルが含まれるフォルダを選択します。アプリは歌詞が必要なときに &lt;basename>.lrc を検索します。</string>
+    <string name="pick_lyrics_folder">歌詞フォルダを選択</string>
+    <string name="use_lyrics_folder">歌詞フォルダを使用する</string>
+    <string name="use_lyrics_folder_explain">選択したフォルダ内の .lrc ファイルを検索します。オフにすると、埋め込まれた歌詞とダウンロードされた歌詞のみが使用されます。</string>
+    <string name="playback">再生</string>
+    <string name="playback_supporting_text">オーディオフォーカス、イコライザー</string>
+    <string name="about_app">アプリについて</string>
+    <string name="about_explain">バージョン、リポジトリ、フィードバック</string>
+    <string name="music_scan">音楽スキャン</string>
+    <string name="music_scan_supporting_text">フィルターモード、フォルダ管理、スキャン</string>
+    <string name="privacy">プライバシー</string>
+    <string name="privacy_supporting_text">デバイスから送信されるもの、ネットワーク制御</string>
+    <string name="network_lookups">ネットワーク検索を許可</string>
+    <string name="network_lookups_explain">LRCLIBの歌詞とMusicBrainzのメタデータ検索のマスター切り替え。完全なオフラインモードにするにはオフにします — アプリの他の機能はローカルライブラリから引き続き動作します。</string>
+    <string name="track_play_stats">再生統計を記録</string>
+    <string name="track_play_stats_explain">トラックを再生およびスキップした頻度と、各トラックの合計再生時間をカウントします。このデバイス上のみに保存されます。これをオフにすると、既存のカウントがクリアされます。</string>
+
+    <!-- Privacy disclosure -->
+    <string name="privacy_what_leaves">デバイスから送信されるもの</string>
+    <string name="privacy_what_stays">デバイスに残るもの</string>
+    <string name="privacy_lrclib_title">LRCLIB (lrclib.net)</string>
+    <string name="privacy_lrclib_body">送信内容: トラックのタイトル、アーティスト、既知のアルバム、および再生時間。検索時: キャッシュされた歌詞がないトラックの歌詞ビューを開いたときに送信されます。公開時: 歌詞コントロール画面で明示的に「LRCLIBに公開」をタップしたときに送信されます。ネットワーク検索がオフの場合、どちらも機能しません。</string>
+    <string name="privacy_musicbrainz_title">MusicBrainz (musicbrainz.org, coverartarchive.org)</string>
+    <string name="privacy_musicbrainz_body">送信内容: 入力した検索クエリとトラックの再生時間。カバーアートとメタデータが一致するリリースを見つけるために使用されます。トラック情報 → 検索画面で「検索」をタップしたときにのみ送信され、自動的に送信されることはありません。</string>
+    <string name="privacy_local_title">ローカルデータ</string>
+    <string name="privacy_local_body">歌詞キャッシュ、音楽スキャン結果、アプリ設定、クラッシュログはすべてこのデバイス上に存在します。クラッシュログの共有はシステムの共有シートを介した手動操作であり、勝手に送信されることはありません。</string>
+    <string name="privacy_no_telemetry_title">テレメトリなし</string>
+    <string name="privacy_no_telemetry_body">分析、利用状況の追跡、診断のアップロードはありません。上記のホストへのアクセスがネットワーク通信のすべてです。</string>
+
+    <!-- Theme settings -->
+    <string name="appearance">外観</string>
+    <string name="appearance_system">システム</string>
+    <string name="appearance_light">ライト</string>
+    <string name="appearance_dark">ダーク</string>
+
+    <string name="palette_style">パレットスタイル</string>
+    <string name="palette_tonal_spot">トーナルスポット</string>
+    <string name="palette_neutral">ニュートラル</string>
+    <string name="palette_vibrant">バイブラント</string>
+    <string name="palette_expressive">エクスプレッシブ</string>
+    <string name="palette_rainbow">レインボー</string>
+    <string name="palette_fruit_salad">フルーツサラダ</string>
+    <string name="palette_monochrome">モノクローム</string>
+    <string name="palette_fidelity">フィデリティ</string>
+    <string name="palette_content">コンテンツ</string>
+
+    <string name="black_theme">ブラックテーマ</string>
+    <string name="black_theme_explain">ダークテーマを完全な黒にします</string>
+    <string name="use_system_key_colors">システムカラー</string>
+    <string name="use_system_key_colors_explain">システムのアクセントカラーを使用します</string>
+    <string name="use_album_art_color">アルバムアートカラー</string>
+    <string name="use_album_art_color_explain">現在のトラックのカバーアートの主要な色を使用します</string>
+
+    <!-- Playback settings -->
+    <string name="audio_focus">オーディオフォーカス</string>
+    <string name="audio_focus_explain">別のアプリがオーディオを再生する必要があるときに再生を一時停止します</string>
+    <string name="changes_will_take_effect_on_next_launch">変更は次回の起動時に有効になります。</string>
+    <string name="equalizer">イコライザー</string>
+    <string name="equalizer_explain">手動で音を調整します</string>
+    <string name="jump_to_beginning">最初に戻る</string>
+    <string name="jump_to_beginning_explain">前へボタンを最初に押したときに現在のトラックを最初からやり直します</string>
+
+    <!-- Tabs settings -->
+    <string name="tabs">タブ</string>
+    <string name="tabs_supporting_text">デフォルトのタブと順序</string>
+    <string name="default_tab_and_order">デフォルトのタブと順序</string>
+    <string name="reorder_tab">タブを並べ替え</string>
+
+    <!-- Playlists settings -->
+    <string name="filter_instead_of_search">検索の代わりにフィルター</string>
+    <string name="filter_instead_of_search_explain">プレイリストの検索をフィルターに置き換えます</string>
+    <string name="playlists_supporting_text">検索フィールド、インポート</string>
+    <string name="filter">フィルター</string>
+    <string name="import_playlist">プレイリストをインポート</string>
+    <string name="import_playlist_explain">M3Uファイルからプレイリストを追加します</string>
+    <string name="imported_successfully">%1$d トラックをインポートしました。</string>
+    <string name="m3u_imported_partial">%2$d トラック中 %1$d トラックをインポートしました（%3$d 見つかりませんでした）。</string>
+    <string name="m3u_no_tracks_found">プレイリストのトラックがデバイス上で見つかりませんでした。</string>
+    <string name="m3u_import_empty">プレイリストファイルにトラックが含まれていません。</string>
+
+    <!-- Lyrics settings -->
+    <string name="dark_theme_for_lyrics">歌詞画面にダークテーマ</string>
+    <string name="dark_theme_for_lyrics_explain">ライトモードが有効な場合でも、歌詞画面にダークテーマを適用します</string>
+    <string name="lyrics_preview_string">この非常に非常に長い行は、これらの設定で曲の歌詞が対応する画面でどのように見えるかを示しています</string>
+    <string name="font_size">フォントサイズ</string>
+    <string name="font_weight">フォントの太さ</string>
+    <string name="line_height">行の高さ</string>
+    <string name="letter_spacing">文字間隔</string>
+    <string name="alignment">配置</string>
+    <string name="start">開始</string>
+    <string name="center">中央</string>
+    <string name="end">終了</string>
+    <string name="reset">リセット</string>
+
+    <!-- Music scan settings -->
+    <string name="include_music_folder">Music フォルダを含める</string>
+    <string name="include_music_folder_explain">デフォルトのMusicフォルダの音楽を表示します</string>
+    <string name="included_folders">含まれるフォルダ</string>
+    <string name="pick_folder_to_include_in_scanning">スキャンに含めるフォルダを選択</string>
+    <string name="remove_folder_from_included_in_scanning">スキャン対象からフォルダを削除</string>
+    <string name="folders_with_audio">オーディオを含むフォルダ</string>
+    <string name="include_folder_in_scanning">フォルダをスキャンに含める</string>
+    <string name="scan_for_folders_with_audio">オーディオを含むフォルダをスキャン</string>
+    <string name="filter_mode">フィルターモード</string>
+    <string name="filter_mode_explain">指定したフォルダの音楽を表示するか、それ以外のすべての音楽を表示します</string>
+    <string name="inclusive">含める</string>
+    <string name="exclusive">除外する</string>
+    <string name="excluded_folders">除外するフォルダ</string>
+    <string name="pick_folder_to_exclude_from_scanning">スキャンから除外するフォルダを選択</string>
+    <string name="remove_folder_from_excluded_from_scanning">スキャン除外対象からフォルダを削除</string>
+    <string name="exclude_folder_from_scanning">フォルダをスキャンから除外する</string>
+    <string name="scanned_successfully">スキャンに成功しました</string>
+    <string name="refresh_on_app_launch">アプリ起動時に更新</string>
+    <string name="refresh_on_app_launch_explain">起動時にMediaStoreのデータを更新します</string>
+    <string name="refresh">MediaStoreを更新</string>
+    <string name="refresh_explain">既にMediaStoreに存在するデータを更新します</string>
+    <string name="scan_folder">フォルダをスキャン</string>
+    <string name="scan_folder_explain">オーディオフォルダをスキャンして新しいデータをMediaStoreに含めます</string>
+    <string name="failed_to_scan">スキャンに失敗しました</string>
+    <string name="nothing_to_refresh">更新するものがありません</string>
+    <string name="refreshed_successfully">正常に更新されました</string>
+    <string name="failed_to_refresh">更新に失敗しました</string>
+    <string name="ignore_short_tracks">短いトラックを無視</string>
+    <string name="ignore_short_tracks_explain">30秒未満のトラックを表示しません</string>
+
+    <!-- About screen -->
+    <string name="repo">リポジトリ</string>
+    <string name="repo_explain">プロジェクトのリポジトリを確認</string>
+    <string name="feedback">フィードバック</string>
+    <string name="feedback_explain">機能の提案や問題の報告はこちらへ</string>
+
+    <!-- Open a track with "Open with..." dialog -->
+    <string name="track_is_not_found_in_media_store">残念ながら、このトラックはプレイヤーで利用できません。スキャンに含まれていないフォルダにある可能性があります。</string>
+
+    <string name="copy_error">コピーエラー</string>
+    <string name="select_all">すべて選択</string>
+
+    <!-- On-device crash reporter -->
+    <string name="share_crash_log">最新のクラッシュログを共有</string>
+    <string name="share_crash_log_explain">バグを報告する際にこのファイルを添付してください。クラッシュログはデバイス上にのみ保存されます。</string>
+    <string name="no_crash_log_available">このデバイスにクラッシュログはありません</string>
+    <string name="share_crash_log_subject">Lotus クラッシュレポート</string>
+
+    <!-- Listening stats screen -->
+    <string name="stats_title">再生統計</string>
+    <string name="stats_supporting_text">最も再生された、最も長く聴いた、最近再生した、トップアーティスト</string>
+    <string name="stats_summary_title">全体</string>
+    <string name="stats_summary_total_time">合計再生時間</string>
+    <string name="stats_summary_plays_skips">再生 / スキップ</string>
+    <string name="stats_summary_plays_skips_value">%1$d / %2$d</string>
+    <string name="stats_summary_tracks">統計があるトラック</string>
+    <string name="stats_section_most_played">最も再生された</string>
+    <string name="stats_section_most_listened">最も長く聴いた</string>
+    <string name="stats_section_recently_played">最近再生した</string>
+    <string name="stats_section_top_artists">トップアーティスト</string>
+    <string name="stats_disabled_title">再生統計がオフになっています</string>
+    <string name="stats_disabled_body">設定 → プライバシーで記録が無効になっています。再生とスキップのカウントを再開するにはオンにしてください。</string>
+    <string name="stats_disabled_action">プライバシー設定を開く</string>
+    <string name="stats_empty_title">表示するものがまだありません</string>
+    <string name="stats_empty_body">数トラックを半分以上再生すると、ここに表示されます。</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$d 回再生</item>
+        <item quantity="other">%1$d 回再生</item>
+    </plurals>
+    <string name="ignore_single_track_albums">1トラックのみのアルバムを無視</string>
+    <string name="ignore_single_track_albums_explain">トラックが1つしか含まれていないアルバムをアルバムタブに表示しません。トラック自体はライブラリに残り、検索可能です。</string>
+    <string name="reduce_lyrics_animation">歌詞のアニメーションを減らす</string>
+    <string name="reduce_lyrics_animation_explain">歌われている行のスワイプ、グロー、ズームをオフにします。再生に合わせて明るくなる効果は残ります。</string>
+    <string name="per_track_artwork">トラックごとのアートワーク</string>
+    <string name="per_track_artwork_explain">有効にすると、アルバムカバーの代わりに各オーディオファイルに埋め込まれた画像を表示します。埋め込み画像がないトラックの場合はアルバムアートにフォールバックします。</string>
+    <string name="playback_error_unsupported_format">このフォーマットはこのデバイスで再生できません</string>
+    <string name="playback_error_file_unreadable">このファイルを読み込めませんでした — 破損しているかアクセスできない可能性があります</string>
+    <string name="playback_error_unknown">不明な再生エラーが発生しました</string>
+</resources>
