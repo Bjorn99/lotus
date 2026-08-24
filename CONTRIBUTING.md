@@ -11,7 +11,7 @@ Thanks for thinking about contributing. This is a community fork, so a few thing
 This is a small project — a little rhythm goes a long way:
 
 - **One focused PR at a time.** Please don't open a stack of PRs across different parts of the app at once — a large pile is hard to review well, and the ones that need discussion end up blocking the ones that don't.
-- **An issue before code** for anything beyond a small bug fix or a translation. It's the cheapest way to find out whether something fits before you spend time on it.
+- **An issue before code** for anything beyond a small bug fix. It's the cheapest way to find out whether something fits before you spend time on it. (Translations don't need one — see below.)
 - **Reviews take time.** A PR may sit for a while, come back with questions, or be re-implemented and merged under your name. None of that means it wasn't worth opening.
 
 ## What needs discussion first
@@ -37,21 +37,26 @@ If you're fixing a bug, include a test that reproduces it. If you're adding a fe
 
 ## Translations
 
-Translations are always welcome and are one of the easiest ways to help.
+Lotus is translated on Weblate: https://hosted.weblate.org/projects/lotus/
 
-Lotus is translated through Android string resources. All translatable text lives in `app/src/main/res/values/strings.xml` (English — the source of truth). A translation is a parallel file at `app/src/main/res/values-<lang>/strings.xml`, for example `values-es` for Spanish or `values-ru` for Russian.
+That's the easiest way in — no GitHub account, no Android tooling, and you can start with a handful of strings. Sign in, pick your language, translate. Weblate opens a pull request here on its own, and your name goes on the commits.
 
-To add or update a translation:
+A few things hold whichever route you take:
 
-- Copy `values/strings.xml` to `values-<lang>/strings.xml` and translate the text **between** the tags. Leave every `name="..."` key exactly as it is — the app looks strings up by key, so a changed key breaks that string.
-- Keep placeholders (`%1$s`, `%1$d`, `%%`), line breaks (`\n`), and any `<b>`/`<i>` tags unchanged. Escape a literal apostrophe as `\'` and a literal quote as `\"`.
-- The `<plurals>` block needs the quantity forms your language uses (English and Spanish use `one` and `other`; some languages need more).
-- Don't translate the app name or the URL strings — they're marked `translatable="false"` and stay as-is.
-- **Partial is fine.** Anything you don't translate falls back to English automatically, so you don't have to finish every string to open a useful PR.
-- **One language per pull request**, and only languages you speak fluently. Every release adds new English strings, so a translation needs someone who can keep it current, not just a first pass.
-- **Don't add keys that aren't in `values/strings.xml`.** Anything extra either does nothing, or silently overrides a string belonging to one of the app's libraries.
+- **One language per contributor**, and only languages you speak fluently. Every release adds new English strings, so a translation needs someone who can keep it current, not just a first pass.
+- Keep placeholders (`%1$s`, `%1$d`, `%%`), line breaks (`\n`), and any `<b>`/`<i>` tags unchanged.
+- **Partial is fine.** Anything untranslated falls back to English automatically.
+- Don't add keys that aren't in the English source. Anything extra either does nothing, or silently overrides a string belonging to one of the app's libraries.
 
-Send it as a pull request (preferred). If you'd rather not use git, attach the file to an issue and it'll be committed with credit to you. If copying the file yourself is a hassle, ask the maintainer for a ready-to-fill scaffold of the current strings.
+If your language isn't listed yet, ask for it on Weblate or open an issue and it'll be added.
+
+### If you'd rather not use Weblate
+
+A pull request still works. English strings live in `app/src/main/res/values/strings.xml`; a translation is a parallel file at `app/src/main/res/values-<lang>/strings.xml`, for example `values-es` or `values-zh-rCN`. Copy the English file, translate the text between the tags, and leave every `name="..."` key exactly as it is — the app looks strings up by key.
+
+Two things Weblate would otherwise handle for you: escape a literal apostrophe as `\'` and a literal quote as `\"`, and give the `<plurals>` block the quantity forms your language uses (English and Spanish use `one` and `other`; some need more). Don't translate the app name or the URL strings — they're marked `translatable="false"`.
+
+Please don't hand-edit a `values-*/strings.xml` while a Weblate translation for that language is open. The two will conflict.
 
 ## Attribution
 
