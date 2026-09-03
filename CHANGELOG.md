@@ -47,7 +47,7 @@ The metadata search lives at a track's **⋮ menu → Track info → the pencil 
 
 Untranslated strings fall back to English one by one, so nothing appears blank.
 
-- **Spanish**, contributed by [@LunaticWolfOk-py](https://github.com/LunaticWolfOk-py). Covers all but ten strings, which were added during this release cycle. (#99, #138)
+- **Spanish**, contributed by [@valenzit0](https://github.com/valenzit0). Covers all but ten strings, which were added during this release cycle. (#99, #138)
 - **Simplified Chinese**, contributed by [@MCfool](https://github.com/MCfool). Covers all but eight, same reason. (#143)
 
 ### Fixes

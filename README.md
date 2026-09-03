@@ -117,7 +117,7 @@ Lotus is kept going by people who file good bug reports, translate it, and send 
 
 - **[@uhrfra](https://github.com/uhrfra)** — relative-path support in M3U playlist import, based on their [#73](https://github.com/Bjorn99/lotus/pull/73) and shipped in v1.8.0; on-device testing of the v1.8.2 fixes
 - **[@bxdxnn](https://github.com/bxdxnn)** — media notification icon ([#118](https://github.com/Bjorn99/lotus/pull/118)) and the track menu in global search ([#131](https://github.com/Bjorn99/lotus/pull/131))
-- **[@LunaticWolfOk-py](https://github.com/LunaticWolfOk-py)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
+- **[@valenzit0](https://github.com/valenzit0)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
 - **[@MCfool](https://github.com/MCfool)** — Simplified Chinese translation ([#143](https://github.com/Bjorn99/lotus/issues/143))
 
 Translations are especially welcome, and you don't need Android tooling to write one — see [CONTRIBUTING.md](CONTRIBUTING.md#translations).
