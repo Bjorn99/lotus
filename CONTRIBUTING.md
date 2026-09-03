@@ -48,6 +48,8 @@ To add or update a translation:
 - The `<plurals>` block needs the quantity forms your language uses (English and Spanish use `one` and `other`; some languages need more).
 - Don't translate the app name or the URL strings — they're marked `translatable="false"` and stay as-is.
 - **Partial is fine.** Anything you don't translate falls back to English automatically, so you don't have to finish every string to open a useful PR.
+- **One language per pull request**, and only languages you speak fluently. Every release adds new English strings, so a translation needs someone who can keep it current, not just a first pass.
+- **Don't add keys that aren't in `values/strings.xml`.** Anything extra either does nothing, or silently overrides a string belonging to one of the app's libraries.
 
 Send it as a pull request (preferred). If you'd rather not use git, attach the file to an issue and it'll be committed with credit to you. If copying the file yourself is a hassle, ask the maintainer for a ready-to-fill scaffold of the current strings.
 
