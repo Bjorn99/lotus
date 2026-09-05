@@ -860,6 +860,12 @@ fun PlayerScreen(
                                 onSeekToPreviousClick = {
                                     viewModel.onEvent(PlayerScreenEvent.OnSeekToPreviousClick)
                                 },
+                                onSwipeToNext = {
+                                    viewModel.onEvent(PlayerScreenEvent.OnSwipeToNextClick)
+                                },
+                                onSwipeToPrevious = {
+                                    viewModel.onEvent(PlayerScreenEvent.OnSwipeToPreviousClick)
+                                },
                                 onSeekTo = {
                                     viewModel.onEvent(PlayerScreenEvent.OnSeekTo(it))
                                 },
