@@ -170,24 +170,16 @@
     <string name="search_explain">Usamos la API de MusicBrainz para ayudarte a encontrar la información de la canción.</string>
     <string name="recipe_header">Fórmula rápida</string>
     <string name="recipe_explain">Para obtener resultados más precisos, buscá por artista Y nombre de la canción juntos. Los campos deben ir en minúsculas y los operadores en MAYÚSCULAS:</string>
-    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
     <string name="quotes_explain_header">Comillas para coincidencias exactas</string>
     <string name="quotes_explain">Usá comillas para buscar palabras o frases específicas:</string>
-    <string name="quotes_example_1">\"4:44\"</string>
-    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
     <string name="field_explain_header">Buscar por campo</string>
     <string name="field_explain">Podés buscar por nombre de artista, álbum o canción (pista):</string>
-    <string name="field_example_1">artist:\"Jay-Z\"</string>
-    <string name="field_example_2">release:\"Over You\"</string>
-    <string name="field_example_3">recording:\"Still Falling For You\"</string>
     <string name="field_reference_header">Referencia de campos</string>
     <string name="field_reference_explain">artist: — nombre del artista o intérprete\nrecording: — título de la canción o pista (usá este, no track:)\nrelease: — nombre del álbum, EP o sencillo\n\nConsejo: track: no es un campo válido en MusicBrainz; usá recording: para nombres de canciones. MusicBrainz busca títulos por defecto, así que también podés buscar sin prefijo.</string>
     <string name="combine_explain_header">Combinar búsquedas</string>
     <string name="combine_explain">Usá AND, OR, NOT (en mayúsculas) para combinar búsquedas por campos. Sin comillas ni prefijos de campo, estas palabras se interpretan como texto literal:</string>
-    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
     <string name="mbid_lookup_header">Búsqueda por ID de MusicBrainz</string>
     <string name="mbid_lookup_explain">Pegá un ID de MusicBrainz (UUID) para encontrar la canción exacta, incluso cuando falle la búsqueda por texto:</string>
-    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
     <string name="duration_toggle_header">Coincidencia por duración</string>
     <string name="duration_toggle_explain">Al activarse, los resultados se filtran a canciones que estén a ±15 segundos de la duración de tu archivo. Desactivalo desde el menú desplegable si no encontrás lo que buscás.</string>
 

@@ -168,24 +168,16 @@
     <string name="search_explain">我们使用 MusicBrainz 接口帮你查找歌曲信息。</string>
     <string name="recipe_header">快速上手</string>
     <string name="recipe_explain">为获得最准确的结果，请同时按艺人名和录音名进行搜索。字段名必须小写，运算符必须大写：</string>
-    <string name="recipe_example">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
     <string name="quotes_explain_header">用引号精确匹配</string>
     <string name="quotes_explain">使用引号可查找特定的词或短语：</string>
-    <string name="quotes_example_1">\"4:44\"</string>
-    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
     <string name="field_explain_header">按字段搜索</string>
     <string name="field_explain">你可以按艺人、专辑或录音（歌曲）名进行搜索：</string>
-    <string name="field_example_1">artist:\"Jay-Z\"</string>
-    <string name="field_example_2">release:\"Over You\"</string>
-    <string name="field_example_3">recording:\"Still Falling For You\"</string>
     <string name="field_reference_header">字段参考</string>
     <string name="field_reference_explain">artist: — 艺人或表演者名称\nrecording: — 歌曲或音轨标题（请使用此项，不要用 track:）\nrelease: — 专辑、EP 或单曲名称\n\n提示：track: 不是有效的 MusicBrainz 字段——查找歌曲名请使用 recording:。MusicBrainz 默认按录音标题搜索，因此你也可以不带字段前缀直接搜索。</string>
     <string name="combine_explain_header">组合搜索</string>
     <string name="combine_explain">使用 AND、OR、NOT（须大写）组合字段搜索。如果不加引号或字段前缀，这些词将被视为普通文本：</string>
-    <string name="combine_example">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
     <string name="mbid_lookup_header">MusicBrainz ID 查询</string>
     <string name="mbid_lookup_explain">粘贴一个 MusicBrainz ID（UUID）即可查找到精确的录音，即使文本搜索失败也无妨：</string>
-    <string name="mbid_example">9c2e84b8-1234-5678-9abc-def012345678</string>
     <string name="duration_toggle_header">时长匹配</string>
     <string name="duration_toggle_explain">开启后，搜索结果会过滤出与你文件时长相差 ±15 秒以内的歌曲。如果找不到想要的内容，可从溢出菜单中关闭此功能。</string>
 

@@ -144,15 +144,10 @@
     <string name="search_explain">Мы используем MusicBrainz API, чтобы помочь Вам найти информацию о треке. Вы можете сделать поиск более точным с помощью простых фильтров.</string>
     <string name="quotes_explain_header">Кавычки для точных совпадений</string>
     <string name="quotes_explain">Используйте кавычки, чтобы найти определенные слова или фразы:</string>
-    <string name="quotes_example_1">\"4:44\"</string>
-    <string name="quotes_example_2"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
     <string name="field_explain_header">Поиск по исполнителю или альбому</string>
     <string name="field_explain">Вы можете искать определенного исполнителя или альбом следующим образом:</string>
-    <string name="field_example_1">artist:\"Jay-Z\"</string>
-    <string name="field_example_2">release:\"Over You\"</string>
     <string name="combine_explain_header">Объединение фильтров</string>
     <string name="combine_explain">Используйте \"AND\" для объединения разных фильтров:</string>
-    <string name="combine_example">\"4:44\" AND artist:\"Jay-Z\" AND release:\"4:44\"</string>
 
     <!-- Search errors -->
     <string name="unknown_error_occurred">Возникла неизвестная ошибка. Пожалуйста, попробуйте еще раз.</string>
