@@ -119,8 +119,18 @@ Lotus is kept going by people who file good bug reports, translate it, and send 
 - **[@bxdxnn](https://github.com/bxdxnn)** — media notification icon ([#118](https://github.com/Bjorn99/lotus/pull/118)) and the track menu in global search ([#131](https://github.com/Bjorn99/lotus/pull/131))
 - **[@valenzit0](https://github.com/valenzit0)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
 - **[@MCfool](https://github.com/MCfool)** — Simplified Chinese translation ([#143](https://github.com/Bjorn99/lotus/issues/143))
+- **[@KerimDemirkaynak](https://github.com/KerimDemirkaynak)** — Turkish translation ([#149](https://github.com/Bjorn99/lotus/pull/149))
+- **Mickaël Binos** — French translation
 
-Translations are especially welcome, and you don't need Android tooling to write one — see [CONTRIBUTING.md](CONTRIBUTING.md#translations).
+## Translations
+
+[![Translation status](https://hosted.weblate.org/widgets/lotus/-/svg-badge.svg)](https://hosted.weblate.org/engage/lotus/)
+
+Lotus is translated on [Weblate](https://weblate.org/), which hosts the project free of charge under its libre plan. You don't need a GitHub account or Android tooling to help — pick a language at [hosted.weblate.org/engage/lotus](https://hosted.weblate.org/engage/lotus/) and start translating; Weblate opens the pull request itself and your name goes on the commits.
+
+New languages are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md#translations) for the details, including how to send a translation as a plain pull request if you'd rather not use Weblate.
+
+Weblate takes [donations](https://weblate.org/donate/) if you'd like to help them keep doing this for libre projects.
 
 ## Contributing
 
