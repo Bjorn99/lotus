@@ -144,6 +144,8 @@ Some UI elements inspired by [Vanilla](https://github.com/vanilla-music/vanilla)
 
 Libraries: [MaterialKolor](https://github.com/jordond/materialkolor), [kmpalette](https://github.com/jordond/kmpalette), [Reorderable](https://github.com/Calvin-LL/Reorderable), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger/src/master/).
 
+Translation hosting provided free of charge by [Weblate](https://weblate.org/) under their Libre plan.
+
 ## License
 
 Lotus is licensed under [GPLv3](LICENSE.md).
