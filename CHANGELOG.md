@@ -10,6 +10,7 @@ Each release page is built from the matching section below, so the wording is ai
 
 - **Tracks longer than an hour showed a wrong time.** The player counted minutes from the start of the track instead of from the start of the hour, while still showing an hours field beside them — so a six-hour mixtape read `06:372:49` instead of `6:12:49`, and the elapsed time beside it was wrong the same way. Anything under an hour was always correct. (#159)
 - **Track info shows hours for long tracks.** The duration there was minutes and seconds only, so the same mixtape read `372:49`. It now reads `6:12:49`, matching the player.
+- **The player's top row of buttons was invisible on small screens.** Shuffle and repeat, the queue, lyrics, the sleep timer and the track menu were being drawn behind the album art instead of above it, so on a short screen they disappeared entirely — and because they were still there, tapping the top of the artwork could silently change the repeat mode or open the queue. The artwork now shrinks to make room. This affected any short screen, not only the phone it was reported on. (#125)
 
 ## 1.9.0
 

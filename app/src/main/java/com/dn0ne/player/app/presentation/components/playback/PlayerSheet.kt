@@ -29,6 +29,7 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -655,107 +656,122 @@ fun ExpandedPlayer(
 
             val context = LocalContext.current
             if (!isSystemInLandscapeOrientation()) {
-                ExpandedPlayerActions(
-                    playbackState = playbackState,
-                    lovedUris = lovedUris,
-                    playbackMode = playbackMode,
-                    onHideClick = onHideClick,
-                    onShowSleepTimer = { showSleepTimerSheet = true },
-                    onShowQueue = {
-                        if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
-                            showQueue = true
-                        }
-                    },
-                    onLyricsClick = onLyricsClick,
-                    onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
-                    onPlaybackModeClick = onPlaybackModeClick,
-                    onToggleLovedClick = { playbackState.currentTrack?.let(onToggleLovedClick) },
-                    onPlayNextClick = onPlayNextClick,
-                    onAddToQueueClick = onAddToQueueClick,
-                    onAddToPlaylistClick = onAddToPlaylistClick,
-                    onViewTrackInfoClick = onViewTrackInfoClick,
-                    onGoToAlbumClick = onGoToAlbumClick,
-                    onGoToArtistClick = onGoToArtistClick,
-                    onShareClick = { playbackState.currentTrack?.let { shareTrack(context, it) } },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                        .align(Alignment.TopCenter),
-                )
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    val currentTrackOrNull: Track? by remember {
-                        derivedStateOf { playbackState.currentTrack }
-                    }
-                    val currentTrack = currentTrackOrNull ?: return@Column
-
-                    AnimatedContent(
-                        targetState = currentTrack,
-                        label = "cover-art-animation"
-                    ) { track ->
-                        CoverArt(
-                            uri = track.coverArtUri,
-                            trackUri = track.uri,
-                            perTrackArtwork = perTrackArtwork,
-                            onCoverArtLoaded = onCoverArtLoaded,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(ShapeDefaults.Large)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(28.dp))
-
-                    AnimatedContent(
-                        targetState = currentTrack,
-                        label = "title-artist-text-animation",
-                        transitionSpec = {
-                            fadeIn() togetherWith fadeOut()
+                // The action row and the player content used to be siblings in the
+                // Box above, with nothing constraining them vertically. Box children
+                // paint in declaration order, so on a screen too short to leave slack
+                // above the centred content the artwork simply painted over the row:
+                // the buttons stayed laid out and still answered touches, but were
+                // invisible behind the cover (#125).
+                //
+                // Stacking them gives the row its own space. The artwork then takes
+                // only the height that is left rather than the full width, so a short
+                // screen shrinks the cover instead of pushing the transport controls
+                // off the bottom -- which is what simply reserving the row's height
+                // would have done.
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ExpandedPlayerActions(
+                        playbackState = playbackState,
+                        lovedUris = lovedUris,
+                        playbackMode = playbackMode,
+                        onHideClick = onHideClick,
+                        onShowSleepTimer = { showSleepTimerSheet = true },
+                        onShowQueue = {
+                            if (playbackState.playbackMode != PlaybackMode.Shuffle && playbackState.playbackMode != PlaybackMode.SmartShuffle) {
+                                showQueue = true
+                            }
                         },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { track ->
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val context = LocalContext.current
-                            Text(
-                                text = track.title
-                                    ?: context.resources.getString(R.string.unknown_title),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.basicMarquee()
-                            )
-
-                            Text(
-                                text = track.artist
-                                    ?: context.resources.getString(R.string.unknown_artist),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.basicMarquee()
-                            )
-                        }
-
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    PlaybackControl(
-                        playbackStateFlow = playbackStateFlow,
-                        onPlayClick = onPlayClick,
-                        onPauseClick = onPauseClick,
-                        onSeekTo = onSeekTo,
-                        onSeekToNextClick = onSeekToNextClick,
-                        onSeekToPreviousClick = onSeekToPreviousClick,
+                        onLyricsClick = onLyricsClick,
+                        onLyricsSheetExpandedChange = onLyricsSheetExpandedChange,
+                        onPlaybackModeClick = onPlaybackModeClick,
+                        onToggleLovedClick = { playbackState.currentTrack?.let(onToggleLovedClick) },
+                        onPlayNextClick = onPlayNextClick,
+                        onAddToQueueClick = onAddToQueueClick,
+                        onAddToPlaylistClick = onAddToPlaylistClick,
+                        onViewTrackInfoClick = onViewTrackInfoClick,
+                        onGoToAlbumClick = onGoToAlbumClick,
+                        onGoToArtistClick = onGoToArtistClick,
+                        onShareClick = { playbackState.currentTrack?.let { shareTrack(context, it) } },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(top = 16.dp),
                     )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        val currentTrackOrNull: Track? by remember {
+                            derivedStateOf { playbackState.currentTrack }
+                        }
+                        val currentTrack = currentTrackOrNull ?: return@Column
+
+                        AnimatedContent(
+                            targetState = currentTrack,
+                            label = "cover-art-animation",
+                            modifier = Modifier.weight(1f, fill = false)
+                        ) { track ->
+                            CoverArt(
+                                uri = track.coverArtUri,
+                                trackUri = track.uri,
+                                perTrackArtwork = perTrackArtwork,
+                                onCoverArtLoaded = onCoverArtLoaded,
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                                    .clip(ShapeDefaults.Large)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(28.dp))
+
+                        AnimatedContent(
+                            targetState = currentTrack,
+                            label = "title-artist-text-animation",
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { track ->
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                val context = LocalContext.current
+                                Text(
+                                    text = track.title
+                                        ?: context.resources.getString(R.string.unknown_title),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.basicMarquee()
+                                )
+
+                                Text(
+                                    text = track.artist
+                                        ?: context.resources.getString(R.string.unknown_artist),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.basicMarquee()
+                                )
+                            }
+
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        PlaybackControl(
+                            playbackStateFlow = playbackStateFlow,
+                            onPlayClick = onPlayClick,
+                            onPauseClick = onPauseClick,
+                            onSeekTo = onSeekTo,
+                            onSeekToNextClick = onSeekToNextClick,
+                            onSeekToPreviousClick = onSeekToPreviousClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
                 }
             } else {
                 Row(
