@@ -4,6 +4,13 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.9.1
+
+### Fixed
+
+- **Tracks longer than an hour showed a wrong time.** The player counted minutes from the start of the track instead of from the start of the hour, while still showing an hours field beside them — so a six-hour mixtape read `06:372:49` instead of `6:12:49`, and the elapsed time beside it was wrong the same way. Anything under an hour was always correct. (#159)
+- **Track info shows hours for long tracks.** The duration there was minutes and seconds only, so the same mixtape read `372:49`. It now reads `6:12:49`, matching the player.
+
 ## 1.9.0
 
 Fetching artwork from MusicBrainz works again after being quietly broken since 1.5.0, `.opus` files can finally carry cover art without being damaged, shuffle has been rebuilt, and Lotus now speaks Spanish and Simplified Chinese.

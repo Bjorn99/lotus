@@ -53,6 +53,7 @@ import com.dn0ne.player.R
 import com.dn0ne.player.app.domain.metadata.Metadata
 import com.dn0ne.player.app.domain.metadata.MetadataSearchResult
 import com.dn0ne.player.app.presentation.components.CoverArt
+import com.dn0ne.player.app.presentation.components.playback.formatPlaybackTime
 import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsibleTopBar
 import java.util.Date
 import kotlin.math.roundToInt
@@ -284,10 +285,7 @@ fun TrackInfoSheet(
                             )
 
                             val durationString = remember {
-                                val durationMinutes = duration / 1000 / 60
-                                val durationSeconds = duration / 1000 % 60
-                                "$durationMinutes".padStart(2, '0') +
-                                        ":" + "$durationSeconds".padStart(2, '0')
+                                formatPlaybackTime(duration.toLong())
                             }
                             TagRow(
                                 tag = context.resources.getString(R.string.duration),
