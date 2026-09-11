@@ -156,17 +156,8 @@ fun PlayerScreen(
                 dominantColorState.result
                     ?.paletteOrNull
                     ?.swatches
-                    ?.sortedByDescending { it.population }
-                    ?.let { swatches ->
-                        val firstSwatch = swatches.first()
-                        val firstSwatchColorHct = firstSwatch.color.toHct()
-                        val firstSwatchPopulation = firstSwatch.population
-                        val moreChromatic = swatches.fastFirstOrNull {
-                            it.color.toHct().chroma - firstSwatchColorHct.chroma >= 30 &&
-                                    it.population.toFloat() / firstSwatchPopulation >= .1f
-                        }
-                        moreChromatic?.color ?: firstSwatch.color
-                    } ?: dominantColorState.color
+                    ?.let { swatches -> pickSeedColor(swatches, dominantColorState.color) }
+                    ?: dominantColorState.color
             } else dominantColorState.color
         }
     }
