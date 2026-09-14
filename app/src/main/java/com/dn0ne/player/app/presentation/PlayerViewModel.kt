@@ -534,8 +534,7 @@ class PlayerViewModel(
     fun onEvent(event: PlayerScreenEvent) {
         when (event) {
             is OnTrackClick, is OnPauseClick, is OnPlayClick, is OnSeekToNextClick,
-            is OnSeekToPreviousClick, is OnSwipeToNextClick, is OnSwipeToPreviousClick,
-            is OnSeekTo, is OnResetPlayback,
+            is OnSeekToPreviousClick, is OnSeekTo, is OnResetPlayback,
             is OnPlaybackModeClick, is OnPlayerExpandedChange, is OnLyricsSheetExpandedChange,
             is OnRemoveFromQueueClick, is OnReorderingQueue, is OnPlayNextClick,
             is OnAddToQueueClick -> handlePlaybackEvent(event)
@@ -626,20 +625,6 @@ class PlayerViewModel(
                     } else {
                         player.seekToPreviousMediaItem()
                     }
-                }
-            }
-
-            OnSwipeToNextClick -> {
-                player?.let { player ->
-                    if (!player.hasNextMediaItem()) return
-
-                    player.seekToNextMediaItem()
-                }
-            }
-
-            OnSwipeToPreviousClick -> {
-                player?.let { player ->
-                    player.seekToPreviousMediaItem()
                 }
             }
 

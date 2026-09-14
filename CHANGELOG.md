@@ -6,6 +6,10 @@ Each release page is built from the matching section below, so the wording is ai
 
 ## 1.9.1
 
+### Added
+
+- **Swipe the album art to change track.** In the expanded player, drag the artwork sideways: left for the next track, right for the previous one. Right does exactly what the skip-back button does, so with "jump to beginning" on — which is the default — swiping right more than three seconds into a track restarts that track rather than going back; swipe right again from the start to reach the previous track. A drag has to travel about 50dp before it counts, and any drag with a clear sideways component counts, including a diagonal one. Works in landscape too, and mirrors in right-to-left layouts. Contributed by @bxdxnn. (#66)
+
 ### Fixed
 
 - **Tracks longer than an hour showed a wrong time.** The player counted minutes from the start of the track instead of from the start of the hour, while still showing an hours field beside them — so a six-hour mixtape read `06:372:49` instead of `6:12:49`, and the elapsed time beside it was wrong the same way. Anything under an hour was always correct. (#159)

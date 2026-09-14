@@ -114,8 +114,6 @@ fun PlayerSheet(
     onPauseClick: () -> Unit,
     onSeekToNextClick: () -> Unit,
     onSeekToPreviousClick: () -> Unit,
-    onSwipeToNext: () -> Unit,
-    onSwipeToPrevious: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onReset: () -> Unit,
     onPlaybackModeClick: () -> Unit,
@@ -270,8 +268,6 @@ fun PlayerSheet(
                     onPlayClick = onPlayClick,
                     onSeekToNextClick = onSeekToNextClick,
                     onSeekToPreviousClick = onSeekToPreviousClick,
-                    onSwipeToNext = onSwipeToNext,
-                    onSwipeToPrevious = onSwipeToPrevious,
                     onHideClick = {
                         onPlayerExpandedChange(false)
                         translationY.updateBounds(
@@ -605,8 +601,6 @@ fun ExpandedPlayer(
     onPauseClick: () -> Unit,
     onSeekToNextClick: () -> Unit,
     onSeekToPreviousClick: () -> Unit,
-    onSwipeToNext: () -> Unit,
-    onSwipeToPrevious: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onHideClick: () -> Unit,
     onPlaybackModeClick: () -> Unit,
@@ -732,8 +726,8 @@ fun ExpandedPlayer(
                                     .aspectRatio(1f)
                                     .clip(ShapeDefaults.Large)
                                     .swipeToSeek(
-                                        onSeekToNext = onSwipeToNext,
-                                        onSeekToPrevious = onSwipeToPrevious,
+                                        onSeekToNext = onSeekToNextClick,
+                                        onSeekToPrevious = onSeekToPreviousClick,
                                         layoutDirection = layoutDirection,
                                     )
                             )
@@ -815,8 +809,8 @@ fun ExpandedPlayer(
                                 .padding(vertical = 28.dp)
                                 .clip(ShapeDefaults.ExtraLarge)
                                 .swipeToSeek(
-                                    onSeekToNext = onSwipeToNext,
-                                    onSeekToPrevious = onSwipeToPrevious,
+                                    onSeekToNext = onSeekToNextClick,
+                                    onSeekToPrevious = onSeekToPreviousClick,
                                     layoutDirection = layoutDirection,
                                 )
                         )
@@ -1097,6 +1091,19 @@ fun PlaybackControl(
 
 internal enum class SeekDirection { Previous, Next, None }
 
+/**
+ * Which way a finished horizontal drag should seek.
+ *
+ * Extracted from the modifier below so it can be unit tested — there are no UI
+ * tests in this module, so anything left inside a composable is untested.
+ *
+ * A drag shorter than [thresholdPx] is [SeekDirection.None]. Without that check
+ * a one-pixel movement while tapping the artwork would change the track.
+ *
+ * The mapping is mirrored under [LayoutDirection.Rtl]: dragging towards the
+ * start of the layout always means "next", whichever side of the screen that
+ * is, so the gesture matches the on-screen order of the transport buttons.
+ */
 internal fun seekDirectionForDrag(
     totalDrag: Float,
     thresholdPx: Float,
@@ -1111,6 +1118,18 @@ internal fun seekDirectionForDrag(
     }
 }
 
+/**
+ * Horizontal swipe on the cover art to change track (#66).
+ *
+ * [onSeekToNext] and [onSeekToPrevious] are deliberately the *same* callbacks the
+ * transport buttons use, rather than swipe-specific ones. A swipe and a button
+ * press mean the same thing, so they must behave the same — including the
+ * "jump to beginning" setting, which is on by default and makes a previous-press
+ * restart the current track when it is more than three seconds in.
+ *
+ * Distance, not velocity: a slow deliberate drag past the threshold should count,
+ * and a fast flick that barely moves should not.
+ */
 private fun Modifier.swipeToSeek(
     onSeekToNext: () -> Unit,
     onSeekToPrevious: () -> Unit,
