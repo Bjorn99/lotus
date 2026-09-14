@@ -18,6 +18,8 @@ sealed interface PlayerScreenEvent {
     data object OnPauseClick: PlayerScreenEvent
     data object OnSeekToNextClick: PlayerScreenEvent
     data object OnSeekToPreviousClick: PlayerScreenEvent
+    data object OnSwipeToNextClick: PlayerScreenEvent
+    data object OnSwipeToPreviousClick: PlayerScreenEvent
     data class OnSeekTo(val position: Long): PlayerScreenEvent
     data object OnResetPlayback: PlayerScreenEvent
 
