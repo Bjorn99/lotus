@@ -1,17 +1,4 @@
 <resources>
-    <!-- App name -->
-    <string name="app_name" translatable="false">Lotus</string>
-
-    <!-- Links -->
-    <!-- Lyrics provider link -->
-    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
-    <!-- Metadata provider link -->
-    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
-    <!-- Repository link -->
-    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
-    <!-- Feedback link (GitHub issue tracker) -->
-    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
-
     <!-- Common back button -->
     <string name="back">Back</string>
 
@@ -167,25 +154,17 @@
     <string name="search_explain">We use the MusicBrainz API to help you find track info.</string>
     <string name="recipe_header">Quick recipe</string>
     <string name="recipe_explain">For the most accurate results, search for the artist and the recording together, with each value in quotes. Field names can be capitalised however you like, but AND must be uppercase:</string>
-    <string name="recipe_example" translatable="false">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
     <string name="recipe_caution">The quotes are what make AND work. Without them the whole line is treated as plain text, and a plain search matches song titles only — so searching for a song and its artist together, unquoted, tends to find songs named after the artist instead.</string>
     <string name="quotes_explain_header">Quotes for exact matches</string>
     <string name="quotes_explain">Use quotes to find specific words or phrases:</string>
-    <string name="quotes_example_1" translatable="false">\"4:44\"</string>
-    <string name="quotes_example_2" translatable="false"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
     <string name="field_explain_header">Search by field</string>
     <string name="field_explain">You can search by artist, album, or recording (track) name:</string>
-    <string name="field_example_1" translatable="false">artist:\"Jay-Z\"</string>
-    <string name="field_example_2" translatable="false">release:\"Over You\"</string>
-    <string name="field_example_3" translatable="false">recording:\"Still Falling For You\"</string>
     <string name="field_reference_header">Field reference</string>
     <string name="field_reference_explain">artist: — artist or performer name\nrecording: — song or track title (use this, not track:)\nrelease: — album, EP, or single name\n\nTip: track: is not a valid MusicBrainz field — use recording: for song names. MusicBrainz searches recording titles by default, so you can also search without a field prefix.</string>
     <string name="combine_explain_header">Combine searches</string>
     <string name="combine_explain">Use AND, OR, NOT (uppercase) to combine searches. They only act as operators when the query contains a matched pair of quotes — otherwise they are treated as literal words:</string>
-    <string name="combine_example" translatable="false">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
     <string name="mbid_lookup_header">MusicBrainz ID lookup</string>
     <string name="mbid_lookup_explain">Paste a MusicBrainz ID (UUID) to find the exact recording, even when text search fails:</string>
-    <string name="mbid_example" translatable="false">9c2e84b8-1234-5678-9abc-def012345678</string>
     <string name="duration_toggle_header">Duration matching</string>
     <string name="duration_toggle_explain">When enabled, search results are filtered to tracks within ±15 seconds of your file\'s duration. Disable from the overflow menu if you can\'t find what you\'re looking for.</string>
 

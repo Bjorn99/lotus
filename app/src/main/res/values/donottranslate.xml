@@ -1,0 +1,38 @@
+<resources>
+    <!--
+        Strings that must never be translated, kept out of strings.xml so that
+        Weblate never exports them in the first place.
+
+        Marking them translatable="false" was not enough: 4040346 did that, and
+        Weblate still shipped all eight search examples into values-tr, one of
+        them with its CDATA ampersand corrupted to "&amp;amp;". translatable="false"
+        is a tooling hint, so a translated copy still wins at runtime for that
+        locale. Weblate reads values/strings.xml; it does not read this file.
+
+        The attribute is kept on every entry anyway, so lint still catches a
+        stray translation if one ever reappears.
+    -->
+
+    <!-- App name -->
+    <string name="app_name" translatable="false">Lotus</string>
+
+    <!-- Links -->
+    <!-- Lyrics provider link -->
+    <string name="lrclib_uri" translatable="false">https://lrclib.net</string>
+    <!-- Metadata provider link -->
+    <string name="musicbrainz_uri" translatable="false">https://musicbrainz.org/</string>
+    <!-- Repository link -->
+    <string name="repo_url" translatable="false">https://github.com/Bjorn99/lotus</string>
+    <!-- Feedback link (GitHub issue tracker) -->
+    <string name="feedback_url" translatable="false">https://github.com/Bjorn99/lotus/issues/new</string>
+
+    <!-- MusicBrainz search examples: query syntax, not prose -->
+    <string name="recipe_example" translatable="false">artist:\"Alter Bridge\" AND recording:\"Slip to the Void\"</string>
+    <string name="quotes_example_1" translatable="false">\"4:44\"</string>
+    <string name="quotes_example_2" translatable="false"><![CDATA[\"7 Weeks & 3 Days\"]]></string>
+    <string name="field_example_1" translatable="false">artist:\"Jay-Z\"</string>
+    <string name="field_example_2" translatable="false">release:\"Over You\"</string>
+    <string name="field_example_3" translatable="false">recording:\"Still Falling For You\"</string>
+    <string name="combine_example" translatable="false">artist:\"Ellie Goulding\" AND recording:\"Still Falling For You\"</string>
+    <string name="mbid_example" translatable="false">9c2e84b8-1234-5678-9abc-def012345678</string>
+</resources>
