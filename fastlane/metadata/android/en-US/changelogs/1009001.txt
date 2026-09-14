@@ -1,0 +1,9 @@
+Lotus 1.9.1
+
+Swipe the album art left or right to change track, contributed by bxdxnn. Swiping right works like the skip-back button, so more than three seconds into a track it restarts that track.
+
+Also fixed:
+- Tracks longer than an hour showed a wrong time
+- Track info showed no hours for long tracks
+- A crash that could close the app at startup
+- The player's top row of buttons hid behind the album art on small screens
