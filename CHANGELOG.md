@@ -15,7 +15,7 @@ Each release page is built from the matching section below, so the wording is ai
 Untranslated strings fall back to English one by one, so nothing appears blank.
 
 - **Turkish**, contributed by [@KerimDemirkaynak](https://github.com/KerimDemirkaynak). Complete — all 362 strings. (#149, #156)
-- **French**, contributed by Mickaël Binos. 63 strings so far, and growing as translation continues. (#156)
+- **French**, contributed by Mickaël Binos. 122 of 362 strings so far, and growing as translation continues. (#156)
 
 ### Fixed
 
