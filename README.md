@@ -41,9 +41,10 @@ I fell in love with Lotus because of what dn0ne built — the design, the feel, 
 - **Loved tracks** — mark tracks as loved, browse them as a playlist
 - **Sleep timer** — presets (15/30/45/60/90 min) with optional finish-current-track
 - **Share track** — send any audio file via the Android share sheet
+- **Swipe the album art** — drag sideways in the expanded player to change track
 - **Listening stats** — top played, top listened, recently played, per-artist breakdowns
 - Material You dynamic color palettes
-- **Available in English, Spanish, Simplified Chinese, Russian, and Ukrainian**
+- **Available in English, Turkish, Spanish, Simplified Chinese, Russian, and Ukrainian** — French is in progress
 - **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
 
 ## What sets this fork apart

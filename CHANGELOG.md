@@ -6,6 +6,8 @@ Each release page is built from the matching section below, so the wording is ai
 
 ## 1.9.1
 
+Swipe the album art to change track. Lotus now speaks Turkish in full and French in part, and four fixes land, including wrong times on tracks over an hour and the player's action row hiding behind the artwork on small screens.
+
 ### Added
 
 - **Swipe the album art to change track.** In the expanded player, drag the artwork sideways: left for the next track, right for the previous one. Right does exactly what the skip-back button does, so with "jump to beginning" on — which is the default — swiping right more than three seconds into a track restarts that track rather than going back; swipe right again from the start to reach the previous track. A drag has to travel about 50dp before it counts, and any drag with a clear sideways component counts, including a diagonal one. Works in landscape too, and mirrors in right-to-left layouts. Contributed by @bxdxnn. (#66)
