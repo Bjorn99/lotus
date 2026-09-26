@@ -10,8 +10,9 @@ import androidx.room.RoomDatabase
         LovedTrackEntity::class,
         TrackStatsEntity::class,
         TrackMetadataEntity::class,
+        ReplayGainCacheEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class LotusDatabase : RoomDatabase() {
@@ -20,6 +21,7 @@ abstract class LotusDatabase : RoomDatabase() {
     abstract fun lovedTrackDao(): LovedTrackDao
     abstract fun trackStatsDao(): TrackStatsDao
     abstract fun trackMetadataDao(): TrackMetadataDao
+    abstract fun replayGainCacheDao(): ReplayGainCacheDao
 
     companion object {
         const val NAME = "lotus.db"

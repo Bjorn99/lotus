@@ -15,6 +15,7 @@ import com.dn0ne.player.app.data.db.LotusDatabase
 import com.dn0ne.player.app.data.db.LovedTrackDao
 import com.dn0ne.player.app.data.db.LyricsDao
 import com.dn0ne.player.app.data.db.PlaylistDao
+import com.dn0ne.player.app.data.db.ReplayGainCacheDao
 import com.dn0ne.player.app.data.db.TrackMetadataDao
 import com.dn0ne.player.app.data.db.TrackStatsDao
 import com.dn0ne.player.app.data.remote.lyrics.ChainLyricsProvider
@@ -110,6 +111,25 @@ internal val MIGRATION_3_4 = object : Migration(3, 4) {
                 "`mb_release_group_id` TEXT, " +
                 "`mb_album_artist_id` TEXT, " +
                 "PRIMARY KEY(`track_data`))"
+        )
+    }
+}
+
+// v4 → v5: add replaygain_cache for parsed ReplayGain tags. Purely additive,
+// backfilled to empty (files are read lazily on first play). Column definitions
+// must match what Room generates from ReplayGainCacheEntity exactly.
+internal val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `replaygain_cache` (" +
+                "`uri` TEXT NOT NULL, " +
+                "`date_modified` INTEGER NOT NULL, " +
+                "`size` INTEGER NOT NULL, " +
+                "`track_gain_db` REAL, " +
+                "`track_peak` REAL, " +
+                "`album_gain_db` REAL, " +
+                "`album_peak` REAL, " +
+                "PRIMARY KEY(`uri`))"
         )
     }
 }
@@ -222,7 +242,7 @@ val playerModule = module {
             LotusDatabase::class.java,
             LotusDatabase.NAME,
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .build()
     }
     single<PlaylistDao> { get<LotusDatabase>().playlistDao() }
@@ -230,6 +250,7 @@ val playerModule = module {
     single<LovedTrackDao> { get<LotusDatabase>().lovedTrackDao() }
     single<TrackStatsDao> { get<LotusDatabase>().trackStatsDao() }
     single<TrackMetadataDao> { get<LotusDatabase>().trackMetadataDao() }
+    single<ReplayGainCacheDao> { get<LotusDatabase>().replayGainCacheDao() }
 
     single {
         LyricsRepository(dao = get())
