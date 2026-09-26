@@ -1,5 +1,6 @@
 package com.dn0ne.player.app.di
 
+import android.util.Log
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -26,6 +27,9 @@ import com.dn0ne.player.core.data.Settings
 import com.dn0ne.player.app.data.remote.metadata.GatedMetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MetadataProvider
 import com.dn0ne.player.app.data.remote.metadata.MusicBrainzMetadataProvider
+import com.dn0ne.player.app.data.replaygain.ReplayGainReader
+import com.dn0ne.player.app.data.replaygain.ReplayGainSource
+import com.dn0ne.player.app.data.replaygain.ReplayGainStore
 import com.dn0ne.player.core.util.RateLimiter
 import com.dn0ne.player.app.data.repository.LovedTracksRepository
 import com.dn0ne.player.app.data.repository.LyricsRepository
@@ -289,6 +293,16 @@ val playerModule = module {
     single<EqualizerController> {
         EqualizerController(
             context = androidContext()
+        )
+    }
+
+    single<ReplayGainSource> { ReplayGainReader(context = androidContext()) }
+
+    single {
+        ReplayGainStore(
+            source = get(),
+            dao = get(),
+            onError = { mediaId, t -> Log.w("ReplayGainStore", "Load failed for $mediaId", t) },
         )
     }
 
