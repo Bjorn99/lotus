@@ -11,6 +11,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.audio.exceptions.CannotReadException
 import org.jaudiotagger.tag.TagTextField
 import org.jaudiotagger.tag.id3.AbstractTagFrame
 import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX
@@ -52,6 +53,9 @@ class ReplayGainReader(private val context: Context) : ReplayGainSource {
 
     override suspend fun readTags(mediaId: String, extension: String): TagState =
         withContext(Dispatchers.IO) {
+            val kind = tagReaderFor(extension)
+            // Nothing can read it, so don't copy it: it's untagged, and gets cached as such.
+            if (kind == TagReaderKind.NONE) return@withContext TagState.Untagged
             var temp: File? = null
             // Everything, temp-file creation included, stays inside the try: in the spike
             // a createTempFile throw outside it took down the playback service.
@@ -64,15 +68,24 @@ class ReplayGainReader(private val context: Context) : ReplayGainSource {
                 }
                 if (copied == null) return@withContext TagState.Unknown
 
-                val fields = if (extension == "opus") {
-                    // jaudiotagger 3.0.1 can't open .opus (see OpusTagEditor)
-                    OpusTagEditor.readComments(temp)
-                } else {
-                    jaudiotaggerFields(temp)
+                val fields = when (kind) {
+                    // jaudiotagger 3.0.1 can't open Opus, even inside a .ogg (see OpusTagEditor)
+                    TagReaderKind.OPUS -> OpusTagEditor.readComments(temp)
+                    TagReaderKind.OGG -> if (isOpusStream(temp.head())) {
+                        OpusTagEditor.readComments(temp)
+                    } else {
+                        jaudiotaggerFields(temp)
+                    }
+                    else -> jaudiotaggerFields(temp)
                 }
                 tagStateFromFields(fields)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: CannotReadException) {
+                // The copy worked but jaudiotagger can't parse this file. That won't
+                // change until the file does, and a new mtime refreshes the cache then.
+                Log.w(LOG_TAG, "No readable tags in $mediaId", e)
+                TagState.Untagged
             } catch (t: Throwable) {
                 // jaudiotagger throws a wide range of checked exceptions for unsupported
                 // or malformed files. Unknown means "retry next play", not "untagged".
@@ -82,6 +95,14 @@ class ReplayGainReader(private val context: Context) : ReplayGainSource {
                 temp?.delete()
             }
         }
+
+    // First bytes of the file: enough to hold the first Ogg page's header and payload start.
+    // A plain read(), since InputStream.readNBytes needs API 33.
+    private fun File.head(): ByteArray = inputStream().use { input ->
+        val buffer = ByteArray(512)
+        val read = input.read(buffer)
+        buffer.copyOf(maxOf(read, 0))
+    }
 
     private fun jaudiotaggerFields(file: File): List<Pair<String, String>> {
         val tag = AudioFileIO.read(file).tag ?: return emptyList()
