@@ -14,22 +14,29 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.dn0ne.player.app.data.replaygain.ReplayGainStore
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
+import com.dn0ne.player.app.domain.replaygain.ReplayGainMode
+import com.dn0ne.player.app.domain.replaygain.resolveGainFactor
 import com.dn0ne.player.core.data.Settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.android.get
@@ -229,6 +236,9 @@ class PlaybackService : MediaSessionService() {
     private val equalizerController = get<EqualizerController>()
     private val trackStatsRepository = get<TrackStatsRepository>()
     private val settings = get<Settings>()
+    private val replayGainStore = get<ReplayGainStore>()
+    // Tag reads copy files, so they run on IO, off the stats scope.
+    private val replayGainScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     // The tracker reads player.currentPosition from a periodic checkpoint;
     // ExoPlayer requires single-threaded access from the player's thread,
     // which is main. Room's suspend DAO calls dispatch their own work to
@@ -246,7 +256,16 @@ class PlaybackService : MediaSessionService() {
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
 
-        val player = ExoPlayer.Builder(this)
+        val replayGainProcessor = ReplayGainAudioProcessor { mediaId ->
+            resolveGainFactor(
+                state = replayGainStore.stateFor(mediaId),
+                mode = settings.replayGainMode.value,
+                preAmpDb = settings.replayGainPreAmpDb.value,
+                fallbackDb = settings.replayGainFallbackDb.value,
+            )
+        }
+
+        val player = ExoPlayer.Builder(this, ReplayGainRenderersFactory(this, replayGainProcessor))
             .setAudioAttributes(audioAttributes, shouldHandleAudioFocus)
             .setHandleAudioBecomingNoisy(true)
             .build()
@@ -273,6 +292,35 @@ class PlaybackService : MediaSessionService() {
                 }
             }
         })
+
+        // Read the playing and next track ahead of the sink. The next one is what makes
+        // gapless transitions right from their first sample.
+        player.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                prefetchReplayGain(player)
+            }
+
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                prefetchReplayGain(player)
+            }
+        })
+
+        // Settings changes apply mid-track with a short ramp. Load the current track
+        // first, so switching ReplayGain on doesn't leave an unread track at unity.
+        combine(
+            settings.replayGainMode,
+            settings.replayGainPreAmpDb,
+            settings.replayGainFallbackDb,
+        ) { _, _, _ -> }
+            .drop(1)
+            .onEach {
+                val ids = replayGainIds(player)
+                replayGainScope.launch {
+                    ids.forEach { replayGainStore.ensureLoaded(it) }
+                    replayGainProcessor.onSettingsChanged()
+                }
+            }
+            .launchIn(statsScope)
 
         playCountTracker = PlayCountTracker(
             player = player,
@@ -353,11 +401,28 @@ class PlaybackService : MediaSessionService() {
             release()
             mediaSession = null
         }
+        replayGainScope.cancel()
         super.onDestroy()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
         mediaSession
+
+    /** Current and next media ids. Main thread only (ExoPlayer access). */
+    private fun replayGainIds(player: Player): List<String> = listOfNotNull(
+        player.currentMediaItem?.mediaId,
+        player.nextMediaItemIndex
+            .takeIf { it != C.INDEX_UNSET }
+            ?.let { player.getMediaItemAt(it).mediaId },
+    )
+
+    private fun prefetchReplayGain(player: Player) {
+        // Off means no file copies at all.
+        if (settings.replayGainMode.value == ReplayGainMode.OFF) return
+        replayGainIds(player).forEach { id ->
+            replayGainScope.launch { replayGainStore.ensureLoaded(id) }
+        }
+    }
 
 }
 
