@@ -126,6 +126,11 @@ fun PlaybackSettings(
             }
         )
 
+        ReplayGainSettings(
+            settings = settings,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
         val isEqEnabled by equalizerController.isEqEnabled.collectAsState()
         SettingSwitch(
             title = context.resources.getString(R.string.equalizer),

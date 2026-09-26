@@ -333,6 +333,15 @@
     <string name="changes_will_take_effect_on_next_launch">Changes will take effect on next launch.</string>
     <string name="equalizer">Equalizer</string>
     <string name="equalizer_explain">Manually adjust sound</string>
+    <string name="replaygain">ReplayGain</string>
+    <string name="replaygain_explain">Play tracks at a consistent loudness using the ReplayGain tags in your files</string>
+    <string name="replaygain_off">Off</string>
+    <string name="replaygain_track">Track</string>
+    <string name="replaygain_album">Album</string>
+    <string name="replaygain_preamp">Pre-amp</string>
+    <string name="replaygain_preamp_explain">Added to the gain of tagged tracks</string>
+    <string name="replaygain_fallback">Untagged tracks</string>
+    <string name="replaygain_fallback_explain">Gain for files without ReplayGain tags</string>
     <string name="jump_to_beginning">Jump to beginning</string>
     <string name="jump_to_beginning_explain">Restart current track on first press of previous button</string>
 
