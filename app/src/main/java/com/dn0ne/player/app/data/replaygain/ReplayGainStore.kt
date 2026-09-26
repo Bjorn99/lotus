@@ -22,16 +22,23 @@ class ReplayGainStore(
     private val dao: ReplayGainCacheDao,
     private val onError: (String, Throwable) -> Unit = { _, _ -> },
 ) {
-    private val states = ConcurrentHashMap<String, TagState>()
+    // The state together with the MediaStore mtime/size it was read at, so a file
+    // retagged while the service is alive is noticed without a restart.
+    private data class Loaded(val state: TagState, val info: MediaFileInfo)
+
+    private val states = ConcurrentHashMap<String, Loaded>()
     private val loading: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     fun stateFor(mediaId: String?): TagState =
-        mediaId?.let { states[it] } ?: TagState.Unknown
+        mediaId?.let { states[it]?.state } ?: TagState.Unknown
 
     suspend fun ensureLoaded(mediaId: String) {
-        if (states.containsKey(mediaId) || !loading.add(mediaId)) return
+        if (!loading.add(mediaId)) return
         try {
+            // One MediaStore query per call. Callers are transitions and settings
+            // changes, never the audio thread.
             val info = source.fileInfo(mediaId) ?: return
+            if (states[mediaId]?.info == info) return
             val cached = dao.get(mediaId)
             val state = if (cached != null && cached.isFreshFor(info)) {
                 cached.toTagState()
@@ -40,7 +47,7 @@ class ReplayGainStore(
                     read.toCacheEntity(mediaId, info)?.let { dao.upsert(it) }
                 }
             }
-            if (state != TagState.Unknown) states[mediaId] = state
+            if (state != TagState.Unknown) states[mediaId] = Loaded(state, info)
         } catch (e: CancellationException) {
             throw e
         } catch (t: Throwable) {

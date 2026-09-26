@@ -122,11 +122,30 @@ class ReplayGainStoreTest {
     }
 
     @Test
-    fun `a loaded track is not read again`() = runBlocking {
+    fun `a loaded track is not read again while MediaStore reports the same file`() = runBlocking {
         val source = FakeSource(info, tagged)
         val store = ReplayGainStore(source, FakeDao())
         store.ensureLoaded(id)
         store.ensureLoaded(id)
         assertEquals(1, source.reads)
+    }
+
+    @Test
+    fun `a retag in the same process is re-read`() = runBlocking {
+        // Retagging with rsgain while the service is alive: MediaStore's rescan reports a
+        // new mtime, and the next load must pick the new tags up without a restart.
+        val source = FakeSource(info, tagged)
+        val dao = FakeDao()
+        val store = ReplayGainStore(source, dao)
+        store.ensureLoaded(id)
+
+        val retagged = TagState.Tagged(ReplayGainTags(GainPeak(-3f, 0.9f), null))
+        source.info = info.copy(dateModified = info.dateModified + 1)
+        source.result = retagged
+        store.ensureLoaded(id)
+
+        assertEquals(retagged, store.stateFor(id))
+        assertEquals(2, source.reads)
+        assertEquals(retagged.toCacheEntity(id, source.info!!), dao.row)
     }
 }
