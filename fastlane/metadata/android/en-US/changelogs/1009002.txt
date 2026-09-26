@@ -1,0 +1,3 @@
+Lotus 1.9.2
+
+ReplayGain: tracks can now play at a consistent loudness. Turn it on in Settings → Playback and pick Track or Album. Lotus reads the ReplayGain tags already in your FLAC, MP3 and M4A files and the R128 tags in Opus files, with a pre-amp and a separate level for files without tags. It uses each track's peak tag so turning a track up doesn't clip.

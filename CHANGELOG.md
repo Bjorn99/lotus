@@ -4,6 +4,14 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.9.2
+
+ReplayGain: tracks can now play at a consistent loudness.
+
+### Added
+
+- **ReplayGain.** Settings → Playback → ReplayGain plays each track at the loudness its ReplayGain tags ask for, so a quiet album and a loud one sit at the same level. Choose Track (every track evened out, good for shuffle) or Album (keeps the loudness differences within an album). Lotus reads the tags your files already carry, from FLAC, MP3 and M4A files and the R128 tags in Opus files; it doesn't measure loudness itself, so tag your library first with a tool such as rsgain. A pre-amp shifts all tagged tracks up or down, and a separate setting sets the level for files without tags. Lotus uses each track's peak tag to make sure turning a track up never clips; a track with no peak tag, which includes every Opus file, is only ever turned down. Off by default. (#122)
+
 ## 1.9.1
 
 Swipe the album art to change track. Lotus now speaks Turkish in full and French in part, and four fixes land, including wrong times on tracks over an hour and the player's action row hiding behind the artwork on small screens.
