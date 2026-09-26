@@ -14,7 +14,6 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
@@ -298,12 +297,8 @@ class PlaybackService : MediaSessionService() {
         // Read the playing and next track ahead of the sink. The next one is what makes
         // gapless transitions right from their first sample.
         player.addListener(object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                prefetchReplayGain(player)
-            }
-
-            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                prefetchReplayGain(player)
+            override fun onEvents(player: Player, events: Player.Events) {
+                if (events.containsAny(*REPLAYGAIN_PREFETCH_EVENTS)) prefetchReplayGain(player)
             }
         })
 
