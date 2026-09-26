@@ -47,6 +47,13 @@ internal object OpusTagEditor {
     // ---- public API ----
 
     /**
+     * Every VorbisComment field in the OpusTags packet, keys upper-cased, in file order.
+     * ReplayGain reads R128_* gains through this, since jaudiotagger can't open .opus.
+     */
+    fun readComments(file: File): List<Pair<String, String>> =
+        readTagPacket(readOggPages(file))?.comments?.all().orEmpty()
+
+    /**
      * Reads embedded lyrics from the OpusTags packet.
      *
      * The write path goes through this editor because jaudiotagger cannot open

@@ -124,6 +124,31 @@ class OpusTagEditorTest {
         }
     }
 
+    // ---- readComments ----
+
+    @Test
+    fun `readComments returns r128 fields in file order`() {
+        val file = writeOpusFile(mapOf("TITLE" to "Song", "R128_TRACK_GAIN" to "-573", "R128_ALBUM_GAIN" to "-600"))
+        try {
+            assertEquals(
+                listOf("TITLE" to "Song", "R128_TRACK_GAIN" to "-573", "R128_ALBUM_GAIN" to "-600"),
+                OpusTagEditor.readComments(file),
+            )
+        } finally {
+            file.delete()
+        }
+    }
+
+    @Test
+    fun `readComments is empty when there is no tags packet`() {
+        val file = File.createTempFile("test_opus_empty", ".opus")
+        try {
+            assertEquals(emptyList<Pair<String, String>>(), OpusTagEditor.readComments(file))
+        } finally {
+            file.delete()
+        }
+    }
+
     // ---- readLyrics ----
 
     @Test
