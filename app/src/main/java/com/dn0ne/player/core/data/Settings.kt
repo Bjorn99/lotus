@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.dn0ne.player.app.domain.replaygain.FALLBACK_RANGE_DB
+import com.dn0ne.player.app.domain.replaygain.PREAMP_RANGE_DB
+import com.dn0ne.player.app.domain.replaygain.ReplayGainMode
 import com.dn0ne.player.app.domain.sort.PlaylistSort
 import com.dn0ne.player.app.domain.sort.SortOrder
 import com.dn0ne.player.app.domain.sort.TrackSort
@@ -36,6 +39,9 @@ class Settings(context: Context) {
     private val useDarkPaletteOnLyricsSheetKey = "dark-palette-on-lyrics-sheet"
     private val networkLookupsEnabledKey = "network-lookups-enabled"
     private val trackPlayStatsKey = "track-play-stats"
+    private val replayGainModeKey = "replaygain-mode"
+    private val replayGainPreAmpDbKey = "replaygain-preamp-db"
+    private val replayGainFallbackDbKey = "replaygain-fallback-db"
 
     private val areRisksOfMetadataEditingAcceptedKey = "metadata-editing-dialog"
 
@@ -280,6 +286,47 @@ class Settings(context: Context) {
         _trackPlayStats.update { value }
         with(sharedPreferences.edit()) {
             putBoolean(trackPlayStatsKey, value)
+            apply()
+        }
+    }
+
+    // ReplayGain. StateFlows because PlaybackService reacts to changes live. The mode is
+    // stored by name (never ordinal) and defaults to OFF, so nobody's loudness changes
+    // on upgrade.
+    private val _replayGainMode = MutableStateFlow(
+        ReplayGainMode.fromStoredName(sharedPreferences.getString(replayGainModeKey, null))
+    )
+    val replayGainMode = _replayGainMode.asStateFlow()
+    fun updateReplayGainMode(value: ReplayGainMode) {
+        _replayGainMode.update { value }
+        with(sharedPreferences.edit()) {
+            putString(replayGainModeKey, value.name)
+            apply()
+        }
+    }
+
+    private val _replayGainPreAmpDb = MutableStateFlow(
+        sharedPreferences.getFloat(replayGainPreAmpDbKey, 0f).coerceIn(PREAMP_RANGE_DB)
+    )
+    val replayGainPreAmpDb = _replayGainPreAmpDb.asStateFlow()
+    fun updateReplayGainPreAmpDb(value: Float) {
+        val clamped = value.coerceIn(PREAMP_RANGE_DB)
+        _replayGainPreAmpDb.update { clamped }
+        with(sharedPreferences.edit()) {
+            putFloat(replayGainPreAmpDbKey, clamped)
+            apply()
+        }
+    }
+
+    private val _replayGainFallbackDb = MutableStateFlow(
+        sharedPreferences.getFloat(replayGainFallbackDbKey, 0f).coerceIn(FALLBACK_RANGE_DB)
+    )
+    val replayGainFallbackDb = _replayGainFallbackDb.asStateFlow()
+    fun updateReplayGainFallbackDb(value: Float) {
+        val clamped = value.coerceIn(FALLBACK_RANGE_DB)
+        _replayGainFallbackDb.update { clamped }
+        with(sharedPreferences.edit()) {
+            putFloat(replayGainFallbackDbKey, clamped)
             apply()
         }
     }
