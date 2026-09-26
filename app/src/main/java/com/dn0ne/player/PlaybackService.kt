@@ -247,6 +247,8 @@ class PlaybackService : MediaSessionService() {
     private val statsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var playCountTracker: PlayCountTracker? = null
 
+    // ExoPlayer.Builder(Context, RenderersFactory) is @UnstableApi in Media3.
+    @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
 
