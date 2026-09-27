@@ -6,11 +6,15 @@ Each release page is built from the matching section below, so the wording is ai
 
 ## 1.9.2
 
-ReplayGain: tracks can now play at a consistent loudness.
+ReplayGain: tracks can now play at a consistent loudness. Shuffle now actually uses the order Lotus picks, which it hadn't since 1.5.9.
 
 ### Added
 
 - **ReplayGain.** Settings → Playback → ReplayGain plays each track at the loudness its ReplayGain tags ask for, so a quiet album and a loud one sit at the same level. Choose Track (every track evened out, good for shuffle) or Album (keeps the loudness differences within an album). Lotus reads the tags your files already carry, from FLAC, MP3 and M4A files and the R128 tags in Opus files; it doesn't measure loudness itself, so tag your library first with a tool such as rsgain. A pre-amp shifts all tagged tracks up or down, and a separate setting sets the level for files without tags. Lotus uses each track's peak tag to make sure turning a track up never clips; a track with no peak tag, which includes every Opus file, is only ever turned down. Off by default. (#122)
+
+### Fixed
+
+- **Shuffle and Smart shuffle never used their own order, from 1.5.9 until now.** We owe you a plain account of this one. Lotus worked out a shuffle order every time you turned shuffle on, then tried to pass it to the player by a route that never worked, so the order was quietly thrown away. Both modes played the same default shuffle, so the Smart shuffle improvements described in 1.7.1 and 1.9.0 never reached your ears. The order now goes to the player, and a new order is worked out when you start a different playlist with shuffle on. This is the first release where Smart shuffle actually behaves as described.
 
 ## 1.9.1
 
