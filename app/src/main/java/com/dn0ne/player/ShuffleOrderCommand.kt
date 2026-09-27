@@ -12,3 +12,12 @@ fun validShuffleOrder(order: IntArray?, itemCount: Int): IntArray? {
     }
     return order
 }
+
+enum class ShuffleOrderAction { APPLY, DEFER, REJECT }
+
+fun shuffleOrderAction(order: IntArray?, itemCount: Int): ShuffleOrderAction = when {
+    order == null -> ShuffleOrderAction.REJECT
+    validShuffleOrder(order, itemCount) != null -> ShuffleOrderAction.APPLY
+    validShuffleOrder(order, order.size) != null -> ShuffleOrderAction.DEFER
+    else -> ShuffleOrderAction.REJECT
+}

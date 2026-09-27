@@ -15,6 +15,7 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder
@@ -436,6 +437,19 @@ private class ShuffleOrderCallback(
     private val ownPackage: String,
 ) : MediaSession.Callback {
     private val command = SessionCommand(SET_SHUFFLE_ORDER_ACTION, Bundle.EMPTY)
+    private var pendingOrder: IntArray? = null
+
+    init {
+        player.addListener(object : Player.Listener {
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                val pending = pendingOrder ?: return
+                if (shuffleOrderAction(pending, player.mediaItemCount) == ShuffleOrderAction.APPLY) {
+                    pendingOrder = null
+                    apply(pending)
+                }
+            }
+        })
+    }
 
     override fun onConnect(
         session: MediaSession,
@@ -459,14 +473,32 @@ private class ShuffleOrderCallback(
         if (customCommand.customAction != SET_SHUFFLE_ORDER_ACTION) {
             return super.onCustomCommand(session, controller, customCommand, args)
         }
-        val order = validShuffleOrder(args.getIntArray(SHUFFLE_ORDER_KEY), player.mediaItemCount)
-            ?: run {
-                Log.w("ShuffleOrderCallback", "Rejected a shuffle order that doesn't match the queue")
-                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+        val order = args.getIntArray(SHUFFLE_ORDER_KEY)
+        val result = when (shuffleOrderAction(order, player.mediaItemCount)) {
+            ShuffleOrderAction.APPLY -> {
+                pendingOrder = null
+                apply(order!!)
+                SessionResult.RESULT_SUCCESS
             }
+            ShuffleOrderAction.DEFER -> {
+                pendingOrder = order
+                Log.d(
+                    "ShuffleOrderCallback",
+                    "Holding a shuffle order of ${order?.size} until the queue of ${player.mediaItemCount} matches",
+                )
+                SessionResult.RESULT_SUCCESS
+            }
+            ShuffleOrderAction.REJECT -> {
+                Log.w("ShuffleOrderCallback", "Rejected a malformed shuffle order of ${order?.size}")
+                SessionResult.RESULT_ERROR_BAD_VALUE
+            }
+        }
+        return Futures.immediateFuture(SessionResult(result))
+    }
+
+    private fun apply(order: IntArray) {
         player.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
         Log.d("ShuffleOrderCallback", "Applied shuffle order: ${order.joinToString()}")
-        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
     }
 }
 

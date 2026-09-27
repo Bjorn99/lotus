@@ -1,6 +1,7 @@
 package com.dn0ne.player
 
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -34,4 +35,23 @@ class ShuffleOrderCommandTest {
     fun `an empty queue takes an empty order`() {
         assertArrayEquals(intArrayOf(), validShuffleOrder(intArrayOf(), itemCount = 0))
     }
+
+    @Test
+    fun `an order for the current queue is applied`() {
+        assertEquals(ShuffleOrderAction.APPLY, shuffleOrderAction(intArrayOf(1, 0, 2), itemCount = 3))
+    }
+
+    @Test
+    fun `a well-formed order that arrives before its queue is deferred`() {
+        assertEquals(ShuffleOrderAction.DEFER, shuffleOrderAction(intArrayOf(1, 0, 2), itemCount = 0))
+        assertEquals(ShuffleOrderAction.DEFER, shuffleOrderAction(intArrayOf(1, 0, 2), itemCount = 5))
+    }
+
+    @Test
+    fun `a malformed order is rejected whatever the queue`() {
+        assertEquals(ShuffleOrderAction.REJECT, shuffleOrderAction(intArrayOf(0, 0, 2), itemCount = 3))
+        assertEquals(ShuffleOrderAction.REJECT, shuffleOrderAction(intArrayOf(0, 5), itemCount = 0))
+        assertEquals(ShuffleOrderAction.REJECT, shuffleOrderAction(null, itemCount = 3))
+    }
 }
+
