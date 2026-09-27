@@ -6,6 +6,7 @@ import android.content.Intent
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.media.audiofx.Equalizer
+import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.annotation.OptIn
@@ -16,13 +17,18 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ShuffleOrder
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import com.dn0ne.player.app.data.replaygain.ReplayGainStore
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.domain.replaygain.ReplayGainMode
 import com.dn0ne.player.app.domain.replaygain.resolveGainFactor
 import com.dn0ne.player.core.data.Settings
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -371,6 +377,7 @@ class PlaybackService : MediaSessionService() {
 
         mediaSession = MediaSession.Builder(this, player)
             .setSessionActivity(pendingIntent)
+            .setCallback(ShuffleOrderCallback(player, ownPackage = packageName))
             .build()
     }
 
@@ -421,6 +428,46 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
+}
+
+@OptIn(UnstableApi::class)
+private class ShuffleOrderCallback(
+    private val player: ExoPlayer,
+    private val ownPackage: String,
+) : MediaSession.Callback {
+    private val command = SessionCommand(SET_SHUFFLE_ORDER_ACTION, Bundle.EMPTY)
+
+    override fun onConnect(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+    ): MediaSession.ConnectionResult {
+        val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+        if (controller.packageName == ownPackage) {
+            builder.setAvailableSessionCommands(
+                MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon().add(command).build()
+            )
+        }
+        return builder.build()
+    }
+
+    override fun onCustomCommand(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        customCommand: SessionCommand,
+        args: Bundle,
+    ): ListenableFuture<SessionResult> {
+        if (customCommand.customAction != SET_SHUFFLE_ORDER_ACTION) {
+            return super.onCustomCommand(session, controller, customCommand, args)
+        }
+        val order = validShuffleOrder(args.getIntArray(SHUFFLE_ORDER_KEY), player.mediaItemCount)
+            ?: run {
+                Log.w("ShuffleOrderCallback", "Rejected a shuffle order that doesn't match the queue")
+                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+            }
+        player.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
+        Log.d("ShuffleOrderCallback", "Applied shuffle order: ${order.joinToString()}")
+        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+    }
 }
 
 object SleepTimer {

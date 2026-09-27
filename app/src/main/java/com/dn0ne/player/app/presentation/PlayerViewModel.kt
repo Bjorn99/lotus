@@ -1,21 +1,25 @@
 package com.dn0ne.player.app.presentation
 
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.io.File
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ShuffleOrder
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
 import com.dn0ne.player.EqualizerController
 import com.dn0ne.player.R
+import com.dn0ne.player.SET_SHUFFLE_ORDER_ACTION
+import com.dn0ne.player.SHUFFLE_ORDER_KEY
 import com.dn0ne.player.app.data.LyricsReader
 import com.dn0ne.player.app.data.LyricsSidecarReader
 import com.dn0ne.player.app.data.SavedPlayerState
@@ -563,7 +567,8 @@ class PlayerViewModel(
         when (event) {
             is OnTrackClick -> {
                 player?.let { player ->
-                    if (_playbackState.value.playlist != event.playlist) {
+                    val playlistChanged = _playbackState.value.playlist != event.playlist
+                    if (playlistChanged) {
                         player.clearMediaItems()
                         player.addMediaItems(
                             event.playlist.trackList.fastMap { track -> track.mediaItem }
@@ -582,6 +587,14 @@ class PlayerViewModel(
                             currentTrack = event.track,
                             position = 0
                         )
+                    }
+
+                    val mode = _playbackState.value.playbackMode
+                    if (playlistChanged &&
+                        (mode == PlaybackMode.Shuffle || mode == PlaybackMode.SmartShuffle)
+                    ) {
+                        currentShuffleOrder = null
+                        regenerateShuffleOrder(mode)
                     }
 
                     viewModelScope.launch(Dispatchers.IO) {
@@ -1686,12 +1699,7 @@ class PlayerViewModel(
                         previousLoopIndices = previousIndices,
                     )
                     currentShuffleOrder = order
-                    val exoPlayer = player as? ExoPlayer
-                    if (exoPlayer != null) {
-                        exoPlayer.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
-                    } else {
-                        Log.w("PlayerViewModel", "Cannot set shuffle order: player is not an ExoPlayer instance")
-                    }
+                    sendShuffleOrder(order)
                 }
                 player?.shuffleModeEnabled = true
                 player?.repeatMode = Player.REPEAT_MODE_ALL
@@ -1710,12 +1718,15 @@ class PlayerViewModel(
             previousLoopIndices = previousIndices,
         )
         currentShuffleOrder = order
-        val exoPlayer = player as? ExoPlayer
-        if (exoPlayer != null) {
-            exoPlayer.setShuffleOrder(ShuffleOrder.DefaultShuffleOrder(order, 0L))
-        } else {
-            Log.w("PlayerViewModel", "Cannot set shuffle order: player is not an ExoPlayer instance")
-        }
+        sendShuffleOrder(order)
+    }
+
+    private fun sendShuffleOrder(order: IntArray) {
+        val controller = player as? MediaController ?: return
+        controller.sendCustomCommand(
+            SessionCommand(SET_SHUFFLE_ORDER_ACTION, Bundle.EMPTY),
+            bundleOf(SHUFFLE_ORDER_KEY to order),
+        )
     }
 
     private fun loadLyrics() {
