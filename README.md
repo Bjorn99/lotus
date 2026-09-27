@@ -31,6 +31,7 @@ I fell in love with Lotus because of what dn0ne built — the design, the feel, 
 - Play MP3, FLAC, OGG, OPUS, WAV, and more
 - Browse tracks, albums, artists, genres, and custom playlists
 - **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation)
+- **ReplayGain** — play tracks at a consistent loudness from the ReplayGain tags in your files, by track or by album
 - **Per-track artwork** — display embedded cover art from individual audio files (opt-in)
 - Synchronized lyrics from [LRCLIB](https://lrclib.net/), plus publish your own
 - Edit track metadata or fetch it from [MusicBrainz](https://musicbrainz.org/)
@@ -51,6 +52,7 @@ I fell in love with Lotus because of what dn0ne built — the design, the feel, 
 
 - **Room storage** — migrated from Realm to Android's official Room library, dropping ~10 MB from the APK
 - **Dual shuffle mode** — Pure (unbiased Fisher-Yates) and Smart (penalty-scored artist/album separation), all on-device
+- **ReplayGain** — track and album modes, peak-protected so a boost never clips, with a pre-amp and a separate level for untagged files
 - **Per-track artwork** — display cover art embedded in individual audio files, with album-art fallback
 - **Improved lyrics and metadata** — multi-source fetching from LRCLIB, MusicBrainz, and sidecar `.lrc` files next to your music; hardened network layer; embedded LRC parsing; plus publish your own lyrics
 - **Global library search** — single search field across tracks, albums, artists, genres, and playlists
@@ -67,6 +69,8 @@ I fell in love with Lotus because of what dn0ne built — the design, the feel, 
 True randomness clusters. Flip a coin enough times and you get runs of heads; a pure shuffle does the same with artists, and three songs by one artist in a row feels broken even though the maths is fine.
 
 So Smart Shuffle builds an order rather than drawing one. It deals tracks out like cards — the artist with the most tracks first, one into every other slot — which forces the most crowded artist as far apart as it can go. Whenever a repeat-free order exists, the deal finds one. A short second pass then makes random swaps and keeps only those that don't make things worse, which breaks up the regularity and also separates albums and anything you just heard. It all runs on-device, with no listening history and no network.
+
+A correction, because you should hear it from us: from 1.5.9 until 1.9.2 the order Smart Shuffle built never reached the player. A bug threw it away, so Pure and Smart both played the same default shuffle. 1.9.2 fixes that, and it's the first release where the behaviour described here actually happens.
 
 Same-artist back-to-backs against a pure shuffle, 500 queues per row:
 
@@ -85,6 +89,34 @@ Treating playlist sequencing as constrained optimisation is well-trodden ground:
 
 1. Pauws, Verhaegh & Vossen, "Music playlist generation by adapted simulated annealing" (2008), *Information Sciences* 178(3):647–662. [doi:10.1016/j.ins.2007.08.019](https://doi.org/10.1016/j.ins.2007.08.019)
 2. Altschul & Erickson, "Significance of nucleotide sequence alignments: a method for random sequence permutation that preserves dinucleotide and codon usage" (1985), *Mol Biol Evol* 2(6):526–538. [doi:10.1093/oxfordjournals.molbev.a040370](https://doi.org/10.1093/oxfordjournals.molbev.a040370) — Jiang, Anderson, Gillespie & Mayne, "uShuffle: a useful tool for shuffling biological sequences while preserving the k-let counts" (2008), *BMC Bioinformatics* 9:192. [doi:10.1186/1471-2105-9-192](https://doi.org/10.1186/1471-2105-9-192)
+
+## ReplayGain
+
+ReplayGain evens out loudness between tracks, so a quiet recording and a loud one play at about the same level without you reaching for the volume.
+
+It works from tags already in your files. A scanner program measures each track and each album and writes down how much to turn it up or down to reach a common loudness (−18 LUFS), plus the loudest sample in it, called the peak. Lotus reads those tags and never analyses audio itself, and nothing leaves your phone. The volume change happens inside the audio pipeline exactly where one track ends and the next begins, so gapless albums stay gapless.
+
+Turn it on in **Settings → Playback → ReplayGain**. It's off by default.
+
+**Track** brings every song to the same loudness. Use it for shuffle and mixed playlists, where a quiet acoustic song can follow a loud rock track.
+
+**Album** moves a whole album up or down by one amount. The album as a whole matches your other music, but its own shape survives: a soft ballad stays softer than the song before it, the way the artist mastered it. Use it when you listen to albums from start to finish. If a file only carries one of the two values, Lotus uses the one it has.
+
+**Pre-amp** (−15 to +15 dB) shifts every tagged track by the same amount. Because ReplayGain aims every track at −18 LUFS, turning it on can make your music quieter overall; the pre-amp brings it back up. Tracks stay evened out against each other.
+
+**Untagged tracks** (−15 to 0 dB) sets the level for files with no ReplayGain tags. Most tagged tracks get turned down, so an untagged file played as-is would stand out as the loudest thing in the room. Lower this until untagged files blend in; around −6 dB is a reasonable place to start. The pre-amp doesn't apply to these files.
+
+Turning a quiet track up can push its loudest moments past what the audio can hold, which distorts it. Lotus uses the peak tag to stop any boost at the point where the loudest sample just reaches full scale. A file without a peak tag is only ever turned down, never up. Opus files tagged the R128 way carry no peak, so they fall in that group; Opus files tagged by rsgain's default mode carry normal peak tags and are treated like FLAC.
+
+### Getting it set up
+
+1. Tag your library once. [rsgain](https://github.com/complexlogic/rsgain) is a good choice: `rsgain easy /path/to/music` writes track and album values and peaks at −18 LUFS.
+2. Put the files on your phone as usual and let Android pick up the changes.
+3. Choose Track or Album, set the pre-amp to taste, and set the untagged level so untagged files blend in.
+
+If you retag files later, Lotus notices the change and reads them again, with no restart.
+
+Lotus reads ReplayGain from FLAC, MP3, M4A and Opus files. Formats it can't read tags from (such as `.aac`, `.wv` and `.ape`) count as untagged. APEv2 tags in MP3 files and iTunes Sound Check aren't read. The first time a very large file plays, Lotus may not have read its tags before it starts, so that one play can begin at normal volume; every play after that is corrected.
 
 ## Download
 
