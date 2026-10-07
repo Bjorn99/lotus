@@ -10,7 +10,7 @@ ReplayGain: tracks can now play at a consistent loudness. Shuffle now actually u
 
 ### Added
 
-- **ReplayGain.** Settings → Playback → ReplayGain plays each track at the loudness its ReplayGain tags ask for, so a quiet album and a loud one sit at the same level. Choose Track (every track evened out, good for shuffle) or Album (keeps the loudness differences within an album). Lotus reads the tags your files already carry, from FLAC, MP3 and M4A files and the R128 tags in Opus files; it doesn't measure loudness itself, so tag your library first with a tool such as rsgain. A pre-amp shifts all tagged tracks up or down, and a separate setting sets the level for files without tags. Lotus uses each track's peak tag to make sure turning a track up never clips; a track with no peak tag, which includes every Opus file, is only ever turned down. Off by default. (#122)
+- **ReplayGain.** Settings → Playback → ReplayGain evens out loudness between tracks, by Track or by Album, from the tags your files already carry (FLAC, MP3, M4A, and the R128 tags in Opus). Lotus reads tags rather than measuring, so tag your library first with a tool such as rsgain. Peak tags keep a boost from clipping, and untagged files get their own level. Off by default. (#122)
 
 ### Fixed
 
