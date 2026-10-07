@@ -15,13 +15,22 @@ jobs:
     name: Analyze (kotlin)
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # CodeQL's bundled Kotlin extractor lags new Kotlin releases. Without this
-    # flag it aborts the run with "kotlin-version-too-new" whenever the project
-    # moves past the extractor's supported ceiling (e.g. the 2.4.0 -> 2.4.10
-    # bump). Allowing unsupported versions lets the extractor analyze anyway.
-    # Worst case is slightly reduced extractor precision on the newest language
-    # features — never a build or security regression — and it keeps the job
-    # green across future Kotlin upgrades instead of one-off pinning.
+    # CodeQL's bundled Kotlin extractor has a hard version ceiling: a literal
+    # list in java/kotlin-extractor/versions.bzl in the github/codeql repo.
+    # Past it the extractor rejects the build with KotlinVersionTooRecentError
+    # and the flag below does NOT bypass that — measured 2026-09-23, when
+    # Kotlin 2.4.20 hard-failed with the flag already set.
+    #
+    # What unblocks a Kotlin bump is a codeql-action release whose
+    # src/defaults.json names a bundle containing the new version. init@v4
+    # reads defaults.json from whatever v4 release is current, so the bundle
+    # does not float on its own. Kotlin 2.4.20 failed on bundle 2.27.0
+    # (action 4.38.1) and passed on 2.27.1 (action 4.38.2), which is the
+    # release that added "2.4.20" to that list.
+    #
+    # The flag stays set, but do not rely on it: in the one case measured here
+    # it changed nothing. Whether to remove it is a separate question that
+    # nobody has evidence on either way.
     env:
       CODEQL_EXTRACTOR_KOTLIN_ALLOW_UNSUPPORTED: "true"
     permissions:
