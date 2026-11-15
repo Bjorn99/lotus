@@ -366,4 +366,13 @@
         <item quantity="many">Des lectures</item>
         <item quantity="other">%1$d lectures</item>
     </plurals>
+    <string name="replaygain">ReplayGain</string>
+    <string name="replaygain_explain">Lire les pistes à un volume équivalent en utilisant les étiquettes ReplayGain dans vos fichiers</string>
+    <string name="replaygain_off">Désactivé</string>
+    <string name="replaygain_track">Piste</string>
+    <string name="replaygain_album">Album</string>
+    <string name="replaygain_preamp">Avant amplification</string>
+    <string name="replaygain_preamp_explain">Ajouté au volume supplémentaire des pistes étiquetées</string>
+    <string name="replaygain_fallback">Pistes non étiquetées</string>
+    <string name="replaygain_fallback_explain">Volume supplémentaire pour les fichiers sans étiquette ReplayGain</string>
 </resources>
