@@ -45,7 +45,7 @@ I fell in love with Lotus because of what dn0ne built — the design, the feel, 
 - **Swipe the album art** — drag sideways in the expanded player to change track
 - **Listening stats** — top played, top listened, recently played, per-artist breakdowns
 - Material You dynamic color palettes
-- **Available in English, Turkish, Spanish, Simplified Chinese, Russian, and Ukrainian** — French is in progress
+- **Available in English, Turkish, Spanish, Simplified Chinese, Russian, Ukrainian, and French**
 - **Privacy-first** — network off by default, no telemetry, no analytics, no tracking
 
 ## What sets this fork apart
@@ -154,7 +154,7 @@ Lotus is kept going by people who file good bug reports, translate it, and send 
 - **[@valenzit0](https://github.com/valenzit0)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
 - **[@MCfool](https://github.com/MCfool)** — Simplified Chinese translation ([#143](https://github.com/Bjorn99/lotus/issues/143))
 - **[@KerimDemirkaynak](https://github.com/KerimDemirkaynak)** — Turkish translation ([#149](https://github.com/Bjorn99/lotus/pull/149))
-- **Mickaël Binos** — French translation
+- **Mickaël Binos** and **[@Keaexe](https://github.com/Keaexe)** — French translation
 
 ## Translations
 
