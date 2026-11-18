@@ -1,3 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="back">بازگشت</string>
+    <string name="get_started">شروع کنید</string>
+    <string name="permissions">مجوزها</string>
+    <string name="audio">صدا</string>
+    <string name="explain_audio_permission_requirement">لوتوس برای پخش موسیقی دل‌نشین شما به این مجوز نیاز دارد</string>
+    <string name="grant_permission">اعطای مجوز</string>
+    <string name="next">بعدی</string>
+    <string name="grant_permission_in_settings">لطفاً در تنظیمات مجوز را اعطا کنید</string>
+    <string name="title">عنوان</string>
+    <string name="album">آلبوم</string>
+    <string name="artist">هنرمند</string>
+    <string name="genre">سبک</string>
+    <string name="year">سال</string>
+    <string name="track_number">شمارهٔ قطعه</string>
+    <string name="bitrate">نرخ بیت</string>
+    <string name="album_artist">هنرمند آلبوم</string>
+    <string name="duration">مدت‌زمان</string>
+    <string name="size">حجم</string>
+    <string name="path">مسیر</string>
+    <string name="date_modified">تاریخ ویرایش</string>
+    <string name="unknown_title">عنوان ناشناخته</string>
+    <string name="unknown_album">آلبوم ناشناخته</string>
+    <string name="unknown_artist">هنرمند ناشناخته</string>
+    <string name="unknown_album_artist">هنرمند آلبوم ناشناخته</string>
+    <string name="unknown_genre">سبک ناشناخته</string>
+    <string name="unknown_year">سال نامشخص</string>
+    <string name="unknown_track_number">شمارهٔ قطعهٔ نامشخص</string>
+    <string name="unknown_bitrate">نرخ بیت نامشخص</string>
+    <string name="unknown">نامشخص</string>
+    <string name="track_menu_button">دکمهٔ منوی قطعه</string>
+    <string name="play_next">پخش بعدی</string>
+    <string name="add_to_queue">افزودن به صف پخش</string>
+    <string name="remove_from_playlist">حذف از فهرست پخش</string>
+    <string name="go_to_album">رفتن به آلبوم</string>
+    <string name="go_to_artist">رفتن به هنرمند</string>
+    <string name="share_track">اشتراک‌گذاری</string>
 </resources>
