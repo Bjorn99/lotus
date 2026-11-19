@@ -154,7 +154,7 @@ Lotus is kept going by people who file good bug reports, translate it, and send 
 - **[@valenzit0](https://github.com/valenzit0)** — Spanish translation ([#138](https://github.com/Bjorn99/lotus/issues/138))
 - **[@MCfool](https://github.com/MCfool)** — Simplified Chinese translation ([#143](https://github.com/Bjorn99/lotus/issues/143))
 - **[@KerimDemirkaynak](https://github.com/KerimDemirkaynak)** — Turkish translation ([#149](https://github.com/Bjorn99/lotus/pull/149))
-- **Mickaël Binos** and **[@Keaexe](https://github.com/Keaexe)** — French translation
+- **Mickaël Binos** and **[@Keaexe](https://github.com/Keaexe)** — French translation ([#183](https://github.com/Bjorn99/lotus/pull/183))
 
 ## Translations
 
