@@ -26,3 +26,10 @@ data class Track(
     val trackNumber: String? = null,
     val bitrate: String? = null
 )
+
+/**
+ * Splits a multi-artist tag value ("David Guetta, Post Malone") into its
+ * individual artists so each one gets its own artist playlist and stats.
+ */
+fun String.splitArtists(): List<String> =
+    split(',', ';').map { it.trim() }.filter { it.isNotEmpty() }.distinct()

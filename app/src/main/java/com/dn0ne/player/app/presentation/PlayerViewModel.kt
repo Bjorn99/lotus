@@ -49,6 +49,7 @@ import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.sort.sortedBy
 import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
+import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.domain.track.format
 import com.dn0ne.player.app.presentation.PlayerScreenEvent.*
 import com.dn0ne.player.app.presentation.components.playback.PlaybackState
@@ -268,7 +269,11 @@ class PlayerViewModel(
         initialValue = emptyList()
     )
     val artistPlaylists = _trackList.map { tracks ->
-        tracks.groupBy { it.albumArtist?.takeIf { it.isNotBlank() } ?: it.artist }.entries.map {
+        tracks.flatMap { track ->
+            val artistKey = track.albumArtist?.takeIf { it.isNotBlank() } ?: track.artist
+            (artistKey?.splitArtists()?.takeIf { it.isNotEmpty() } ?: listOf(artistKey))
+                .map { it to track }
+        }.groupBy({ it.first }, { it.second }).entries.map {
                 (artist, artistTracks) ->
             Playlist(
                 name = artist,
@@ -926,8 +931,9 @@ class PlayerViewModel(
                 _selectedPlaylist.update {
                     val artistKey = event.track.albumArtist?.takeIf { it.isNotBlank() }
                         ?: event.track.artist
+                    val firstArtist = artistKey?.splitArtists()?.firstOrNull() ?: artistKey
                     artistPlaylists.value.fastFirstOrNull {
-                        it.name == artistKey
+                        it.name == firstArtist
                     }
                 }
             }
