@@ -1,0 +1,5 @@
+Lotus 1.9.3
+
+Fixed: with a search field open, rotating the phone or changing a setting such as font size made the keyboard reopen by itself, over and over on some phones. All five search fields are fixed.
+
+French is now fully translated, by Keaexe. Persian has started, by MohammadHasan Abedi.
