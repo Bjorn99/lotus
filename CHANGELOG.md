@@ -4,6 +4,21 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.9.3
+
+A keyboard annoyance in search is fixed, French is now complete, and Persian joins the app.
+
+### Fixed
+
+- **The keyboard kept reopening itself while you were searching.** With a search field open, rotating the phone or changing a system setting such as font size brought the keyboard straight back up on its own — repeatedly on some devices, which showed up as a flicker. It now stays down, and still opens as usual when you tap search. All five search fields are fixed: global search, the library tab search, the queue, and both playlist screens. ([#175](https://github.com/Bjorn99/lotus/issues/175))
+
+### Languages
+
+Untranslated strings fall back to English one by one, so nothing ever appears blank.
+
+- **French** is now complete — all 371 strings. Finished by Keaexe, continuing Mickaël Binos' work.
+- **Persian** is new, 36 of 371 strings so far, by MohammadHasan Abedi. Right-to-left layout is already supported, so it reads correctly as the translation grows.
+
 ## 1.9.2
 
 ReplayGain: tracks can now play at a consistent loudness. Shuffle now actually uses the order Lotus picks, which it hadn't since 1.5.9.
