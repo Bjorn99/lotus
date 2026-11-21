@@ -129,7 +129,15 @@ fun GlobalSearchSheet(
                         )
                     }
                 }
-                LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                var focusRequested by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                LaunchedEffect(Unit) {
+                    if (!focusRequested) {
+                        focusRequested = true
+                        focusRequester.requestFocus()
+                    }
+                }
 
                 val tracks = remember(allTracks, query) { allTracks.filterTracks(query) }
                 val userPlaylistsMatch = remember(playlists, query) {

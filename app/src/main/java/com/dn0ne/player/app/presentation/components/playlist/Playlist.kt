@@ -270,8 +270,14 @@ fun Playlist(
                                     .focusRequester(focusRequester)
                             )
 
+                            var focusRequested by rememberSaveable {
+                                mutableStateOf(false)
+                            }
                             LaunchedEffect(Unit) {
-                                focusRequester.requestFocus()
+                                if (!focusRequested) {
+                                    focusRequested = true
+                                    focusRequester.requestFocus()
+                                }
                             }
 
                             IconButton(
