@@ -22,7 +22,7 @@ ktor = "3.6.1"
 reorderable = "2.5.1"
 splashScreen = "1.2.0"
 jaudiotagger = "3.0.1"
-scrollbars = "2.2.0"
+scrollbars = "3.0.0"
 detekt = "1.23.8"
 ktlint = "14.2.0"
 room = "2.8.5"
@@ -61,7 +61,7 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
 jaudiotagger = { group = "net.jthink", name = "jaudiotagger", version.ref = "jaudiotagger" }
-scrollbars = { group = "com.github.nanihadesuka", name = "LazyColumnScrollbar", version.ref = "scrollbars" }
+scrollbars = { group = "com.github.nanihadesuka.LazyColumnScrollbar", name = "lazycolumnscrollbar", version.ref = "scrollbars" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
