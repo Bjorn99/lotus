@@ -49,8 +49,9 @@ import com.dn0ne.player.app.domain.result.Result
 import com.dn0ne.player.app.domain.sort.sortedBy
 import com.dn0ne.player.app.domain.track.Playlist
 import com.dn0ne.player.app.domain.track.Track
-import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.domain.track.format
+import com.dn0ne.player.app.domain.track.groupByArtist
+import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.presentation.PlayerScreenEvent.*
 import com.dn0ne.player.app.presentation.components.playback.PlaybackState
 import com.dn0ne.player.app.presentation.components.settings.SettingsSheetState
@@ -269,11 +270,7 @@ class PlayerViewModel(
         initialValue = emptyList()
     )
     val artistPlaylists = _trackList.map { tracks ->
-        tracks.flatMap { track ->
-            val artistKey = track.albumArtist?.takeIf { it.isNotBlank() } ?: track.artist
-            (artistKey?.splitArtists()?.takeIf { it.isNotEmpty() } ?: listOf(artistKey))
-                .map { it to track }
-        }.groupBy({ it.first }, { it.second }).entries.map {
+        tracks.groupByArtist().entries.map {
                 (artist, artistTracks) ->
             Playlist(
                 name = artist,

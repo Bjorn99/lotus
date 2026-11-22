@@ -47,8 +47,8 @@ import com.dn0ne.player.R
 import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.domain.track.Track
-import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.domain.track.TrackStats
+import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.presentation.components.CoverArt
 import com.dn0ne.player.app.presentation.components.NoteCard
 import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsibleTopBar
