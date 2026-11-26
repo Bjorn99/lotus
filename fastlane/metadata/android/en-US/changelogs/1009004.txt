@@ -1,0 +1,5 @@
+Lotus 1.9.4
+
+No changes to the app itself.
+
+F-Droid rebuilds every release from source and publishes it only when the result matches the official APK exactly. That check started failing at 1.9.3, which is why F-Droid stayed on 1.9.2. The build now runs on the same Java version F-Droid uses, so updates flow again.

@@ -4,6 +4,16 @@ All notable changes to Lotus (community fork) are recorded here, newest first. F
 
 Each release page is built from the matching section below, so the wording is aimed at the end user.
 
+## 1.9.4
+
+No changes to the app itself. This release exists so that F-Droid can verify and publish it.
+
+### Under the hood
+
+- **F-Droid's reproducible build is fixed.** F-Droid rebuilds every release from source and publishes it only when the result matches the APK here byte for byte. That check started failing at 1.9.3, which is why F-Droid stayed on 1.9.2. The cause was the Java version: the optimiser in the release toolchain produces slightly different output on Java 17 than on Java 21, and F-Droid builds on 21 while this project built on 17. Releases are now built on Java 21 to match. ([#188](https://github.com/Bjorn99/lotus/issues/188))
+
+If you install from GitHub rather than F-Droid, 1.9.4 is functionally identical to 1.9.3 and there is no reason to update.
+
 ## 1.9.3
 
 A keyboard annoyance in search is fixed, French is now complete, and Persian joins the app.
