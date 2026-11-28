@@ -48,6 +48,7 @@ import com.dn0ne.player.app.data.repository.TrackRepository
 import com.dn0ne.player.app.data.repository.TrackStatsRepository
 import com.dn0ne.player.app.domain.track.Track
 import com.dn0ne.player.app.domain.track.TrackStats
+import com.dn0ne.player.app.domain.track.splitArtists
 import com.dn0ne.player.app.presentation.components.CoverArt
 import com.dn0ne.player.app.presentation.components.NoteCard
 import com.dn0ne.player.app.presentation.components.topbar.ColumnWithCollapsibleTopBar
@@ -268,7 +269,8 @@ private fun buildViewState(
 
     val topArtists = resolved
         .filter { !it.track.artist.isNullOrBlank() && it.stats.totalListeningMs > 0 }
-        .groupBy { it.track.artist!! }
+        .flatMap { item -> item.track.artist!!.splitArtists().map { it to item } }
+        .groupBy({ it.first }, { it.second })
         .map { (artist, items) ->
             ArtistStats(
                 artist = artist,
